@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo \"Branch: $(git branch --show-current) | Last commit: $(git log --oneline -1)\" && echo \"Backlog: docs/_project_specs/00_oderply_backlog_v2.md — when asked for the next task, read it and find the first unchecked item\""
+            "command": "echo \"Branch: $(git branch --show-current) | Last commit: $(git log --oneline -1)\" && echo \"Backlog: docs/_project_specs/00_oderply_backlog_v2.md — when asked for the next task, read it and find the first unchecked item\" && echo \"Testing backlog: docs/_project_specs/06_testing_backlog.spec.md — before implementing any task, find sections referencing that TASK ID and use those as TDD test cases\""
           }
         ]
       }

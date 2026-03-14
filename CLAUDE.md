@@ -101,7 +101,10 @@ When asked "what is the next task":
 1. Read the backlog
 2. Find the first unchecked task (`- [ ]`) in order, skipping any checked (`- [x]`) tasks
 3. Present the epic, story, task, and its sub-tasks clearly
-4. Implement it following the TDD cycle and git workflow in this file,
+4. Before writing any test, search docs/_project_specs/06_testing_backlog.spec.md for
+   sections that reference the current TASK ID (e.g. `> Covers: TASK-02.1.1`). Those
+   pre-specified tests are the TDD cases to implement — use them in the order they appear.
+5. Implement it following the TDD cycle and git workflow in this file,
    and referencing section 17 of docs/_project_specs/06_testing_backlog.spec.md
    for the step-by-step development loop and branching strategy
 
