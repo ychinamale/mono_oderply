@@ -109,10 +109,12 @@ When asked "what is the next task":
    for the step-by-step development loop and branching strategy
 
 When a task is complete:
-1. Commit all changes related to the task
-2. Push to remote
-3. Only after a successful push, ask: "Shall I mark TASK-XX as complete in the backlog?"
-4. If yes: check the task's checkbox (`- [x]`) in the backlog file
+1. Before committing, give a brief note on how to verify the task is done — commands
+   to run, things to check. Sacrifice grammar for concision. Await confirmation.
+2. Commit all changes related to the task
+3. Push to remote
+4. Only after a successful push, ask: "Shall I mark TASK-XX as complete in the backlog?"
+5. If yes: check the task's checkbox (`- [x]`) in the backlog file
 
 Do NOT ask about marking a task complete before the work is committed and pushed.
 
