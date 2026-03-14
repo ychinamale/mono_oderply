@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -10,4 +5,84 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+enum PartnerType {
+  PANIC_SOURCE
+  RESPONDER_SYSTEM
+}
+
+enum PanicStatus {
+  PENDING
+  ACKNOWLEDGED
+  DISPATCHED
+  RESOLVED
+}
+
+enum LogTrigger {
+  OPERATOR
+  PARTNER_CLAIM
+}
+
+model Partner {
+  id           String      @id @default(cuid())
+  name         String
+  type         PartnerType
+  apiKeyHash   String      @unique
+  webhookUrl   String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  panicEvents       PanicEvent[]     @relation("PanicSource")
+  claimedPanics     PanicEvent[]     @relation("Responder")
+  panicEventLogs    PanicEventLog[]
+}
+
+model PanicEvent {
+  id                  String      @id @default(cuid())
+  partnerId           String
+  claimedByPartnerId  String?
+  externalUserId      String
+  latitude            Float
+  longitude           Float
+  status              PanicStatus @default(PENDING)
+  idempotencyKey      String      @unique
+  metadata            Json?
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+
+  partner             Partner         @relation("PanicSource", fields: [partnerId], references: [id])
+  claimedByPartner    Partner?        @relation("Responder", fields: [claimedByPartnerId], references: [id])
+  logs                PanicEventLog[]
+
+  @@index([status])
+  @@index([partnerId])
+  @@index([claimedByPartnerId])
+  @@index([createdAt(sort: Desc)])
+}
+
+model PanicEventLog {
+  id          String      @id @default(cuid())
+  panicId     String
+  triggeredBy LogTrigger
+  operatorId  String?
+  partnerId   String?
+  fromStatus  PanicStatus
+  toStatus    PanicStatus
+  createdAt   DateTime    @default(now())
+
+  panic       PanicEvent  @relation(fields: [panicId], references: [id])
+  operator    Operator?   @relation(fields: [operatorId], references: [id])
+  partner     Partner?    @relation(fields: [partnerId], references: [id])
+}
+
+model Operator {
+  id            String          @id @default(cuid())
+  email         String          @unique
+  passwordHash  String
+  name          String
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  logs          PanicEventLog[]
 }
