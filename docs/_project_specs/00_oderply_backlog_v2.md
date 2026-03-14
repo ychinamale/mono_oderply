@@ -98,12 +98,12 @@
     - [x] ⚪ SUB: Define `Operator` model with `email`, `passwordHash`, `name`
     - [x] ⚪ SUB: Add DB indexes: `panic_events.status`, `panic_events.partnerId`, `panic_events.claimedByPartnerId`, `panic_events.createdAt DESC`
 
-- [ ] 🟢 TASK-01.2.4 — Run migrations and verify schema
+- [x] 🟢 TASK-01.2.4 — Run migrations and verify schema
 
-    - [ ] ⚪ SUB: Run `npx prisma migrate dev --name init`
-    - [ ] ⚪ SUB: Confirm all tables created correctly in `oderply_dev`
-    - [ ] ⚪ SUB: Run `npx prisma studio` and verify schema visually
-    - [ ] ⚪ SUB: Confirm `@prisma/client` is generated and importable from `api/src`
+    - [x] ⚪ SUB: Run `npx prisma migrate dev --name init`
+    - [x] ⚪ SUB: Confirm all tables created correctly in `oderply_dev`
+    - [x] ⚪ SUB: Run `npx prisma studio` and verify schema visually
+    - [x] ⚪ SUB: Confirm `@prisma/client` is generated and importable from `api/src`
 
 - [ ] 🟢 TASK-01.2.5 — Write seed file
 
