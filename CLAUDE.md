@@ -112,6 +112,24 @@ Write a failing test before any implementation. Every time. No exceptions.
 
 Follow this sequence strictly. Do not skip steps.
 
+### Test quality rules
+- Tests verify behavior through public interfaces, not implementation details.
+  A test that breaks during a refactor without behavior changing is a bad test.
+- Do not mock your own modules. Mock only at system boundaries: external APIs,
+  time, randomness. Prisma and Socket.io are system boundaries for this project.
+  See .claude/skills/tdd/mocking.md for detailed patterns.
+- For good/bad test examples see .claude/skills/tdd/tests.md.
+
+### Anti-pattern: horizontal slicing
+DO NOT write multiple tests up front, then implement them all.
+This is horizontal slicing — it produces tests that verify imagined behavior
+and are insensitive to real changes.
+
+Correct approach — vertical slices, one at a time:
+  RED→GREEN: test1→impl1
+  RED→GREEN: test2→impl2
+  ...
+
 ### RED
 Write one failing test only. Run the test suite and confirm it fails with a
 meaningful error — not a syntax error. Stop here. Do not write implementation.
@@ -137,6 +155,7 @@ Commit:
 ### REFACTOR
 Clean up the implementation if needed. The test suite must remain green after
 every refactor. Skip this phase if the implementation is already clean.
+See .claude/skills/tdd/refactoring.md for refactor candidates to look for.
 
 Commit (only if changes were made):
 
@@ -144,6 +163,9 @@ Commit (only if changes were made):
 
 Repeat this loop for every test. Never write more than one test at a time.
 Never write implementation code without a failing test in front of it.
+
+When designing new modules, see .claude/skills/tdd/interface-design.md and
+.claude/skills/tdd/deep-modules.md.
 
 ---
 
