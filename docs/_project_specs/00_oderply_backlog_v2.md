@@ -43,14 +43,14 @@
     - [x] ⚪ SUB: Export `PanicStatus` enum constants
     - [x] ⚪ SUB: Verify `@oderply/shared` resolves correctly from both `api` and `client`
 
-- [ ] 🟢 TASK-01.1.3 — Set up `api` package
+- [x] 🟢 TASK-01.1.3 — Set up `api` package
 
-    - [ ] ⚪ SUB: Create `api/package.json` with `"type": "module"` and dev/start scripts
-    - [ ] ⚪ SUB: Add dependencies: `fastify`, `@fastify/jwt`, `@fastify/cors`, `@fastify/static`, `zod`, `@oderply/shared`, `prisma`, `@prisma/client`, `socket.io`
-    - [ ] ⚪ SUB: Create `api/src/index.js` with a minimal Fastify server that boots and listens
-    - [ ] ⚪ SUB: Create `api/src/routes/` directory
-    - [ ] ⚪ SUB: Create `api/.env.example` with `NODE_ENV`, `JWT_SECRET`, `PORT`, `DATABASE_URL`
-    - [ ] ⚪ SUB: Copy `.env.example` to `.env` and confirm server starts on `:3000`
+    - [x] ⚪ SUB: Create `api/package.json` with `"type": "module"` and dev/start scripts
+    - [x] ⚪ SUB: Add dependencies: `fastify`, `@fastify/jwt`, `@fastify/cors`, `@fastify/static`, `zod`, `@oderply/shared`, `prisma`, `@prisma/client`, `socket.io`
+    - [x] ⚪ SUB: Create `api/src/index.js` with a minimal Fastify server that boots and listens
+    - [x] ⚪ SUB: Create `api/src/routes/` directory
+    - [x] ⚪ SUB: Create `api/.env.example` with `NODE_ENV`, `JWT_SECRET`, `PORT`, `DATABASE_URL`
+    - [x] ⚪ SUB: Copy `.env.example` to `.env` and confirm server starts on `:3000`
 
 - [ ] 🟢 TASK-01.1.4 — Set up `client` package
 
