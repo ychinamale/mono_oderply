@@ -27,14 +27,14 @@
 **I want** the monorepo scaffolded with all three packages wired together,
 **so that** I can start writing business logic without fighting project structure.
 
-- [ ] 🟢 TASK-01.1.1 — Initialise Git repository and root workspace
+- [x] 🟢 TASK-01.1.1 — Initialise Git repository and root workspace
 
-    - [ ] ⚪ SUB: Create `oderply/` directory and run `git init`
-    - [ ] ⚪ SUB: Create root `package.json` with `workspaces: ["api", "client", "shared"]`
-    - [ ] ⚪ SUB: Add `concurrently` as a root dev dependency
-    - [ ] ⚪ SUB: Add root-level scripts: `dev`, `dev:api`, `dev:client`, `build`, `start`
-    - [ ] ⚪ SUB: Create `.gitignore` (node_modules, dist, .env, .env.local)
-    - [ ] ⚪ SUB: Create initial commit
+    - [x] ⚪ SUB: Create `oderply/` directory and run `git init`
+    - [x] ⚪ SUB: Create root `package.json` with `workspaces: ["api", "client", "shared"]`
+    - [x] ⚪ SUB: Add `concurrently` as a root dev dependency
+    - [x] ⚪ SUB: Add root-level scripts: `dev`, `dev:api`, `dev:client`, `build`, `start`
+    - [x] ⚪ SUB: Create `.gitignore` (node_modules, dist, .env, .env.local)
+    - [x] ⚪ SUB: Create initial commit
 
 - [ ] 🟢 TASK-01.1.2 — Set up `shared` package
 
