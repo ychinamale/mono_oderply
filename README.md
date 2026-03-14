@@ -1,4 +1,4 @@
-# ODERP'ly — On-Demand Emergency Response Platform
+# On-Demand Emergency Response Platform - ODERP'ly
 
 ## Docs
 
