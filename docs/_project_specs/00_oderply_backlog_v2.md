@@ -105,14 +105,14 @@
     - [x] ⚪ SUB: Run `npx prisma studio` and verify schema visually
     - [x] ⚪ SUB: Confirm `@prisma/client` is generated and importable from `api/src`
 
-- [ ] 🟢 TASK-01.2.5 — Write seed file
+- [x] 🟢 TASK-01.2.5 — Write seed file
 
-    - [ ] ⚪ SUB: Create `api/prisma/seed.js`
-    - [ ] ⚪ SUB: Seed one `PANIC_SOURCE` partner with a known raw API key (hashed with SHA-256 before storing)
-    - [ ] ⚪ SUB: Seed one `RESPONDER_SYSTEM` partner with a known raw API key
-    - [ ] ⚪ SUB: Seed one `Operator` with a known email/password (bcrypt hashed)
-    - [ ] ⚪ SUB: Add `prisma.seed` script to `api/package.json`
-    - [ ] ⚪ SUB: Run seed and confirm rows exist in all tables
+    - [x] ⚪ SUB: Create `api/prisma/seed.js`
+    - [x] ⚪ SUB: Seed one `PANIC_SOURCE` partner with a known raw API key (hashed with SHA-256 before storing)
+    - [x] ⚪ SUB: Seed one `RESPONDER_SYSTEM` partner with a known raw API key
+    - [x] ⚪ SUB: Seed one `Operator` with a known email/password (bcrypt hashed)
+    - [x] ⚪ SUB: Add `prisma.seed` script to `api/package.json`
+    - [x] ⚪ SUB: Run seed and confirm rows exist in all tables
 
 ---
 
