@@ -29,6 +29,15 @@
             "command": "jq -r '.tool_input.file_path' | grep -q '_project_specs' && echo 'A spec file was modified. Read docs/01_AGENTIC_DEV_SETUP.md and apply the inline-vs-reference framework to determine if CLAUDE.md needs updating.' || true"
           }
         ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path' | grep -q '.claude/skills' && echo 'A skills file was modified. Read docs/01_AGENTIC_DEV_SETUP.md and apply the inline-vs-reference framework to determine if CLAUDE.md needs updating.' || true"
+          }
+        ]
       }
     ]
   }

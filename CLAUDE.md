@@ -193,3 +193,30 @@ Every new Fastify route must:
 If a file in docs/_project_specs/ is modified or a new one is added, read it
 and apply the inline-vs-reference framework from docs/01_AGENTIC_DEV_SETUP.md
 to determine whether this file (CLAUDE.md) needs updating. Do not wait to be asked.
+
+---
+
+## Skills folder
+
+If a file in .claude/skills/ is modified or a new one is added, read it
+and apply the inline-vs-reference framework from docs/01_AGENTIC_DEV_SETUP.md
+to determine whether this file (CLAUDE.md) needs updating. Do not wait to be asked.
+
+---
+
+## Plan Mode
+
+- Make the plan brief and to the point. Sacrifice some grammar to maximize concision.
+- At the end of each plan give me a list of unresolved questions to answer, if any. Also ask questions aimed to help address possible edge cases.
+
+---
+
+## Agent Mode
+
+- Make explanations and summaries brief and to the point. Sacrifice some grammar to maximize concision.
+
+---
+
+## Comments
+
+- Only add comments when absolutely necessary. Necessary comments are those that talk about WHY something was done. Comments that tell the reader WHAT something is/does or HOW it does something are not useful.
