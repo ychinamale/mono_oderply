@@ -108,9 +108,13 @@ When asked "what is the next task":
    and referencing section 17 of docs/_project_specs/06_testing_backlog.spec.md
    for the step-by-step development loop and branching strategy
 
-When a task is complete and pushed to remote:
-- Ask: "Shall I mark TASK-XX as complete in the backlog?"
-- If yes: check the task's checkbox (`- [x]`) in the backlog file
+When a task is complete:
+1. Commit all changes related to the task
+2. Push to remote
+3. Only after a successful push, ask: "Shall I mark TASK-XX as complete in the backlog?"
+4. If yes: check the task's checkbox (`- [x]`) in the backlog file
+
+Do NOT ask about marking a task complete before the work is committed and pushed.
 
 ## Git workflow
 - Branch from develop: feature/TASK-XX-short-description
