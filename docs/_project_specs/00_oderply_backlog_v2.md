@@ -36,12 +36,12 @@
     - [x] ⚪ SUB: Create `.gitignore` (node_modules, dist, .env, .env.local)
     - [x] ⚪ SUB: Create initial commit
 
-- [ ] 🟢 TASK-01.1.2 — Set up `shared` package
+- [x] 🟢 TASK-01.1.2 — Set up `shared` package
 
-    - [ ] ⚪ SUB: Create `shared/package.json` with `"name": "@oderply/shared"`, `"type": "module"`
-    - [ ] ⚪ SUB: Create `shared/src/index.js` as the package entry point
-    - [ ] ⚪ SUB: Export `PanicStatus` enum constants
-    - [ ] ⚪ SUB: Verify `@oderply/shared` resolves correctly from both `api` and `client`
+    - [x] ⚪ SUB: Create `shared/package.json` with `"name": "@oderply/shared"`, `"type": "module"`
+    - [x] ⚪ SUB: Create `shared/src/index.js` as the package entry point
+    - [x] ⚪ SUB: Export `PanicStatus` enum constants
+    - [x] ⚪ SUB: Verify `@oderply/shared` resolves correctly from both `api` and `client`
 
 - [ ] 🟢 TASK-01.1.3 — Set up `api` package
 
