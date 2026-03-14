@@ -98,7 +98,8 @@ The backlog is at docs/_project_specs/00_oderply_backlog_v2.md. Treat it as
 the issue tracker for the entire project.
 
 Before starting any task, run `git status` and check for uncommitted or untracked
-files. If any exist, commit and push them automatically without waiting to be asked.
+files. If any exist, prepare the commit message and present it to the user for
+confirmation before committing and pushing.
 
 When asked "what is the next task":
 1. Read the backlog
