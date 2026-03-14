@@ -60,12 +60,12 @@
     - [x] ⚪ SUB: Create `client/src/App.jsx` with a placeholder component
     - [x] ⚪ SUB: Confirm Vite dev server starts on `:5173` and proxy resolves correctly
 
-- [ ] 🟢 TASK-01.1.5 — Install all dependencies and verify workspace
+- [x] 🟢 TASK-01.1.5 — Install all dependencies and verify workspace
 
-    - [ ] ⚪ SUB: Run `npm install` from the workspace root
-    - [ ] ⚪ SUB: Confirm `@oderply/shared` is symlinked into `api/node_modules` and `client/node_modules`
-    - [ ] ⚪ SUB: Run `npm run dev` and confirm both processes start cleanly
-    - [ ] ⚪ SUB: Document any ESM gotchas (`.js` extensions, `import.meta.dirname`) in README
+    - [x] ⚪ SUB: Run `npm install` from the workspace root
+    - [x] ⚪ SUB: Confirm `@oderply/shared` is symlinked into `api/node_modules` and `client/node_modules`
+    - [x] ⚪ SUB: Run `npm run dev` and confirm both processes start cleanly
+    - [x] ⚪ SUB: Document any ESM gotchas (`.js` extensions, `import.meta.dirname`) in README
 
 ---
 
