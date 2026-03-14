@@ -87,16 +87,16 @@
     - [x] ⚪ SUB: Confirm `api/prisma/schema.prisma` is created
     - [x] ⚪ SUB: Set `provider = "postgresql"` and wire `DATABASE_URL` from env
 
-- [ ] 🟢 TASK-01.2.3 — Write the full Prisma schema
+- [x] 🟢 TASK-01.2.3 — Write the full Prisma schema
 
-    - [ ] ⚪ SUB: Define `PartnerType` enum: `PANIC_SOURCE | RESPONDER_SYSTEM`
-    - [ ] ⚪ SUB: Define `PanicStatus` enum: `PENDING | ACKNOWLEDGED | DISPATCHED | RESOLVED`
-    - [ ] ⚪ SUB: Define `LogTrigger` enum: `OPERATOR | PARTNER_CLAIM`
-    - [ ] ⚪ SUB: Define `Partner` model with all fields including `type`, `apiKeyHash`, `webhookUrl`, `claimedPanics` relation
-    - [ ] ⚪ SUB: Define `PanicEvent` model with `partnerId`, `claimedByPartnerId?`, `externalUserId`, `latitude`, `longitude`, `status`, `idempotencyKey` (unique), `metadata`, relations
-    - [ ] ⚪ SUB: Define `PanicEventLog` model with `triggeredBy`, `operatorId?`, `partnerId?`, relations
-    - [ ] ⚪ SUB: Define `Operator` model with `email`, `passwordHash`, `name`
-    - [ ] ⚪ SUB: Add DB indexes: `panic_events.status`, `panic_events.partnerId`, `panic_events.claimedByPartnerId`, `panic_events.createdAt DESC`
+    - [x] ⚪ SUB: Define `PartnerType` enum: `PANIC_SOURCE | RESPONDER_SYSTEM`
+    - [x] ⚪ SUB: Define `PanicStatus` enum: `PENDING | ACKNOWLEDGED | DISPATCHED | RESOLVED`
+    - [x] ⚪ SUB: Define `LogTrigger` enum: `OPERATOR | PARTNER_CLAIM`
+    - [x] ⚪ SUB: Define `Partner` model with all fields including `type`, `apiKeyHash`, `webhookUrl`, `claimedPanics` relation
+    - [x] ⚪ SUB: Define `PanicEvent` model with `partnerId`, `claimedByPartnerId?`, `externalUserId`, `latitude`, `longitude`, `status`, `idempotencyKey` (unique), `metadata`, relations
+    - [x] ⚪ SUB: Define `PanicEventLog` model with `triggeredBy`, `operatorId?`, `partnerId?`, relations
+    - [x] ⚪ SUB: Define `Operator` model with `email`, `passwordHash`, `name`
+    - [x] ⚪ SUB: Add DB indexes: `panic_events.status`, `panic_events.partnerId`, `panic_events.claimedByPartnerId`, `panic_events.createdAt DESC`
 
 - [ ] 🟢 TASK-01.2.4 — Run migrations and verify schema
 
