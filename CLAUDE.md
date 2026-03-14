@@ -92,6 +92,23 @@ pagination structure, and WebSocket payload format.
 Before writing a new test, check that file — the test may already be defined there.
 Implement tests in the order they appear in the backlog.
 
+## Backlog workflow
+
+The backlog is at docs/_project_specs/00_oderply_backlog_v2.md. Treat it as
+the issue tracker for the entire project.
+
+When asked "what is the next task":
+1. Read the backlog
+2. Find the first unchecked task (`- [ ]`) in order, skipping any checked (`- [x]`) tasks
+3. Present the epic, story, task, and its sub-tasks clearly
+4. Implement it following the TDD cycle and git workflow in this file,
+   and referencing section 17 of docs/_project_specs/06_testing_backlog.spec.md
+   for the step-by-step development loop and branching strategy
+
+When a task is complete and pushed to remote:
+- Ask: "Shall I mark TASK-XX as complete in the backlog?"
+- If yes: check the task's checkbox (`- [x]`) in the backlog file
+
 ## Git workflow
 - Branch from develop: feature/TASK-XX-short-description
 - Commit format: type(scope): description [RED|GREEN|REFACTOR]
