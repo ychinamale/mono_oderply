@@ -1,0 +1,24 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "node --experimental-vm-modules node_modules/.bin/jest"
+  },
+  "dependencies": {
+    "@fastify/jwt": "10.0.0",
+    "@prisma/client": "7.5.0",
+    "fastify": "5.8.2",
+    "socket.io": "4.8.3",
+    "zod": "4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "25.5.0",
+    "prisma": "7.5.0",
+    "tsx": "4.21.0",
+    "typescript": "5.9.3"
+  }
+}

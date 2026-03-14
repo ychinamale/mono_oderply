@@ -1,0 +1,35 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"Branch: $(git branch --show-current) | Last commit: $(git log --oneline -1)\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path' | grep -qE '\\.(js|jsx|ts|tsx)$' && echo 'File written — run tests: npm test --workspace=api' || true"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path' | grep -q '_project_specs' && echo 'A spec file was modified. Read docs/01_AGENTIC_DEV_SETUP.md and apply the inline-vs-reference framework to determine if CLAUDE.md needs updating.' || true"
+          }
+        ]
+      }
+    ]
+  }
+}
