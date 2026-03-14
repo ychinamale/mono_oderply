@@ -97,6 +97,9 @@ Implement tests in the order they appear in the backlog.
 The backlog is at docs/_project_specs/00_oderply_backlog_v2.md. Treat it as
 the issue tracker for the entire project.
 
+Before starting any task, run `git status` and check for uncommitted or untracked
+files. If any exist, commit and push them automatically without waiting to be asked.
+
 When asked "what is the next task":
 1. Read the backlog
 2. Find the first unchecked task (`- [ ]`) in order, skipping any checked (`- [x]`) tasks
