@@ -52,13 +52,13 @@
     - [x] ⚪ SUB: Create `api/.env.example` with `NODE_ENV`, `JWT_SECRET`, `PORT`, `DATABASE_URL`
     - [x] ⚪ SUB: Copy `.env.example` to `.env` and confirm server starts on `:3000`
 
-- [ ] 🟢 TASK-01.1.4 — Set up `client` package
+- [x] 🟢 TASK-01.1.4 — Set up `client` package
 
-    - [ ] ⚪ SUB: Create `client/package.json` with Vite + React dependencies
-    - [ ] ⚪ SUB: Create `client/vite.config.js` with `/api` proxy pointing to `http://localhost:3000`
-    - [ ] ⚪ SUB: Create `client/index.html` and `client/src/main.jsx` entry points
-    - [ ] ⚪ SUB: Create `client/src/App.jsx` with a placeholder component
-    - [ ] ⚪ SUB: Confirm Vite dev server starts on `:5173` and proxy resolves correctly
+    - [x] ⚪ SUB: Create `client/package.json` with Vite + React dependencies
+    - [x] ⚪ SUB: Create `client/vite.config.js` with `/api` proxy pointing to `http://localhost:3000`
+    - [x] ⚪ SUB: Create `client/index.html` and `client/src/main.jsx` entry points
+    - [x] ⚪ SUB: Create `client/src/App.jsx` with a placeholder component
+    - [x] ⚪ SUB: Confirm Vite dev server starts on `:5173` and proxy resolves correctly
 
 - [ ] 🟢 TASK-01.1.5 — Install all dependencies and verify workspace
 
