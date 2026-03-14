@@ -1,0 +1,10 @@
+services:
+  db:
+    image: postgres:16
+    container_name: oderply-db
+    environment:
+      POSTGRES_USER: oderply
+      POSTGRES_PASSWORD: oderply
+      POSTGRES_DB: oderply_dev
+    ports:
+      - "5432:5432"
