@@ -41,6 +41,31 @@ launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.postgresql@14.plist
 cd /opt/homebrew && git pull origin master
 ```
 
+### Prisma 7 — driver adapter required
+
+Prisma 7 uses driver adapters instead of a built-in query engine. Every place
+you instantiate `PrismaClient` in application code, you must pass the adapter:
+
+```ts
+import { PrismaPg } from '@prisma/adapter-pg'
+import { PrismaClient } from '../src/generated/prisma/client.js'
+
+const prisma = new PrismaClient({
+  adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
+})
+```
+
+The generated client lives at `api/src/generated/prisma/` (gitignored) — run
+`npx prisma generate` from `api/` to regenerate it after schema changes.
+
+**How to recognise the problem:** if you see this error at startup or in tests —
+```
+PrismaClientInitializationError: `PrismaClient` needs to be constructed with a
+non-empty, valid `PrismaClientOptions`
+```
+— it means `PrismaClient` was instantiated without the adapter. Add the `PrismaPg`
+adapter as shown above.
+
 ### Running migrations
 
 We use `prisma migrate dev` for local development. This command:
