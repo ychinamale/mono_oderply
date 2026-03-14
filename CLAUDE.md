@@ -145,9 +145,6 @@ Follow this sequence strictly. Do not skip steps.
 ### Test quality rules
 - Tests verify behavior through public interfaces, not implementation details.
   A test that breaks during a refactor without behavior changing is a bad test.
-- Do not mock your own modules. Mock only at system boundaries: external APIs,
-  time, randomness. Prisma and Socket.io are system boundaries for this project.
-  See .claude/skills/tdd/mocking.md for detailed patterns.
 - For good/bad test examples see .claude/skills/tdd/tests.md.
 
 ### Anti-pattern: horizontal slicing

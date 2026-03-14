@@ -1,7 +1,10 @@
 import 'dotenv/config'
+
 import { createHash } from 'crypto'
+
 import bcrypt from 'bcrypt'
 import { PrismaPg } from '@prisma/adapter-pg'
+
 import { PrismaClient } from '../src/generated/prisma/client.js'
 
 const prisma = new PrismaClient({
@@ -59,4 +62,4 @@ async function main() {
 
 main()
   .catch((e) => { console.error(e); process.exit(1) })
-  .finally(() => prisma.$disconnect())
+  .finally(() => { void prisma.$disconnect() })

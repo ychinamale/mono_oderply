@@ -3,6 +3,6 @@ export const PanicStatus = {
   ACKNOWLEDGED: 'ACKNOWLEDGED',
   DISPATCHED: 'DISPATCHED',
   RESOLVED: 'RESOLVED',
-} as const
+} as const;
 
-export type PanicStatus = (typeof PanicStatus)[keyof typeof PanicStatus]
+export type PanicStatus = (typeof PanicStatus)[keyof typeof PanicStatus];

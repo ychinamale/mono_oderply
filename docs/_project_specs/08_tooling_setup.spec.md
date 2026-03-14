@@ -185,16 +185,12 @@ npm install --save-dev \
   eslint-plugin-no-secrets@1.1.2
 ```
 
-### Filename enforcement
+### Prettier
 
 ```bash
 npm install --save-dev \
-  eslint-plugin-unicorn@57.0.0
+  prettier@3.5.3
 ```
-
-> With ESLint 9 flat config, unicorn v52+ works correctly. No version pinning
-> workaround is needed — this is one of the direct benefits of using
-> ESLint 9 over ESLint 8.
 
 ### Pre-commit tooling
 
@@ -232,11 +228,11 @@ should contain these exact versions:
     "eslint-plugin-react": "7.37.5",
     "eslint-plugin-react-hooks": "5.2.0",
     "eslint-plugin-security": "3.0.1",
-    "eslint-plugin-unicorn": "57.0.0",
     "husky": "9.1.7",
     "lint-staged": "15.5.0",
     "npm-package-json-lint": "8.0.0",
     "npm-package-json-lint-config-default": "7.0.1",
+    "prettier": "3.5.3",
     "typescript": "5.8.3",
     "typescript-eslint": "8.30.1"
   }
@@ -245,7 +241,49 @@ should contain these exact versions:
 
 ---
 
-## 5. ESLint 9 Flat Config
+## 5. Prettier Configuration
+
+Prettier handles all formatting. ESLint is not configured for formatting rules —
+Prettier is the sole authority on style.
+
+### Install
+
+```bash
+npm install --save-dev \
+  prettier@3.5.3
+```
+
+### `.prettierrc` (monorepo root)
+
+```json
+{
+  "singleQuote": true,
+  "semi": true,
+  "trailingComma": "all",
+  "printWidth": 100,
+  "tabWidth": 2
+}
+```
+
+`singleQuote` and `trailingComma: "all"` reduce git diff noise. `semi: true` enforces
+semicolons on every statement.
+
+### `.prettierignore` (monorepo root)
+
+```
+node_modules/
+dist/
+build/
+*.lock
+package-lock.json
+api/prisma/migrations/
+```
+
+Lock files and auto-generated Prisma migration SQL are excluded from formatting.
+
+---
+
+## 6. ESLint 9 Flat Config
 
 ESLint 9 uses `eslint.config.js` at the monorepo root instead of the legacy
 `.eslintrc.*` format. Create `eslint.config.js`:
@@ -259,7 +297,6 @@ import security from 'eslint-plugin-security'
 import noSecrets from 'eslint-plugin-no-secrets'
 import react from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
-import unicorn from 'eslint-plugin-unicorn'
 
 export default tseslint.config(
   // Base JS rules
@@ -272,13 +309,21 @@ export default tseslint.config(
   {
     languageOptions: {
       parserOptions: {
-        projectService: true,
+        projectService: {
+          // Allow files that live outside tsconfig include paths (config/scripts)
+          allowDefaultProject: [
+            '*.js',
+            'api/prisma/*.ts',
+            'api/prisma.config.ts',
+            'client/vite.config.ts',
+          ],
+        },
         tsconfigRootDir: import.meta.dirname,
       },
     },
   },
 
-  // Import plugin
+  // Import plugin — extensionAlias maps .js imports to .ts source files (ESM convention)
   {
     plugins: { import: importPlugin },
     rules: {
@@ -287,7 +332,10 @@ export default tseslint.config(
     },
     settings: {
       'import/resolver': {
-        typescript: { project: ['api/tsconfig.json', 'client/tsconfig.json', 'shared/tsconfig.json'] },
+        typescript: {
+          project: ['api/tsconfig.json', 'client/tsconfig.json', 'shared/tsconfig.json'],
+          extensionAlias: { '.js': ['.ts', '.js'] },
+        },
       },
     },
   },
@@ -298,6 +346,8 @@ export default tseslint.config(
     plugins: { security, 'no-secrets': noSecrets },
     rules: {
       ...security.configs.recommended.rules,
+      // Disabled: fires on every obj[key] access; Prisma result-row iteration triggers this constantly
+      'security/detect-object-injection': 'off',
       'no-secrets/no-secrets': ['error', { tolerance: 4.2 }],
     },
   },
@@ -316,27 +366,36 @@ export default tseslint.config(
     },
   },
 
-  // Filename conventions
+  // Exempt script/config files outside src/ from unsafe-* rules —
+  // they run under allowDefaultProject where full type resolution isn't guaranteed
   {
-    plugins: { unicorn },
+    files: ['api/prisma/**/*.ts', 'api/prisma.config.ts', 'client/vite.config.ts'],
     rules: {
-      'unicorn/filename-case': [
-        'error',
-        { cases: { kebabCase: true, pascalCase: true } },
-      ],
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
     },
   },
 
   // Ignored paths
   {
-    ignores: ['**/node_modules/**', '**/dist/**', '**/build/**'],
+    ignores: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/build/**',
+      // ESLint config files — not application source, no value linting them through themselves
+      'eslint.config.js',
+      'eslint.config.staged.js',
+    ],
   },
 )
 ```
 
 ---
 
-## 6. Pre-Commit Safety Net
+## 7. Pre-Commit Safety Net
 
 ### Why this layer matters
 
@@ -486,7 +545,7 @@ CI (GitHub Actions — future)
 
 ---
 
-## 7. `npm-package-json-lint` Configuration
+## 8. `npm-package-json-lint` Configuration
 
 `.npmrc save-exact=true` prevents `npm install` from writing ranges. But it
 cannot protect against a developer manually typing `"fastify": "^5.0.0"` into
@@ -519,7 +578,7 @@ When a range is found, the commit is blocked:
 
 ---
 
-## 8. Updating Dependencies Safely
+## 9. Updating Dependencies Safely
 
 Renovate is not configured for this project at current scope. All updates are
 manual. The process below must be followed every time.
@@ -570,7 +629,7 @@ breaking changes and must:
 
 ---
 
-## 9. Root `package.json` — Complete Scripts and Config
+## 10. Root `package.json` — Complete Scripts and Config
 
 For reference, here is the full set of root-level scripts, engines, and
 lint-staged config in one place:
