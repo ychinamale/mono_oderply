@@ -75,17 +75,17 @@
 **I want** a local database with Prisma connected and migrations working,
 **so that** I can persist data and iterate on the schema safely.
 
-- [ ] 🟢 TASK-01.2.1 — Set up local PostgreSQL
+- [x] 🟢 TASK-01.2.1 — Set up local PostgreSQL
 
-    - [ ] ⚪ SUB: Install PostgreSQL locally or run via Docker (`docker run --name oderply-db -e POSTGRES_PASSWORD=... -p 5432:5432 -d postgres`)
-    - [ ] ⚪ SUB: Create `oderply_dev` database
-    - [ ] ⚪ SUB: Add `DATABASE_URL` to `api/.env`
+    - [x] ⚪ SUB: Install PostgreSQL locally or run via Docker (`docker run --name oderply-db -e POSTGRES_PASSWORD=... -p 5432:5432 -d postgres`)
+    - [x] ⚪ SUB: Create `oderply_dev` database
+    - [x] ⚪ SUB: Add `DATABASE_URL` to `api/.env`
 
-- [ ] 🟢 TASK-01.2.2 — Initialise Prisma
+- [x] 🟢 TASK-01.2.2 — Initialise Prisma
 
-    - [ ] ⚪ SUB: Run `npx prisma init` from `api/`
-    - [ ] ⚪ SUB: Confirm `api/prisma/schema.prisma` is created
-    - [ ] ⚪ SUB: Set `provider = "postgresql"` and wire `DATABASE_URL` from env
+    - [x] ⚪ SUB: Run `npx prisma init` from `api/`
+    - [x] ⚪ SUB: Confirm `api/prisma/schema.prisma` is created
+    - [x] ⚪ SUB: Set `provider = "postgresql"` and wire `DATABASE_URL` from env
 
 - [ ] 🟢 TASK-01.2.3 — Write the full Prisma schema
 
