@@ -1,3 +1,5 @@
+import PanicActions from './PanicActions.tsx';
+
 export interface Panic {
   id: string;
   status: string;
@@ -19,6 +21,7 @@ export default function PanicCard({ panic }: PanicCardProps) {
   return (
     <div data-testid="panic-card" data-status={panic.status} className={className}>
       {panic.id}
+      <PanicActions panic={panic} />
     </div>
   );
 }
