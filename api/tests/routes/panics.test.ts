@@ -694,4 +694,21 @@ describe('GET /api/v1/panics', () => {
     expect(typeof body.pagination.total).toBe('number')
     expect(typeof body.pagination.totalPages).toBe('number')
   })
+
+  it('pagination.total reflects the actual count of matching records', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    await prisma.panicEvent.createMany({
+      data: [
+        { externalUserId: 'u1', latitude: 0, longitude: 0, idempotencyKey: `idem-total-1`, partnerId: source.id },
+        { externalUserId: 'u2', latitude: 0, longitude: 0, idempotencyKey: `idem-total-2`, partnerId: source.id },
+        { externalUserId: 'u3', latitude: 0, longitude: 0, idempotencyKey: `idem-total-3`, partnerId: source.id },
+      ],
+    })
+    const res = await app.inject({ method: 'GET', url: '/api/v1/panics', headers: { authorization: `Bearer ${token}` } })
+    const body = res.json<{ data: unknown[]; pagination: { total: number } }>()
+    expect(body.pagination.total).toBe(3)
+    expect(body.data).toHaveLength(3)
+  })
 })
