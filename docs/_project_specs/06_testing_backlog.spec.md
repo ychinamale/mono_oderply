@@ -150,8 +150,8 @@ Each section covers a testable concern. Within each section, tests are grouped b
 
 ### Shared transition assertions
 
-- [ ] `it('every transition response includes partner inline')`
-- [ ] `it('every transition response does not include apiKeyHash')`
+- [x] `it('every transition response includes partner inline')`
+- [x] `it('every transition response does not include apiKeyHash')`
 - [x] `it('assertTransition returns a 400 with a descriptive message on any invalid transition')`
     - Message format: `"Cannot [action] a panic with status [currentStatus]"`
 
