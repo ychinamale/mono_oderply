@@ -58,4 +58,26 @@ describe('AuditLog', () => {
     expect(await screen.findByTestId('log-row-log-1')).toBeInTheDocument();
     expect(await screen.findByTestId('log-row-log-2')).toBeInTheDocument();
   });
+
+  it('log entries triggered by OPERATOR show operator name', async () => {
+    (axios.get as Mock).mockResolvedValueOnce({
+      data: { data: [logOperator], pagination: { totalPages: 1 } },
+    });
+
+    renderLog();
+
+    const row = await screen.findByTestId('log-row-log-1');
+    expect(row).toHaveTextContent('Alice');
+  });
+
+  it('log entries triggered by PARTNER_CLAIM show partner name', async () => {
+    (axios.get as Mock).mockResolvedValueOnce({
+      data: { data: [logPartner], pagination: { totalPages: 1 } },
+    });
+
+    renderLog();
+
+    const row = await screen.findByTestId('log-row-log-2');
+    expect(row).toHaveTextContent('ResponderCo');
+  });
 });
