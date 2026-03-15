@@ -603,21 +603,21 @@
 **I want** to click into a panic event and see its full details and status history,
 **so that** I have complete context when making decisions and for post-incident review.
 
-- [ ] TASK-09.4.1 — Build panic detail view
+- [x] TASK-09.4.1 — Build panic detail view
 
-    - [ ] SUB: Create `client/src/pages/PanicDetail.jsx`
-    - [ ] SUB: Fetch `GET /api/v1/panics/:id` on mount
-    - [ ] SUB: Display: status badge, partner name and type, external user ID, coordinates, metadata, claimed by (if set), created at
-    - [ ] SUB: Include `PanicActions` component for status transitions
-    - [ ] SUB: Subscribe to `panic:updated` events and refresh detail if the current panic is updated
+    - [x] SUB: Create `client/src/pages/PanicDetail.jsx`
+    - [x] SUB: Fetch `GET /api/v1/panics/:id` on mount
+    - [x] SUB: Display: status badge, partner name and type, external user ID, coordinates, metadata, claimed by (if set), created at
+    - [x] SUB: Include `PanicActions` component for status transitions
+    - [x] SUB: Subscribe to `panic:updated` events and refresh detail if the current panic is updated
 
-- [ ] TASK-09.4.2 — Build audit log component
+- [x] TASK-09.4.2 — Build audit log component
 
-    - [ ] SUB: Create `client/src/components/AuditLog.jsx`
-    - [ ] SUB: Fetch `GET /api/v1/panics/:id/logs` on mount
-    - [ ] SUB: Render each log entry as a timeline row: previous status → new status, triggered by (operator name or partner name), timestamp
-    - [ ] SUB: Differentiate `OPERATOR` and `PARTNER_CLAIM` triggers visually
-    - [ ] SUB: Support pagination if log has more than 20 entries
+    - [x] SUB: Create `client/src/components/AuditLog.jsx`
+    - [x] SUB: Fetch `GET /api/v1/panics/:id/logs` on mount
+    - [x] SUB: Render each log entry as a timeline row: previous status → new status, triggered by (operator name or partner name), timestamp
+    - [x] SUB: Differentiate `OPERATOR` and `PARTNER_CLAIM` triggers visually
+    - [x] SUB: Support pagination if log has more than 20 entries
 
 ---
 

@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 import PanicActions from './PanicActions.tsx';
 
 export interface Panic {
@@ -27,6 +29,7 @@ export default function PanicCard({ panic }: PanicCardProps) {
   const style = STATUS_STYLES[panic.status] ?? STATUS_STYLES['RESOLVED']!;
 
   return (
+    <Link to={`/panics/${panic.id}`} className="block">
     <div
       data-testid="panic-card"
       data-status={panic.status}
@@ -47,5 +50,6 @@ export default function PanicCard({ panic }: PanicCardProps) {
       </p>
       <PanicActions panic={panic} />
     </div>
+    </Link>
   );
 }
