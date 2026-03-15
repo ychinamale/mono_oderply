@@ -14,6 +14,7 @@ export function authRoutes(fastify: FastifyInstance) {
     if (!match) {
       return reply.code(401).send({ error: 'Invalid credentials' })
     }
-    return reply.code(501).send()
+    const token = fastify.jwt.sign({ operatorId: operator.id, email: operator.email, name: operator.name })
+    return reply.code(200).send({ token, operator: { id: operator.id, name: operator.name, email: operator.email } })
   })
 }
