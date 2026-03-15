@@ -28,6 +28,7 @@ describe('WebSocket Gateway', () => {
 
   afterEach(async () => {
     jest.restoreAllMocks()
+    await prisma.panicEventLog.deleteMany()
     await prisma.panicEvent.deleteMany()
   })
 
@@ -108,6 +109,71 @@ describe('WebSocket Gateway', () => {
             longitude: 28.056,
             idempotencyKey: 'ws-test-key-00000001',
           },
+        })
+      })
+    })
+
+    await app.close()
+    expect(received).toBeDefined()
+  })
+
+  it('emits panic:updated to operator clients after a successful claim', async () => {
+    const app = await createApp()
+    await app.listen({ port: 0 })
+    const { port } = app.server.address() as { port: number }
+
+    const token = app.jwt.sign({ operatorId: 'test-op', email: 'op@test.com', name: 'Test Op' })
+
+    const received = await new Promise<unknown>((resolve, reject) => {
+      const client: Socket = ioc(`http://localhost:${port}`, { auth: { token } })
+
+      const timeout = setTimeout(() => {
+        client.disconnect()
+        reject(new Error('panic:updated not received within timeout'))
+      }, 3000)
+
+      client.on('panic:updated', (data: unknown) => {
+        clearTimeout(timeout)
+        client.disconnect()
+        resolve(data)
+      })
+
+      client.on('connect', () => {
+        // Create then claim in sequence inside the connect handler to avoid
+        // any window where the panic could be deleted by another test's afterEach
+        app.inject({
+          method: 'POST',
+          url: '/api/v1/panics',
+          headers: { 'x-api-key': 'ps-test-api-key-001' },
+          payload: {
+            externalUserId: 'user-ws-claim',
+            latitude: -26.1,
+            longitude: 28.0,
+            idempotencyKey: `ws-claim-key-${Date.now()}`,
+          },
+        }).then((createRes) => {
+          if (createRes.statusCode !== 201) {
+            clearTimeout(timeout)
+            client.disconnect()
+            reject(new Error(`Panic creation failed: ${createRes.statusCode}`))
+            return
+          }
+          const panicId = createRes.json<{ id: string }>().id
+          return app.inject({
+            method: 'POST',
+            url: `/api/v1/panics/${panicId}/claim`,
+            headers: { 'x-api-key': 'rs-test-api-key-001' },
+          })
+        }).then((claimRes) => {
+          if (claimRes && claimRes.statusCode !== 200) {
+            clearTimeout(timeout)
+            client.disconnect()
+            reject(new Error(`Claim failed: ${claimRes.statusCode} ${claimRes.body}`))
+          }
+        }).catch((err: unknown) => {
+          clearTimeout(timeout)
+          client.disconnect()
+          reject(err)
         })
       })
     })

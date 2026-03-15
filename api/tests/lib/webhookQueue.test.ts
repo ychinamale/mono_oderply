@@ -29,6 +29,7 @@ describe('webhookQueue', () => {
 
   it('a failed webhook delivery does not throw or crash the queue', async () => {
     jest.spyOn(global, 'fetch').mockRejectedValue(new Error('network error'))
+    jest.spyOn(console, 'error').mockImplementation(() => {})
     // should not throw
     await expect(
       new Promise<void>((resolve) => {
@@ -39,6 +40,7 @@ describe('webhookQueue', () => {
   })
 
   it('queue continues processing subsequent jobs after a delivery failure', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {})
     const delivered: string[] = []
     jest.spyOn(global, 'fetch').mockImplementation((url) => {
       if (url === 'http://example.com/fail') return Promise.reject(new Error('network error'))
@@ -52,6 +54,7 @@ describe('webhookQueue', () => {
   })
 
   it('a job with no webhookUrl is skipped without throwing', async () => {
+    jest.spyOn(console, 'warn').mockImplementation(() => {})
     const mockFetch = jest.spyOn(global, 'fetch').mockResolvedValue(new Response(null, { status: 200 }))
     webhookQueue.enqueue({ url: '', payload: { event: 'panic.created', panic: {} as never } })
     await new Promise(resolve => setTimeout(resolve, 30))

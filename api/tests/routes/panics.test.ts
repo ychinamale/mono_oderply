@@ -206,3 +206,167 @@ describe('POST /api/v1/panics', () => {
     }
   })
 })
+
+describe('POST /api/v1/panics/:id/claim', () => {
+  let enqueueSpy: ReturnType<typeof jest.spyOn>
+  beforeEach(() => {
+    enqueueSpy = jest.spyOn(webhookQueue, 'enqueue').mockImplementation(() => {})
+  })
+
+  afterEach(async () => {
+    jest.restoreAllMocks()
+    await prisma.panicEventLog.deleteMany()
+    await prisma.panicEvent.deleteMany()
+  })
+
+  const rsHeaders = { 'x-api-key': 'rs-test-api-key-001' }
+  const psHeaders = { 'x-api-key': 'ps-test-api-key-001' }
+
+  it('returns 403 when API key belongs to a PANIC_SOURCE partner', async () => {
+    const app = await createApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/v1/panics/some-id/claim',
+      headers: psHeaders,
+    })
+    expect(res.statusCode).toBe(403)
+  })
+
+  it('returns 404 when panic id does not exist', async () => {
+    const app = await createApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/v1/panics/nonexistent-id/claim',
+      headers: rsHeaders,
+    })
+    expect(res.statusCode).toBe(404)
+  })
+
+  async function createPanic(overrides: Record<string, unknown> = {}) {
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    return prisma.panicEvent.create({
+      data: {
+        externalUserId: 'user-test',
+        latitude: -26.1,
+        longitude: 28.0,
+        idempotencyKey: `idem-${Date.now()}-${Math.random()}`,
+        partnerId: source.id,
+        ...overrides,
+      },
+    })
+  }
+
+  it('returns 409 when panic has already been claimed by another partner', async () => {
+    const app = await createApp()
+    const responder = await prisma.partner.findFirstOrThrow({ where: { type: 'RESPONDER_SYSTEM' } })
+    const panic = await createPanic({ claimedByPartnerId: responder.id, status: 'ACKNOWLEDGED' })
+    const res = await app.inject({
+      method: 'POST',
+      url: `/api/v1/panics/${panic.id}/claim`,
+      headers: rsHeaders,
+    })
+    expect(res.statusCode).toBe(409)
+  })
+
+  it('returns 400 when panic status is not PENDING', async () => {
+    const app = await createApp()
+    for (const status of ['ACKNOWLEDGED', 'DISPATCHED', 'RESOLVED'] as const) {
+      const panic = await createPanic({ status })
+      const res = await app.inject({
+        method: 'POST',
+        url: `/api/v1/panics/${panic.id}/claim`,
+        headers: rsHeaders,
+      })
+      expect(res.statusCode).toBe(400)
+    }
+  })
+
+  it('returns 200 on successful claim', async () => {
+    const app = await createApp()
+    const panic = await createPanic()
+    const res = await app.inject({
+      method: 'POST',
+      url: `/api/v1/panics/${panic.id}/claim`,
+      headers: rsHeaders,
+    })
+    expect(res.statusCode).toBe(200)
+  })
+
+  it('sets status to ACKNOWLEDGED after successful claim', async () => {
+    const app = await createApp()
+    const panic = await createPanic()
+    const res = await app.inject({ method: 'POST', url: `/api/v1/panics/${panic.id}/claim`, headers: rsHeaders })
+    expect(res.json<{ status: string }>().status).toBe('ACKNOWLEDGED')
+  })
+
+  it('sets claimedByPartnerId to the claiming partner after successful claim', async () => {
+    const app = await createApp()
+    const panic = await createPanic()
+    const responder = await prisma.partner.findFirstOrThrow({ where: { type: 'RESPONDER_SYSTEM' } })
+    const res = await app.inject({ method: 'POST', url: `/api/v1/panics/${panic.id}/claim`, headers: rsHeaders })
+    expect(res.json<{ claimedByPartnerId: string }>().claimedByPartnerId).toBe(responder.id)
+  })
+
+  it('creates a PanicEventLog entry with triggeredBy PARTNER_CLAIM', async () => {
+    const app = await createApp()
+    const panic = await createPanic()
+    await app.inject({ method: 'POST', url: `/api/v1/panics/${panic.id}/claim`, headers: rsHeaders })
+    const log = await prisma.panicEventLog.findFirst({ where: { panicId: panic.id } })
+    expect(log?.triggeredBy).toBe('PARTNER_CLAIM')
+  })
+
+  it('PanicEventLog entry has partnerId set and operatorId null', async () => {
+    const app = await createApp()
+    const panic = await createPanic()
+    const responder = await prisma.partner.findFirstOrThrow({ where: { type: 'RESPONDER_SYSTEM' } })
+    await app.inject({ method: 'POST', url: `/api/v1/panics/${panic.id}/claim`, headers: rsHeaders })
+    const log = await prisma.panicEventLog.findFirst({ where: { panicId: panic.id } })
+    expect(log?.partnerId).toBe(responder.id)
+    expect(log?.operatorId).toBeNull()
+  })
+
+  it('PanicEventLog entry records previousStatus as PENDING and newStatus as ACKNOWLEDGED', async () => {
+    const app = await createApp()
+    const panic = await createPanic()
+    await app.inject({ method: 'POST', url: `/api/v1/panics/${panic.id}/claim`, headers: rsHeaders })
+    const log = await prisma.panicEventLog.findFirst({ where: { panicId: panic.id } })
+    expect(log?.fromStatus).toBe('PENDING')
+    expect(log?.toStatus).toBe('ACKNOWLEDGED')
+  })
+
+  it('response includes claimedByPartner object inline', async () => {
+    const app = await createApp()
+    const panic = await createPanic()
+    const res = await app.inject({ method: 'POST', url: `/api/v1/panics/${panic.id}/claim`, headers: rsHeaders })
+    const body = res.json<{ claimedByPartner: Record<string, unknown> }>()
+    expect(body.claimedByPartner).toBeDefined()
+    expect(typeof body.claimedByPartner).toBe('object')
+    expect(body.claimedByPartner.apiKeyHash).toBeUndefined()
+  })
+
+  it('enqueues a webhook to the PANIC_SOURCE partner after successful claim', async () => {
+    const app = await createApp()
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    await prisma.partner.update({ where: { id: source.id }, data: { webhookUrl: 'http://source.example.com/webhook' } })
+    const panic = await createPanic()
+    await app.inject({ method: 'POST', url: `/api/v1/panics/${panic.id}/claim`, headers: rsHeaders })
+    const enqueuedUrls = (enqueueSpy.mock.calls as [{ url: string }][]).map((args) => args[0].url)
+    expect(enqueuedUrls).toContain('http://source.example.com/webhook')
+    await prisma.partner.update({ where: { id: source.id }, data: { webhookUrl: null } })
+  })
+
+  it('when two claims are submitted concurrently, exactly one succeeds and one receives 409', async () => {
+    const app = await createApp()
+    const panic = await createPanic()
+    const [res1, res2] = await Promise.all([
+      app.inject({ method: 'POST', url: `/api/v1/panics/${panic.id}/claim`, headers: rsHeaders }),
+      app.inject({ method: 'POST', url: `/api/v1/panics/${panic.id}/claim`, headers: rsHeaders }),
+    ])
+    const statuses = [res1.statusCode, res2.statusCode].sort()
+    expect(statuses).toEqual([200, 409])
+    const logCount = await prisma.panicEventLog.count({ where: { panicId: panic.id } })
+    expect(logCount).toBe(1)
+    const updated = await prisma.panicEvent.findUniqueOrThrow({ where: { id: panic.id } })
+    expect(updated.claimedByPartnerId).not.toBeNull()
+  })
+})

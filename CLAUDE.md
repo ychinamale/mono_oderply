@@ -21,7 +21,7 @@
 
 ## Key conventions
 - TypeScript throughout — all source files are .ts (api/, shared/) or .ts/.tsx (client/)
-- ESM module system — write .ts source files; imports in source use .js extensions for compiled output
+- ESM module system — write .ts source files; use .js extensions in relative imports for the api/ workspace (NodeNext module resolution maps .js → .ts for both type checking and IDE go-to-definition, while the compiled output correctly references .js files). For client/ (Vite), use .tsx/.ts extensions directly. Never invent a different extension convention without explicit instruction.
 - Strict mode is on across all workspaces via tsconfig.base.json
 - Prisma transactions wrap every status transition + audit log write
 - SELECT FOR UPDATE on the claim endpoint (pessimistic locking)

@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 
-import { Prisma } from '../generated/prisma/client.js'
+import * as Prisma from '../generated/prisma/internal/prismaNamespace.js'
 import { apiKeyGuard } from '../hooks/apiKeyGuard.js'
 import { getIo } from '../lib/gateway.js'
 import prisma from '../lib/prisma.js'
@@ -16,6 +16,62 @@ const createPanicSchema = z.object({
 })
 
 export function panicRoutes(fastify: FastifyInstance) {
+  fastify.post(
+    '/api/v1/panics/:id/claim',
+    { preHandler: apiKeyGuard('RESPONDER_SYSTEM') },
+    async (request, reply) => {
+      const { id } = request.params as { id: string }
+
+      const exists = await prisma.panicEvent.findUnique({ where: { id }, select: { id: true } })
+      if (!exists) return reply.code(404).send({ error: 'Panic not found' })
+
+      type ClaimResult = { panic: Awaited<ReturnType<typeof prisma.panicEvent.update>>; error?: never } | { error: { code: number; message: string }; panic?: never }
+
+      const result = await prisma.$transaction(async (tx: Prisma.TransactionClient): Promise<ClaimResult> => {
+        const rows = await tx.$queryRaw<{ claimedByPartnerId: string | null; status: string }[]>`
+          SELECT "claimedByPartnerId", status FROM "PanicEvent" WHERE id = ${id} FOR UPDATE
+        `
+        const locked = rows[0]
+
+        if (locked.claimedByPartnerId) return { error: { code: 409, message: 'Panic already claimed' } }
+        if (locked.status !== 'PENDING') return { error: { code: 400, message: 'Cannot claim a panic with status ' + locked.status } }
+
+        const panic = await tx.panicEvent.update({
+          where: { id },
+          data: {
+            status: 'ACKNOWLEDGED',
+            claimedByPartnerId: request.partner.id,
+            logs: {
+              create: {
+                triggeredBy: 'PARTNER_CLAIM',
+                partnerId: request.partner.id,
+                fromStatus: 'PENDING',
+                toStatus: 'ACKNOWLEDGED',
+              },
+            },
+          },
+          include: {
+            partner: { omit: { apiKeyHash: true } },
+            claimedByPartner: { omit: { apiKeyHash: true } },
+          },
+        })
+
+        return { panic }
+      })
+
+      if (result.error) return reply.code(result.error.code).send({ error: result.error.message })
+
+      const panicSource = await prisma.partner.findUnique({ where: { id: result.panic.partnerId }, select: { webhookUrl: true } })
+      if (panicSource?.webhookUrl) {
+        webhookQueue.enqueue({ url: panicSource.webhookUrl, payload: { event: 'panic.status_updated', panic: result.panic } })
+      }
+
+      getIo()?.emit('panic:updated', result.panic)
+
+      return reply.code(200).send(result.panic)
+    },
+  )
+
   fastify.post(
     '/api/v1/panics',
     { preHandler: apiKeyGuard('PANIC_SOURCE') },
@@ -41,12 +97,12 @@ export function panicRoutes(fastify: FastifyInstance) {
         })
 
         const responders = await prisma.partner.findMany({
-          where: { type: 'RESPONDER_SYSTEM' },
+          where: { type: 'RESPONDER_SYSTEM', webhookUrl: { not: null } },
           select: { webhookUrl: true },
         })
 
         for (const responder of responders) {
-          webhookQueue.enqueue({ url: responder.webhookUrl ?? '', payload: { event: 'panic.created', panic } })
+          webhookQueue.enqueue({ url: responder.webhookUrl!, payload: { event: 'panic.created', panic } })
         }
 
         getIo()?.emit('panic:new', panic)
