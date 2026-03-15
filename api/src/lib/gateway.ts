@@ -6,10 +6,11 @@ let io: Server | null = null
 
 export function attachGateway(httpServer: HttpServer): Server {
   io = new Server(httpServer, { cors: { origin: '*' } })
+  // Clear reference when the server closes so tests don't share state
+  httpServer.once('close', () => { io = null })
   return io
 }
 
-export function getIo(): Server {
-  if (!io) throw new Error('Socket.io gateway not initialised')
+export function getIo(): Server | null {
   return io
 }

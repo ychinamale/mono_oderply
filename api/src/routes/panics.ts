@@ -3,6 +3,7 @@ import { z } from 'zod'
 
 import { Prisma } from '../generated/prisma/client.js'
 import { apiKeyGuard } from '../hooks/apiKeyGuard.js'
+import { getIo } from '../lib/gateway.js'
 import prisma from '../lib/prisma.js'
 import { webhookQueue } from '../lib/webhookQueue.js'
 
@@ -47,6 +48,8 @@ export function panicRoutes(fastify: FastifyInstance) {
         for (const responder of responders) {
           webhookQueue.enqueue({ url: responder.webhookUrl ?? '', payload: { event: 'panic.created', panic } })
         }
+
+        getIo()?.emit('panic:new', panic)
 
         return reply.code(201).send(panic)
       } catch (err) {
