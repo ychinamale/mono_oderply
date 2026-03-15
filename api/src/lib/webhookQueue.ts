@@ -21,6 +21,12 @@ async function processNext(): Promise<void> {
     return
   }
 
+  if (!job.url) {
+    console.warn('[webhookQueue] skipping job with no webhookUrl')
+    void processNext()
+    return
+  }
+
   try {
     const res = await fetch(job.url, {
       method: 'POST',
