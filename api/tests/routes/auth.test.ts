@@ -41,4 +41,22 @@ describe('POST /api/auth/login', () => {
     expect(body.operator.name).toBe('Admin')
     expect(typeof body.operator.id).toBe('string')
   })
+
+  it('returned JWT payload contains operatorId, email, and name', async () => {
+    const app = await createApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/auth/login',
+      payload: { email: 'admin@oderply.com', password: 'Admin1234!' },
+    })
+    const { token } = res.json<{ token: string }>()
+    const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString()) as {
+      operatorId: string
+      email: string
+      name: string
+    }
+    expect(typeof payload.operatorId).toBe('string')
+    expect(payload.email).toBe('admin@oderply.com')
+    expect(payload.name).toBe('Admin')
+  })
 })
