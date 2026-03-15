@@ -92,6 +92,37 @@ describe('WebSocket Gateway', () => {
     expect(error.message).toMatch(/unauthorised/i)
   })
 
+  it('accepts connection when auth token is a valid operator JWT', async () => {
+    const app = await createApp()
+    await app.listen({ port: 0 })
+    const { port } = app.server.address() as { port: number }
+
+    const token = app.jwt.sign({ operatorId: 'test-op', email: 'op@test.com', name: 'Test Op' })
+
+    await new Promise<void>((resolve, reject) => {
+      const client: Socket = ioc(`http://localhost:${port}`, { auth: { token } })
+
+      const timeout = setTimeout(() => {
+        client.disconnect()
+        reject(new Error('Expected connection to succeed but it timed out'))
+      }, 3000)
+
+      client.on('connect', () => {
+        clearTimeout(timeout)
+        client.disconnect()
+        resolve()
+      })
+
+      client.on('connect_error', (err: Error) => {
+        clearTimeout(timeout)
+        client.disconnect()
+        reject(err)
+      })
+    })
+
+    await app.close()
+  })
+
   it('panic:new payload matches the shape of POST /api/v1/panics 201 response', async () => {
     const app = await createApp()
     await app.listen({ port: 0 })
