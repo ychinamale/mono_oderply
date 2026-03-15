@@ -44,6 +44,22 @@ describe('GET /api/v1/partners', () => {
     expect(partner?._count.panicEvents).toBe(3)
   })
 
+  it('filters by type when type query param is provided', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/v1/partners?type=PANIC_SOURCE',
+      headers: { authorization: `Bearer ${token}` },
+    })
+    expect(res.statusCode).toBe(200)
+    const body = res.json<{ data: { type: string }[] }>()
+    expect(body.data.length).toBeGreaterThan(0)
+    for (const partner of body.data) {
+      expect(partner.type).toBe('PANIC_SOURCE')
+    }
+  })
+
   it('returns paginated list with _count.panicEvents on each partner', async () => {
     const app = await createApp()
     const token = await getToken()
