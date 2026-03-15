@@ -22,14 +22,14 @@ Each section covers a testable concern. Within each section, tests are grouped b
 
 **Type:** Integration
 
-- [ ] `it('returns 401 when x-api-key header is missing')`
-- [ ] `it('returns 403 when x-api-key does not match any partner')`
-- [ ] `it('returns 403 when x-api-key is a valid key but belongs to wrong partner type')`
+- [x] `it('returns 401 when x-api-key header is missing')`
+- [x] `it('returns 403 when x-api-key does not match any partner')`
+- [x] `it('returns 403 when x-api-key is a valid key but belongs to wrong partner type')`
     - Specifically: PANIC_SOURCE key on a RESPONDER_SYSTEM-only route → 403
-- [ ] `it('attaches the resolved Partner record to request.partner on valid key')`
-- [ ] `it('attaches the correct partner — not just any partner — to request.partner')`
+- [x] `it('attaches the resolved Partner record to request.partner on valid key')`
+- [x] `it('attaches the correct partner — not just any partner — to request.partner')`
     - Two partners seeded; confirm the right one is resolved
-- [ ] `it('returns 403 with a descriptive message when partner type assertion fails')`
+- [x] `it('returns 403 with a descriptive message when partner type assertion fails')`
 
 ---
 
@@ -39,13 +39,13 @@ Each section covers a testable concern. Within each section, tests are grouped b
 
 **Type:** Integration
 
-- [ ] `it('returns 401 when email does not exist')`
-- [ ] `it('returns 401 when password is incorrect')`
-- [ ] `it('returns 200 with a signed JWT and operator object on valid credentials')`
-- [ ] `it('returned JWT payload contains operatorId, email, and name')`
-- [ ] `it('does not return passwordHash in the response')`
-- [ ] `it('returns 400 when email field is not a valid email format')`
-- [ ] `it('returns 400 when password field is missing')`
+- [x] `it('returns 401 when email does not exist')`
+- [x] `it('returns 401 when password is incorrect')`
+- [x] `it('returns 200 with a signed JWT and operator object on valid credentials')`
+- [x] `it('returned JWT payload contains operatorId, email, and name')`
+- [x] `it('does not return passwordHash in the response')`
+- [x] `it('returns 400 when email field is not a valid email format')`
+- [x] `it('returns 400 when password field is missing')`
 
 ---
 
@@ -55,12 +55,12 @@ Each section covers a testable concern. Within each section, tests are grouped b
 
 **Type:** Integration
 
-- [ ] `it('returns 401 when Authorization header is missing')`
-- [ ] `it('returns 401 when Authorization header is present but token is malformed')`
-- [ ] `it('returns 401 when token is signed with a different secret')`
-- [ ] `it('returns 401 when token is expired')`
-- [ ] `it('attaches decoded operator payload to request.operator on valid token')`
-- [ ] `it('allows request to proceed to route handler when token is valid')`
+- [x] `it('returns 401 when Authorization header is missing')`
+- [x] `it('returns 401 when Authorization header is present but token is malformed')`
+- [x] `it('returns 401 when token is signed with a different secret')`
+- [x] `it('returns 401 when token is expired')`
+- [x] `it('attaches decoded operator payload to request.operator on valid token')`
+- [x] `it('allows request to proceed to route handler when token is valid')`
 
 ---
 
@@ -70,26 +70,26 @@ Each section covers a testable concern. Within each section, tests are grouped b
 
 **Type:** Integration
 
-- [ ] `it('returns 401 when x-api-key header is missing')`
-- [ ] `it('returns 403 when API key belongs to a RESPONDER_SYSTEM partner')`
-- [ ] `it('returns 400 when externalUserId is missing')`
-- [ ] `it('returns 400 when latitude is missing')`
-- [ ] `it('returns 400 when longitude is missing')`
-- [ ] `it('returns 400 when idempotencyKey is missing')`
-- [ ] `it('returns 400 when latitude is out of range (e.g. 91)')`
-- [ ] `it('returns 400 when longitude is out of range (e.g. -181)')`
-- [ ] `it('returns 201 with the created PanicEvent on valid request')`
-- [ ] `it('created PanicEvent has status PENDING')`
-- [ ] `it('created PanicEvent has partnerId matching the authenticated partner')`
-- [ ] `it('response includes partner object inline — not just partnerId')`
-- [ ] `it('response does not include apiKeyHash on the inline partner')`
-- [ ] `it('metadata is stored and returned when provided')`
-- [ ] `it('metadata is null when not provided')`
+- [x] `it('returns 401 when x-api-key header is missing')`
+- [x] `it('returns 403 when API key belongs to a RESPONDER_SYSTEM partner')`
+- [x] `it('returns 400 when externalUserId is missing')`
+- [x] `it('returns 400 when latitude is missing')`
+- [x] `it('returns 400 when longitude is missing')`
+- [x] `it('returns 400 when idempotencyKey is missing')`
+- [x] `it('returns 400 when latitude is out of range (e.g. 91)')`
+- [x] `it('returns 400 when longitude is out of range (e.g. -181)')`
+- [x] `it('returns 201 with the created PanicEvent on valid request')`
+- [x] `it('created PanicEvent has status PENDING')`
+- [x] `it('created PanicEvent has partnerId matching the authenticated partner')`
+- [x] `it('response includes partner object inline — not just partnerId')`
+- [x] `it('response does not include apiKeyHash on the inline partner')`
+- [x] `it('metadata is stored and returned when provided')`
+- [x] `it('metadata is null when not provided')`
 
 **Idempotency:**
-- [ ] `it('returns 200 with the original event when idempotencyKey is submitted a second time')`
-- [ ] `it('does not create a second PanicEvent row on duplicate idempotencyKey')`
-- [ ] `it('returns a different event for a different idempotencyKey')`
+- [x] `it('returns 200 with the original event when idempotencyKey is submitted a second time')`
+- [x] `it('does not create a second PanicEvent row on duplicate idempotencyKey')`
+- [x] `it('returns a different event for a different idempotencyKey')`
 
 ---
 
@@ -99,21 +99,21 @@ Each section covers a testable concern. Within each section, tests are grouped b
 
 **Type:** Integration
 
-- [ ] `it('returns 403 when API key belongs to a PANIC_SOURCE partner')`
-- [ ] `it('returns 404 when panic id does not exist')`
-- [ ] `it('returns 409 when panic has already been claimed by another partner')`
-- [ ] `it('returns 400 when panic status is not PENDING')`
+- [x] `it('returns 403 when API key belongs to a PANIC_SOURCE partner')`
+- [x] `it('returns 404 when panic id does not exist')`
+- [x] `it('returns 409 when panic has already been claimed by another partner')`
+- [x] `it('returns 400 when panic status is not PENDING')`
     - Test with ACKNOWLEDGED, DISPATCHED, and RESOLVED panics
-- [ ] `it('returns 200 on successful claim')`
-- [ ] `it('sets status to ACKNOWLEDGED after successful claim')`
-- [ ] `it('sets claimedByPartnerId to the claiming partner after successful claim')`
-- [ ] `it('creates a PanicEventLog entry with triggeredBy PARTNER_CLAIM')`
-- [ ] `it('PanicEventLog entry has partnerId set and operatorId null')`
-- [ ] `it('PanicEventLog entry records previousStatus as PENDING and newStatus as ACKNOWLEDGED')`
-- [ ] `it('response includes claimedByPartner object inline')`
+- [x] `it('returns 200 on successful claim')`
+- [x] `it('sets status to ACKNOWLEDGED after successful claim')`
+- [x] `it('sets claimedByPartnerId to the claiming partner after successful claim')`
+- [x] `it('creates a PanicEventLog entry with triggeredBy PARTNER_CLAIM')`
+- [x] `it('PanicEventLog entry has partnerId set and operatorId null')`
+- [x] `it('PanicEventLog entry records previousStatus as PENDING and newStatus as ACKNOWLEDGED')`
+- [x] `it('response includes claimedByPartner object inline')`
 
 **Race condition (pessimistic locking):**
-- [ ] `it('when two claims are submitted concurrently, exactly one succeeds and one receives 409')`
+- [x] `it('when two claims are submitted concurrently, exactly one succeeds and one receives 409')`
     - Use `Promise.all` to fire two simultaneous requests; assert DB has exactly one log entry and one claimedByPartnerId
 
 ---
@@ -126,33 +126,33 @@ Each section covers a testable concern. Within each section, tests are grouped b
 
 ### `POST /api/v1/panics/:id/acknowledge`
 
-- [ ] `it('returns 401 when JWT is missing')`
-- [ ] `it('returns 404 when panic id does not exist')`
-- [ ] `it('returns 400 when panic status is not PENDING')`
+- [x] `it('returns 401 when JWT is missing')`
+- [x] `it('returns 404 when panic id does not exist')`
+- [x] `it('returns 400 when panic status is not PENDING')`
     - Test with ACKNOWLEDGED, DISPATCHED, RESOLVED
-- [ ] `it('returns 200 and sets status to ACKNOWLEDGED')`
-- [ ] `it('creates a PanicEventLog with triggeredBy OPERATOR and operatorId set')`
-- [ ] `it('PanicEventLog has operatorId set and partnerId null')`
+- [x] `it('returns 200 and sets status to ACKNOWLEDGED')`
+- [x] `it('creates a PanicEventLog with triggeredBy OPERATOR and operatorId set')`
+- [x] `it('PanicEventLog has operatorId set and partnerId null')`
 
 ### `POST /api/v1/panics/:id/dispatch`
 
-- [ ] `it('returns 400 when panic status is not ACKNOWLEDGED')`
+- [x] `it('returns 400 when panic status is not ACKNOWLEDGED')`
     - Test with PENDING, DISPATCHED, RESOLVED
-- [ ] `it('returns 200 and sets status to DISPATCHED')`
-- [ ] `it('creates a PanicEventLog with triggeredBy OPERATOR')`
+- [x] `it('returns 200 and sets status to DISPATCHED')`
+- [x] `it('creates a PanicEventLog with triggeredBy OPERATOR')`
 
 ### `POST /api/v1/panics/:id/resolve`
 
-- [ ] `it('returns 400 when panic status is not DISPATCHED')`
+- [x] `it('returns 400 when panic status is not DISPATCHED')`
     - Test with PENDING, ACKNOWLEDGED, RESOLVED
-- [ ] `it('returns 200 and sets status to RESOLVED')`
-- [ ] `it('creates a PanicEventLog with triggeredBy OPERATOR')`
+- [x] `it('returns 200 and sets status to RESOLVED')`
+- [x] `it('creates a PanicEventLog with triggeredBy OPERATOR')`
 
 ### Shared transition assertions
 
 - [ ] `it('every transition response includes partner inline')`
 - [ ] `it('every transition response does not include apiKeyHash')`
-- [ ] `it('assertTransition returns a 400 with a descriptive message on any invalid transition')`
+- [x] `it('assertTransition returns a 400 with a descriptive message on any invalid transition')`
     - Message format: `"Cannot [action] a panic with status [currentStatus]"`
 
 ---
@@ -184,14 +184,14 @@ Each section covers a testable concern. Within each section, tests are grouped b
 
 ### `GET /api/v1/panics/:id/logs`
 
-- [ ] `it('returns 401 when JWT is missing')`
-- [ ] `it('returns 404 when parent panic does not exist')`
-- [ ] `it('returns logs in ascending createdAt order')`
-- [ ] `it('each log entry includes operator inline when triggeredBy is OPERATOR')`
-- [ ] `it('each log entry includes partner inline when triggeredBy is PARTNER_CLAIM')`
-- [ ] `it('operator is null when triggeredBy is PARTNER_CLAIM')`
-- [ ] `it('partner is null when triggeredBy is OPERATOR')`
-- [ ] `it('returns paginated results with correct pagination metadata')`
+- [x] `it('returns 401 when JWT is missing')`
+- [x] `it('returns 404 when parent panic does not exist')`
+- [x] `it('returns logs in ascending createdAt order')`
+- [x] `it('each log entry includes operator inline when triggeredBy is OPERATOR')`
+- [x] `it('each log entry includes partner inline when triggeredBy is PARTNER_CLAIM')`
+- [x] `it('operator is null when triggeredBy is PARTNER_CLAIM')`
+- [x] `it('partner is null when triggeredBy is OPERATOR')`
+- [x] `it('returns paginated results with correct pagination metadata')`
 
 ### `GET /api/v1/panics/:id/logs/:logId`
 
@@ -201,18 +201,18 @@ Each section covers a testable concern. Within each section, tests are grouped b
 
 ### `GET /api/v1/partners`
 
-- [ ] `it('returns 401 when JWT is missing')`
-- [ ] `it('returns paginated list with _count.panicEvents on each partner')`
-- [ ] `it('_count.activePanicEvents excludes RESOLVED panics')`
-- [ ] `it('filters by type when type query param is provided')`
-- [ ] `it('does not include apiKeyHash on any partner in the response')`
+- [x] `it('returns 401 when JWT is missing')`
+- [x] `it('returns paginated list with _count.panicEvents on each partner')`
+- [x] `it('_count.activePanicEvents excludes RESOLVED panics')`
+- [x] `it('filters by type when type query param is provided')`
+- [x] `it('does not include apiKeyHash on any partner in the response')`
 
 ### `GET /api/v1/partners/:id`
 
-- [ ] `it('returns 401 when JWT is missing')`
-- [ ] `it('returns 404 when partner does not exist')`
-- [ ] `it('returns partner with _count aggregations')`
-- [ ] `it('does not include apiKeyHash')`
+- [x] `it('returns 401 when JWT is missing')`
+- [x] `it('returns 404 when partner does not exist')`
+- [x] `it('returns partner with _count aggregations')`
+- [x] `it('does not include apiKeyHash')`
 
 ---
 
@@ -222,16 +222,16 @@ Each section covers a testable concern. Within each section, tests are grouped b
 
 **Type:** Integration / E2E
 
-- [ ] `it('rejects connection when no auth token is provided')`
-- [ ] `it('rejects connection when auth token is invalid')`
-- [ ] `it('accepts connection when auth token is a valid operator JWT')`
-- [ ] `it('emits panic:new to connected operator clients when a panic is submitted')`
-- [ ] `it('panic:new payload matches the shape of GET /api/v1/panics/:id response')`
-- [ ] `it('emits panic:updated to connected operator clients when a panic is acknowledged')`
-- [ ] `it('emits panic:updated to connected operator clients when a panic is claimed')`
-- [ ] `it('emits panic:updated to connected operator clients when a panic is dispatched')`
-- [ ] `it('emits panic:updated to connected operator clients when a panic is resolved')`
-- [ ] `it('does not emit panic:updated to clients that connected with an invalid token')`
+- [x] `it('rejects connection when no auth token is provided')`
+- [x] `it('rejects connection when auth token is invalid')`
+- [x] `it('accepts connection when auth token is a valid operator JWT')`
+- [x] `it('emits panic:new to connected operator clients when a panic is submitted')`
+- [x] `it('panic:new payload matches the shape of GET /api/v1/panics/:id response')`
+- [x] `it('emits panic:updated to connected operator clients when a panic is acknowledged')`
+- [x] `it('emits panic:updated to connected operator clients when a panic is claimed')`
+- [x] `it('emits panic:updated to connected operator clients when a panic is dispatched')`
+- [x] `it('emits panic:updated to connected operator clients when a panic is resolved')`
+- [x] `it('does not emit panic:updated to clients that connected with an invalid token')`
 
 ---
 
@@ -243,21 +243,21 @@ Each section covers a testable concern. Within each section, tests are grouped b
 
 ### Queue behaviour
 
-- [ ] `it('enqueue() adds a job to the queue')`
-- [ ] `it('jobs are processed in FIFO order')`
-- [ ] `it('a failed webhook delivery does not throw or crash the queue')`
-- [ ] `it('queue continues processing subsequent jobs after a delivery failure')`
-- [ ] `it('a job with no webhookUrl is skipped without throwing')`
+- [x] `it('enqueue() adds a job to the queue')`
+- [x] `it('jobs are processed in FIFO order')`
+- [x] `it('a failed webhook delivery does not throw or crash the queue')`
+- [x] `it('queue continues processing subsequent jobs after a delivery failure')`
+- [x] `it('a job with no webhookUrl is skipped without throwing')`
 
 ### Trigger points (use a mock/spy on the queue's enqueue function)
 
-- [ ] `it('enqueues a broadcast to all RESPONDER_SYSTEM partners on panic creation')`
-- [ ] `it('does not enqueue a broadcast to PANIC_SOURCE partners on panic creation')`
-- [ ] `it('enqueues a status update to PANIC_SOURCE only on claim')`
-- [ ] `it('does not enqueue a status update to RESPONDER_SYSTEM on acknowledge (no claimer)')`
-- [ ] `it('enqueues a status update to both PANIC_SOURCE and claimedByPartner on dispatch')`
-- [ ] `it('enqueues a status update to both PANIC_SOURCE and claimedByPartner on resolve')`
-- [ ] `it('skips enqueue for a partner with no webhookUrl and logs a warning')`
+- [x] `it('enqueues a broadcast to all RESPONDER_SYSTEM partners on panic creation')`
+- [x] `it('does not enqueue a broadcast to PANIC_SOURCE partners on panic creation')`
+- [x] `it('enqueues a status update to PANIC_SOURCE only on claim')`
+- [x] `it('does not enqueue a status update to RESPONDER_SYSTEM on acknowledge (no claimer)')`
+- [x] `it('enqueues a status update to both PANIC_SOURCE and claimedByPartner on dispatch')`
+- [x] `it('enqueues a status update to both PANIC_SOURCE and claimedByPartner on resolve')`
+- [x] `it('skips enqueue for a partner with no webhookUrl and logs a warning')`
 
 ---
 
