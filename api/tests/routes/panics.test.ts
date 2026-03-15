@@ -314,4 +314,23 @@ describe('POST /api/v1/panics/:id/claim', () => {
     const log = await prisma.panicEventLog.findFirst({ where: { panicId: panic.id } })
     expect(log?.triggeredBy).toBe('PARTNER_CLAIM')
   })
+
+  it('PanicEventLog entry has partnerId set and operatorId null', async () => {
+    const app = await createApp()
+    const panic = await createPanic()
+    const responder = await prisma.partner.findFirstOrThrow({ where: { type: 'RESPONDER_SYSTEM' } })
+    await app.inject({ method: 'POST', url: `/api/v1/panics/${panic.id}/claim`, headers: rsHeaders })
+    const log = await prisma.panicEventLog.findFirst({ where: { panicId: panic.id } })
+    expect(log?.partnerId).toBe(responder.id)
+    expect(log?.operatorId).toBeNull()
+  })
+
+  it('PanicEventLog entry records previousStatus as PENDING and newStatus as ACKNOWLEDGED', async () => {
+    const app = await createApp()
+    const panic = await createPanic()
+    await app.inject({ method: 'POST', url: `/api/v1/panics/${panic.id}/claim`, headers: rsHeaders })
+    const log = await prisma.panicEventLog.findFirst({ where: { panicId: panic.id } })
+    expect(log?.fromStatus).toBe('PENDING')
+    expect(log?.toStatus).toBe('ACKNOWLEDGED')
+  })
 })
