@@ -318,7 +318,7 @@ describe('WebSocket Gateway', () => {
     expect(received).toBeDefined()
   })
 
-  it('emits panic:updated to operator clients after a successful claim', async () => {
+  it('emits panic:updated to connected operator clients when a panic is claimed', async () => {
     const app = await createApp()
     await app.listen({ port: 0 })
     const { port } = app.server.address() as { port: number }
