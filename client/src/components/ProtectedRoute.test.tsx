@@ -31,4 +31,10 @@ describe('ProtectedRoute', () => {
     expect(screen.getByText('login page')).toBeInTheDocument();
     expect(screen.queryByText('protected content')).not.toBeInTheDocument();
   });
+
+  it('renders children when token is present in AuthContext', () => {
+    renderProtectedRoute('valid-token');
+    expect(screen.getByText('protected content')).toBeInTheDocument();
+    expect(screen.queryByText('login page')).not.toBeInTheDocument();
+  });
 });
