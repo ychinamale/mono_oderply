@@ -741,4 +741,26 @@ describe('GET /api/v1/panics', () => {
     expect(body.data).toHaveLength(1)
     expect(body.data[0].status).toBe('PENDING')
   })
+
+  it('filters by partnerId when partnerId query param is provided', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    const responder = await prisma.partner.findFirstOrThrow({ where: { type: 'RESPONDER_SYSTEM' } })
+    await prisma.panicEvent.createMany({
+      data: [
+        { externalUserId: 'u1', latitude: 0, longitude: 0, idempotencyKey: `idem-pid-1`, partnerId: source.id },
+        { externalUserId: 'u2', latitude: 0, longitude: 0, idempotencyKey: `idem-pid-2`, partnerId: responder.id },
+      ],
+    })
+    const res = await app.inject({
+      method: 'GET',
+      url: `/api/v1/panics?partnerId=${source.id}`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    const body = res.json<{ data: { partnerId: string }[]; pagination: { total: number } }>()
+    expect(body.pagination.total).toBe(1)
+    expect(body.data).toHaveLength(1)
+    expect(body.data[0].partnerId).toBe(source.id)
+  })
 })
