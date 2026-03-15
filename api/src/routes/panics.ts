@@ -61,6 +61,11 @@ export function panicRoutes(fastify: FastifyInstance) {
 
       if (result.error) return reply.code(result.error.code).send({ error: result.error.message })
 
+      const panicSource = await prisma.partner.findUnique({ where: { id: result.panic.partnerId }, select: { webhookUrl: true } })
+      if (panicSource?.webhookUrl) {
+        webhookQueue.enqueue({ url: panicSource.webhookUrl, payload: { event: 'panic.status_updated', panic: result.panic } })
+      }
+
       return reply.code(200).send(result.panic)
     },
   )
