@@ -790,3 +790,15 @@ describe('GET /api/v1/panics', () => {
     expect(body.data[0].partner.apiKeyHash).toBeUndefined()
   })
 })
+
+describe('GET /api/v1/panics/:id', () => {
+  afterEach(async () => {
+    await prisma.panicEvent.deleteMany()
+  })
+
+  it('returns 401 when JWT is missing', async () => {
+    const app = await createApp()
+    const res = await app.inject({ method: 'GET', url: '/api/v1/panics/some-id' })
+    expect(res.statusCode).toBe(401)
+  })
+})
