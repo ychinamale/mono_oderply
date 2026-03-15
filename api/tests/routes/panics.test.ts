@@ -857,4 +857,30 @@ describe('GET /api/v1/panics/:id', () => {
     const body = res.json<{ claimedByPartner: unknown }>()
     expect(body.claimedByPartner).toBeNull()
   })
+
+  it('claimedByPartner is populated when panic has been claimed', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    const responder = await prisma.partner.findFirstOrThrow({ where: { type: 'RESPONDER_SYSTEM' } })
+    const panic = await prisma.panicEvent.create({
+      data: {
+        externalUserId: 'u1',
+        latitude: 0,
+        longitude: 0,
+        idempotencyKey: 'idem-claimed-1',
+        partnerId: source.id,
+        status: 'ACKNOWLEDGED',
+        claimedByPartnerId: responder.id,
+      },
+    })
+    const res = await app.inject({
+      method: 'GET',
+      url: `/api/v1/panics/${panic.id}`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    const body = res.json<{ claimedByPartner: { id: string } | null }>()
+    expect(body.claimedByPartner).not.toBeNull()
+    expect(body.claimedByPartner?.id).toBe(responder.id)
+  })
 })
