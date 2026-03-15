@@ -46,7 +46,14 @@ export function partnerRoutes(fastify: FastifyInstance) {
     })
   })
 
-  fastify.get('/api/v1/partners/:id', { preHandler: jwtGuard() }, async (_req, reply) => {
-    return reply.code(501).send()
+  fastify.get('/api/v1/partners/:id', { preHandler: jwtGuard() }, async (req, reply) => {
+    const { id } = req.params as { id: string }
+    const partner = await prisma.partner.findUnique({
+      where: { id },
+      omit: { apiKeyHash: true },
+      include: { _count: { select: { panicEvents: true } } },
+    })
+    if (!partner) return reply.code(404).send({ error: 'Partner not found' })
+    return reply.send(partner)
   })
 }
