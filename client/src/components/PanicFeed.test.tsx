@@ -85,6 +85,14 @@ describe('PanicFeed', () => {
     expect(await screen.findAllByTestId('panic-card')).toHaveLength(2);
   });
 
+  it('shows a loading skeleton while the initial fetch is in progress', () => {
+    (axios.get as Mock).mockReturnValueOnce(new Promise(() => {})); // never resolves
+
+    renderFeed();
+
+    expect(screen.getByTestId('loading-skeleton')).toBeInTheDocument();
+  });
+
   it('updates the correct PanicCard when panic:updated socket event is received', async () => {
     (axios.get as Mock).mockResolvedValueOnce({
       data: { data: [panicA, panicB] },
