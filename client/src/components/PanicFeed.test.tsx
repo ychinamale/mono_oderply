@@ -85,6 +85,18 @@ describe('PanicFeed', () => {
     expect(await screen.findAllByTestId('panic-card')).toHaveLength(2);
   });
 
+  it('PENDING panics are visually distinct from other statuses', async () => {
+    (axios.get as Mock).mockResolvedValueOnce({
+      data: { data: [panicA, panicB] }, // panicA=PENDING, panicB=ACKNOWLEDGED
+    });
+
+    renderFeed();
+
+    const cards = await screen.findAllByTestId('panic-card');
+    expect(cards[0]).toHaveAttribute('data-status', 'PENDING');
+    expect(cards[0].className).not.toBe(cards[1].className);
+  });
+
   it('shows an error state when the initial fetch fails', async () => {
     (axios.get as Mock).mockRejectedValueOnce(new Error('Network error'));
 
