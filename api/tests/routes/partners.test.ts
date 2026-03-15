@@ -102,4 +102,15 @@ describe('GET /api/v1/partners/:id', () => {
     const res = await app.inject({ method: 'GET', url: '/api/v1/partners/some-id' })
     expect(res.statusCode).toBe(401)
   })
+
+  it('returns 404 when partner does not exist', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/v1/partners/00000000-0000-0000-0000-000000000000',
+      headers: { authorization: `Bearer ${token}` },
+    })
+    expect(res.statusCode).toBe(404)
+  })
 })
