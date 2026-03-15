@@ -1,3 +1,5 @@
+import jwt from '@fastify/jwt'
+import Fastify from 'fastify'
 import { createApp } from '../../src/app.js'
 import { jwtGuard } from '../../src/hooks/jwtGuard.js'
 import prisma from '../../src/lib/prisma.js'
@@ -27,6 +29,20 @@ describe('jwtGuard', () => {
       method: 'GET',
       url: '/protected',
       headers: { authorization: 'Bearer not.a.jwt' },
+    })
+    expect(res.statusCode).toBe(401)
+  })
+
+  it('returns 401 when token is signed with a different secret', async () => {
+    const signer = Fastify()
+    await signer.register(jwt, { secret: 'wrong-secret' })
+    const token = signer.jwt.sign({ operatorId: 'x', email: 'x@x.com', name: 'X' })
+
+    const app = await buildGuardApp()
+    const res = await app.inject({
+      method: 'GET',
+      url: '/protected',
+      headers: { authorization: `Bearer ${token}` },
     })
     expect(res.statusCode).toBe(401)
   })
