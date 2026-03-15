@@ -557,4 +557,17 @@ describe('POST /api/v1/panics/:id/dispatch', () => {
       expect(res.statusCode).toBe(400)
     }
   })
+
+  it('returns 200 and sets status to DISPATCHED', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const panic = await createPanic({ status: 'ACKNOWLEDGED' })
+    const res = await app.inject({
+      method: 'POST',
+      url: `/api/v1/panics/${panic.id}/dispatch`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    expect(res.statusCode).toBe(200)
+    expect(res.json<{ status: string }>().status).toBe('DISPATCHED')
+  })
 })
