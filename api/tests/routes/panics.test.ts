@@ -372,7 +372,12 @@ describe('POST /api/v1/panics/:id/claim', () => {
 })
 
 describe('POST /api/v1/panics/:id/acknowledge', () => {
+  let enqueueSpy: ReturnType<typeof jest.spyOn>
+  beforeEach(() => {
+    enqueueSpy = jest.spyOn(webhookQueue, 'enqueue').mockImplementation(() => {})
+  })
   afterEach(async () => {
+    jest.restoreAllMocks()
     await prisma.panicEventLog.deleteMany()
     await prisma.panicEvent.deleteMany()
   })
@@ -498,6 +503,22 @@ describe('POST /api/v1/panics/:id/acknowledge', () => {
     })
     const body = res.json<{ partner: Record<string, unknown> }>()
     expect(body.partner.apiKeyHash).toBeUndefined()
+  })
+
+  it('does not enqueue a status update to RESPONDER_SYSTEM on acknowledge (no claimer)', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const panic = await createPanic()
+    const responders = await prisma.partner.findMany({ where: { type: 'RESPONDER_SYSTEM' } })
+    await app.inject({
+      method: 'POST',
+      url: `/api/v1/panics/${panic.id}/acknowledge`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    const enqueuedUrls = (enqueueSpy.mock.calls as [{ url: string }][]).map((args) => args[0].url)
+    for (const responder of responders) {
+      expect(enqueuedUrls).not.toContain(responder.webhookUrl)
+    }
   })
 
   it('400 error message follows "Cannot acknowledge a panic with status [currentStatus]" format', async () => {
