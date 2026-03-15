@@ -87,6 +87,10 @@ describe('GET /api/v1/partners', () => {
 })
 
 describe('GET /api/v1/partners/:id', () => {
+  afterEach(async () => {
+    await prisma.panicEvent.deleteMany()
+  })
+
   async function getToken() {
     const app = await createApp()
     const res = await app.inject({
