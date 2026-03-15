@@ -101,6 +101,11 @@ Before starting any task, run `git status` and check for uncommitted or untracke
 files. If any exist, prepare the commit message and present it to the user for
 confirmation before committing and pushing.
 
+Before every commit (not just at the start of a task), run `git status` to confirm
+you are staging all changed files — including package-lock.json, generated files, or
+anything else modified as a side effect of the work. Never stage files by name alone;
+always verify with `git status` first so nothing is accidentally omitted.
+
 When asked "what is the next task":
 1. Read the backlog
 2. Find the first unchecked task (`- [ ]`) in order, skipping any checked (`- [x]`) tasks
