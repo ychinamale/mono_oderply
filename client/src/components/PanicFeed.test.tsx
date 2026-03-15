@@ -85,6 +85,18 @@ describe('PanicFeed', () => {
     expect(await screen.findAllByTestId('panic-card')).toHaveLength(2);
   });
 
+  it('disconnects the socket on component unmount', async () => {
+    (axios.get as Mock).mockResolvedValueOnce({ data: { data: [] } });
+
+    const { unmount } = renderFeed();
+
+    await new Promise((r) => setTimeout(r, 0));
+
+    unmount();
+
+    expect(mockSocket.disconnect).toHaveBeenCalledTimes(1);
+  });
+
   it('PENDING panics are visually distinct from other statuses', async () => {
     (axios.get as Mock).mockResolvedValueOnce({
       data: { data: [panicA, panicB] }, // panicA=PENDING, panicB=ACKNOWLEDGED
