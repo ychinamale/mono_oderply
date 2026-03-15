@@ -417,4 +417,18 @@ describe('POST /api/v1/panics/:id/acknowledge', () => {
     })
     expect(res.statusCode).toBe(404)
   })
+
+  it('returns 400 when panic status is not PENDING', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    for (const status of ['ACKNOWLEDGED', 'DISPATCHED', 'RESOLVED'] as const) {
+      const panic = await createPanic({ status })
+      const res = await app.inject({
+        method: 'POST',
+        url: `/api/v1/panics/${panic.id}/acknowledge`,
+        headers: { authorization: `Bearer ${token}` },
+      })
+      expect(res.statusCode).toBe(400)
+    }
+  })
 })
