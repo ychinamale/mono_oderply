@@ -390,14 +390,14 @@
 **I want** to see every status transition for a specific panic with timestamps and actor details,
 **so that** I have a complete record of how the event was handled.
 
-- [ ] TASK-06.2.1 — Implement `GET /api/v1/panics/:id/logs`
+- [x] TASK-06.2.1 — Implement `GET /api/v1/panics/:id/logs`
 
-    - [ ] SUB: Apply `jwtGuard`
-    - [ ] SUB: Verify parent `PanicEvent` exists; return 404 if not
-    - [ ] SUB: Query logs with `include: { operator: true, partner: true }`
-    - [ ] SUB: Order by `createdAt ASC`
-    - [ ] SUB: Apply pagination with `page` and `limit` query params
-    - [ ] SUB: Return `{ data, pagination }`
+    - [x] SUB: Apply `jwtGuard`
+    - [x] SUB: Verify parent `PanicEvent` exists; return 404 if not
+    - [x] SUB: Query logs with `include: { operator: true, partner: true }`
+    - [x] SUB: Order by `createdAt ASC`
+    - [x] SUB: Apply pagination with `page` and `limit` query params
+    - [x] SUB: Return `{ data, pagination }`
 
 - [ ] TASK-06.2.2 — Implement `GET /api/v1/panics/:id/logs/:logId`
 

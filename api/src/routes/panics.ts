@@ -16,6 +16,11 @@ const listPanicsQuerySchema = z.object({
   partnerId: z.string().optional(),
 })
 
+const listLogsQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+})
+
 const createPanicSchema = z.object({
   externalUserId: z.string().min(1),
   latitude: z.number().min(-90).max(90),
@@ -58,6 +63,37 @@ export function panicRoutes(fastify: FastifyInstance) {
       })
       if (!panic) return reply.code(404).send({ error: 'Panic not found' })
       return reply.code(200).send(panic)
+    },
+  )
+
+  fastify.get(
+    '/api/v1/panics/:id/logs',
+    { preHandler: jwtGuard() },
+    async (request, reply) => {
+      const { id } = request.params as { id: string }
+      const parsed = listLogsQuerySchema.safeParse(request.query)
+      if (!parsed.success) return reply.code(400).send({ error: 'Invalid query params' })
+
+      const panic = await prisma.panicEvent.findUnique({ where: { id }, select: { id: true } })
+      if (!panic) return reply.code(404).send({ error: 'Panic not found' })
+
+      const { page, limit } = parsed.data
+      const where = { panicId: id }
+      const [data, total] = await Promise.all([
+        prisma.panicEventLog.findMany({
+          where,
+          orderBy: { createdAt: 'asc' },
+          skip: (page - 1) * limit,
+          take: limit,
+          include: {
+            operator: { omit: { passwordHash: true } },
+            partner: { omit: { apiKeyHash: true } },
+          },
+        }),
+        prisma.panicEventLog.count({ where }),
+      ])
+
+      return reply.code(200).send({ data, pagination: { page, limit, total, totalPages: Math.ceil(total / limit) } })
     },
   )
 
