@@ -1,3 +1,8 @@
+import { useState } from 'react';
+import axios from 'axios';
+
+import { useAuth } from '../context/AuthContext.tsx';
+
 import { type Panic } from './PanicCard.tsx';
 
 interface PanicActionsProps {
@@ -11,7 +16,26 @@ const ACTION_MAP: Record<string, { label: string; endpoint: string } | undefined
 };
 
 export default function PanicActions({ panic }: PanicActionsProps) {
+  const { token } = useAuth();
+  const [loading, setLoading] = useState(false);
+
   const action = ACTION_MAP[panic.status];
   if (!action) return null;
-  return <button type="button">{action.label}</button>;
+
+  function handleClick() {
+    setLoading(true);
+    void axios
+      .post(`/api/v1/panics/${panic.id}/${action!.endpoint}`, null, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }
+
+  return (
+    <button type="button" data-loading={loading || undefined} onClick={handleClick}>
+      {loading ? 'Loading…' : action.label}
+    </button>
+  );
 }
