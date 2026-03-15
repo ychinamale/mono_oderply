@@ -25,4 +25,20 @@ describe('POST /api/auth/login', () => {
     })
     expect(res.statusCode).toBe(401)
   })
+
+  it('returns 200 with a signed JWT and operator object on valid credentials', async () => {
+    const app = await createApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/auth/login',
+      payload: { email: 'admin@oderply.com', password: 'Admin1234!' },
+    })
+    expect(res.statusCode).toBe(200)
+    const body = res.json<{ token: string; operator: { id: string; name: string; email: string } }>()
+    expect(typeof body.token).toBe('string')
+    expect(body.token.length).toBeGreaterThan(0)
+    expect(body.operator.email).toBe('admin@oderply.com')
+    expect(body.operator.name).toBe('Admin')
+    expect(typeof body.operator.id).toBe('string')
+  })
 })
