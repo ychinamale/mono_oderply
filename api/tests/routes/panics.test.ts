@@ -370,3 +370,146 @@ describe('POST /api/v1/panics/:id/claim', () => {
     expect(updated.claimedByPartnerId).not.toBeNull()
   })
 })
+
+describe('POST /api/v1/panics/:id/acknowledge', () => {
+  afterEach(async () => {
+    await prisma.panicEventLog.deleteMany()
+    await prisma.panicEvent.deleteMany()
+  })
+
+  async function getToken() {
+    const app = await createApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/auth/login',
+      payload: { email: 'admin@oderply.com', password: 'Admin1234!' },
+    })
+    return res.json<{ token: string }>().token
+  }
+
+  async function createPanic(overrides: Record<string, unknown> = {}) {
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    return prisma.panicEvent.create({
+      data: {
+        externalUserId: 'user-test',
+        latitude: -26.1,
+        longitude: 28.0,
+        idempotencyKey: `idem-${Date.now()}-${Math.random()}`,
+        partnerId: source.id,
+        ...overrides,
+      },
+    })
+  }
+
+  it('returns 401 when JWT is missing', async () => {
+    const app = await createApp()
+    const res = await app.inject({ method: 'POST', url: '/api/v1/panics/some-id/acknowledge' })
+    expect(res.statusCode).toBe(401)
+  })
+
+  it('returns 404 when panic id does not exist', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/v1/panics/nonexistent-id/acknowledge',
+      headers: { authorization: `Bearer ${token}` },
+    })
+    expect(res.statusCode).toBe(404)
+  })
+
+  it('returns 400 when panic status is not PENDING', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    for (const status of ['ACKNOWLEDGED', 'DISPATCHED', 'RESOLVED'] as const) {
+      const panic = await createPanic({ status })
+      const res = await app.inject({
+        method: 'POST',
+        url: `/api/v1/panics/${panic.id}/acknowledge`,
+        headers: { authorization: `Bearer ${token}` },
+      })
+      expect(res.statusCode).toBe(400)
+    }
+  })
+
+  it('returns 200 and sets status to ACKNOWLEDGED', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const panic = await createPanic()
+    const res = await app.inject({
+      method: 'POST',
+      url: `/api/v1/panics/${panic.id}/acknowledge`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    expect(res.statusCode).toBe(200)
+    expect(res.json<{ status: string }>().status).toBe('ACKNOWLEDGED')
+  })
+
+  it('creates a PanicEventLog with triggeredBy OPERATOR and operatorId set', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const panic = await createPanic()
+    await app.inject({
+      method: 'POST',
+      url: `/api/v1/panics/${panic.id}/acknowledge`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    const log = await prisma.panicEventLog.findFirst({ where: { panicId: panic.id } })
+    expect(log?.triggeredBy).toBe('OPERATOR')
+    expect(log?.operatorId).not.toBeNull()
+  })
+
+  it('PanicEventLog has operatorId set and partnerId null', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const panic = await createPanic()
+    await app.inject({
+      method: 'POST',
+      url: `/api/v1/panics/${panic.id}/acknowledge`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    const log = await prisma.panicEventLog.findFirst({ where: { panicId: panic.id } })
+    expect(log?.operatorId).not.toBeNull()
+    expect(log?.partnerId).toBeNull()
+  })
+
+  it('response includes partner inline', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const panic = await createPanic()
+    const res = await app.inject({
+      method: 'POST',
+      url: `/api/v1/panics/${panic.id}/acknowledge`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    const body = res.json<{ partner: unknown }>()
+    expect(body.partner).toBeDefined()
+    expect(typeof body.partner).toBe('object')
+  })
+
+  it('response does not include apiKeyHash on the inline partner', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const panic = await createPanic()
+    const res = await app.inject({
+      method: 'POST',
+      url: `/api/v1/panics/${panic.id}/acknowledge`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    const body = res.json<{ partner: Record<string, unknown> }>()
+    expect(body.partner.apiKeyHash).toBeUndefined()
+  })
+
+  it('400 error message follows "Cannot acknowledge a panic with status [currentStatus]" format', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const panic = await createPanic({ status: 'ACKNOWLEDGED' })
+    const res = await app.inject({
+      method: 'POST',
+      url: `/api/v1/panics/${panic.id}/acknowledge`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    expect(res.statusCode).toBe(400)
+    expect(res.json<{ error: string }>().error).toBe('Cannot acknowledge a panic with status ACKNOWLEDGED')
+  })
+})
