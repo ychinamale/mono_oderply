@@ -1098,4 +1098,28 @@ describe('GET /api/v1/panics/:id/logs/:logId', () => {
     })
     expect(res.statusCode).toBe(404)
   })
+
+  it('returns the log entry with operator or partner inline', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    const operator = await prisma.operator.findFirstOrThrow()
+    const panic = await prisma.panicEvent.create({
+      data: { externalUserId: 'u1', latitude: 0, longitude: 0, idempotencyKey: 'idem-log-inline-1', partnerId: source.id },
+    })
+    const log = await prisma.panicEventLog.create({
+      data: { panicId: panic.id, triggeredBy: 'OPERATOR', operatorId: operator.id, fromStatus: 'PENDING', toStatus: 'ACKNOWLEDGED' },
+    })
+    const res = await app.inject({
+      method: 'GET',
+      url: `/api/v1/panics/${panic.id}/logs/${log.id}`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    expect(res.statusCode).toBe(200)
+    const body = res.json<{ id: string; operator: { id: string; name: string } | null; partner: unknown }>()
+    expect(body.id).toBe(log.id)
+    expect(body.operator).not.toBeNull()
+    expect(body.operator?.id).toBe(operator.id)
+    expect(body.partner).toBeNull()
+  })
 })
