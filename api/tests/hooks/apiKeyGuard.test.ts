@@ -39,4 +39,15 @@ describe('apiKeyGuard', () => {
     })
     expect(res.statusCode).toBe(403)
   })
+
+  it('attaches the resolved Partner record to request.partner on valid key', async () => {
+    const app = buildApp()
+    const res = await app.inject({
+      method: 'GET',
+      url: '/test',
+      headers: { 'x-api-key': 'ps-test-api-key-001' },
+    })
+    expect(res.statusCode).toBe(200)
+    expect(res.json<{ partnerName: string }>().partnerName).toBe('Test Panic Source')
+  })
 })
