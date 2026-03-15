@@ -5,16 +5,15 @@ import { createApp } from '../../src/app.js'
 import prisma from '../../src/lib/prisma.js'
 import { webhookQueue } from '../../src/lib/webhookQueue.js'
 
-const OPERATOR_JWT_SECRET = 'test-secret'
-
-// Minimal JWT for test — signed with the same secret used by createApp
-async function makeOperatorToken(): Promise<string> {
-  // Use the app's jwt.sign so we don't need an external JWT lib
-  const app = await createApp()
-  await app.ready()
-  const token = app.jwt.sign({ operatorId: 'test-op', email: 'op@test.com', name: 'Test Op' })
-  await app.close()
-  return token
+// Returns a JWT with a real operatorId from the seeded Operator table (needed
+// for routes that write PanicEventLog, which has an FK on operatorId).
+async function getRealOperatorToken(app: Awaited<ReturnType<typeof createApp>>): Promise<string> {
+  const res = await app.inject({
+    method: 'POST',
+    url: '/api/auth/login',
+    payload: { email: 'admin@oderply.com', password: 'Admin1234!' },
+  })
+  return res.json<{ token: string }>().token
 }
 
 afterAll(async () => {
@@ -248,6 +247,69 @@ describe('WebSocket Gateway', () => {
             longitude: 28.056,
             idempotencyKey: 'ws-test-key-00000001',
           },
+        })
+      })
+    })
+
+    await app.close()
+    expect(received).toBeDefined()
+  })
+
+  it('emits panic:updated to connected operator clients when a panic is acknowledged', async () => {
+    const app = await createApp()
+    await app.listen({ port: 0 })
+    const { port } = app.server.address() as { port: number }
+
+    const token = await getRealOperatorToken(app)
+
+    const received = await new Promise<unknown>((resolve, reject) => {
+      const client: Socket = ioc(`http://localhost:${port}`, { auth: { token } })
+
+      const timeout = setTimeout(() => {
+        client.disconnect()
+        reject(new Error('panic:updated not received within timeout'))
+      }, 3000)
+
+      client.on('panic:updated', (data: unknown) => {
+        clearTimeout(timeout)
+        client.disconnect()
+        resolve(data)
+      })
+
+      client.on('connect', () => {
+        app.inject({
+          method: 'POST',
+          url: '/api/v1/panics',
+          headers: { 'x-api-key': 'ps-test-api-key-001' },
+          payload: {
+            externalUserId: 'user-ws-ack',
+            latitude: -26.1,
+            longitude: 28.0,
+            idempotencyKey: `ws-ack-key-${Date.now()}`,
+          },
+        }).then((createRes) => {
+          if (createRes.statusCode !== 201) {
+            clearTimeout(timeout)
+            client.disconnect()
+            reject(new Error(`Panic creation failed: ${createRes.statusCode} ${createRes.body}`))
+            return
+          }
+          const panicId = createRes.json<{ id: string }>().id
+          return app.inject({
+            method: 'POST',
+            url: `/api/v1/panics/${panicId}/acknowledge`,
+            headers: { authorization: `Bearer ${token}` },
+          })
+        }).then((ackRes) => {
+          if (ackRes && ackRes.statusCode !== 200) {
+            clearTimeout(timeout)
+            client.disconnect()
+            reject(new Error(`Acknowledge failed: ${ackRes.statusCode} ${ackRes.body}`))
+          }
+        }).catch((err: unknown) => {
+          clearTimeout(timeout)
+          client.disconnect()
+          reject(err)
         })
       })
     })
