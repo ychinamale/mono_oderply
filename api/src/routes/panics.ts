@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 
-import { Prisma } from '../generated/prisma/client.js'
+import * as Prisma from '../generated/prisma/internal/prismaNamespace.js'
 import { apiKeyGuard } from '../hooks/apiKeyGuard.js'
 import { getIo } from '../lib/gateway.js'
 import prisma from '../lib/prisma.js'
@@ -27,7 +27,7 @@ export function panicRoutes(fastify: FastifyInstance) {
 
       type ClaimResult = { panic: Awaited<ReturnType<typeof prisma.panicEvent.update>>; error?: never } | { error: { code: number; message: string }; panic?: never }
 
-      const result = await prisma.$transaction(async (tx): Promise<ClaimResult> => {
+      const result = await prisma.$transaction(async (tx: Prisma.TransactionClient): Promise<ClaimResult> => {
         const rows = await tx.$queryRaw<{ claimedByPartnerId: string | null; status: string }[]>`
           SELECT "claimedByPartnerId", status FROM "PanicEvent" WHERE id = ${id} FOR UPDATE
         `

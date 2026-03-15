@@ -2,7 +2,7 @@ import { createHash } from 'crypto'
 
 import type { FastifyReply, FastifyRequest } from 'fastify'
 
-import type { PartnerType } from '../generated/prisma/client.js'
+import type { PartnerType } from '../generated/prisma/enums.js'
 import prisma from '../lib/prisma.js'
 
 export function apiKeyGuard(requiredType?: PartnerType) {
