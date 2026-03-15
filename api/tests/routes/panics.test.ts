@@ -1019,4 +1019,29 @@ describe('GET /api/v1/panics/:id/logs', () => {
     const body = res.json<{ data: { partner: unknown }[] }>()
     expect(body.data[0].partner).toBeNull()
   })
+
+  it('returns paginated results with correct pagination metadata', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    const operator = await prisma.operator.findFirstOrThrow()
+    const panic = await prisma.panicEvent.create({
+      data: { externalUserId: 'u1', latitude: 0, longitude: 0, idempotencyKey: 'idem-logs-pagination-1', partnerId: source.id, status: 'DISPATCHED' },
+    })
+    await prisma.panicEventLog.create({ data: { panicId: panic.id, triggeredBy: 'OPERATOR', operatorId: operator.id, fromStatus: 'PENDING', toStatus: 'ACKNOWLEDGED' } })
+    await prisma.panicEventLog.create({ data: { panicId: panic.id, triggeredBy: 'OPERATOR', operatorId: operator.id, fromStatus: 'ACKNOWLEDGED', toStatus: 'DISPATCHED' } })
+
+    const res = await app.inject({
+      method: 'GET',
+      url: `/api/v1/panics/${panic.id}/logs?page=1&limit=1`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    expect(res.statusCode).toBe(200)
+    const body = res.json<{ data: unknown[]; pagination: { page: number; limit: number; total: number; totalPages: number } }>()
+    expect(body.data).toHaveLength(1)
+    expect(body.pagination.page).toBe(1)
+    expect(body.pagination.limit).toBe(1)
+    expect(body.pagination.total).toBe(2)
+    expect(body.pagination.totalPages).toBe(2)
+  })
 })
