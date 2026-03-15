@@ -1,4 +1,4 @@
-import { render, screen, act } from '@testing-library/react';
+import { render, screen, act, waitFor } from '@testing-library/react';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 import { MemoryRouter } from 'react-router-dom';
@@ -90,7 +90,9 @@ describe('PanicFeed', () => {
 
     const { unmount } = renderFeed();
 
-    await new Promise((r) => setTimeout(r, 0));
+    await waitFor(() =>
+      expect(screen.queryByTestId('loading-skeleton')).not.toBeInTheDocument(),
+    );
 
     unmount();
 
