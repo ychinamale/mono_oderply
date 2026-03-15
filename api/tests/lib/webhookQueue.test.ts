@@ -50,4 +50,11 @@ describe('webhookQueue', () => {
     await new Promise(resolve => setTimeout(resolve, 50))
     expect(delivered).toContain('http://example.com/after-fail')
   })
+
+  it('a job with no webhookUrl is skipped without throwing', async () => {
+    const mockFetch = jest.spyOn(global, 'fetch').mockResolvedValue(new Response(null, { status: 200 }))
+    webhookQueue.enqueue({ url: '', payload: { event: 'panic.created', panic: {} as never } })
+    await new Promise(resolve => setTimeout(resolve, 30))
+    expect(mockFetch).not.toHaveBeenCalled()
+  })
 })
