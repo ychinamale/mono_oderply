@@ -6,6 +6,7 @@ import Fastify from 'fastify'
 import { attachGateway } from './lib/gateway.js'
 import { authRoutes } from './routes/auth.js'
 import { panicRoutes } from './routes/panics.js'
+import { partnerRoutes } from './routes/partners.js'
 import type { OperatorPayload } from './types/fastify.js'
 
 export async function createApp() {
@@ -14,6 +15,7 @@ export async function createApp() {
   await app.register(jwt, { secret: process.env.JWT_SECRET ?? 'test-secret' })
   await app.register(authRoutes)
   await app.register(panicRoutes)
+  await app.register(partnerRoutes)
 
   app.get('/health', () => ({ status: 'ok' }))
 
