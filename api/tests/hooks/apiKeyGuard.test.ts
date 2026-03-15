@@ -29,4 +29,14 @@ describe('apiKeyGuard', () => {
     const res = await app.inject({ method: 'GET', url: '/test' })
     expect(res.statusCode).toBe(401)
   })
+
+  it('returns 403 when x-api-key does not match any partner', async () => {
+    const app = buildApp()
+    const res = await app.inject({
+      method: 'GET',
+      url: '/test',
+      headers: { 'x-api-key': 'not-a-real-key' },
+    })
+    expect(res.statusCode).toBe(403)
+  })
 })
