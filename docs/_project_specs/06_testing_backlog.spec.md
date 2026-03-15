@@ -333,14 +333,14 @@ Each section covers a testable concern. Within each section, tests are grouped b
 
 **Type:** Unit (React Testing Library)
 
-- [ ] `it('renders status badge, partner name, coordinates, and createdAt')`
-- [ ] `it('renders claimedByPartner name when panic has been claimed')`
-- [ ] `it('does not render claimedByPartner section when panic is unclaimed')`
-- [ ] `it('renders each log entry as a timeline row')`
-- [ ] `it('log entries triggered by OPERATOR show operator name')`
-- [ ] `it('log entries triggered by PARTNER_CLAIM show partner name')`
-- [ ] `it('updates detail view when panic:updated event is received for the current panic')`
-- [ ] `it('does not update detail view when panic:updated event is for a different panic')`
+- [x] `it('renders status badge, partner name, coordinates, and createdAt')`
+- [x] `it('renders claimedByPartner name when panic has been claimed')`
+- [x] `it('does not render claimedByPartner section when panic is unclaimed')`
+- [x] `it('renders each log entry as a timeline row')`
+- [x] `it('log entries triggered by OPERATOR show operator name')`
+- [x] `it('log entries triggered by PARTNER_CLAIM show partner name')`
+- [x] `it('updates detail view when panic:updated event is received for the current panic')`
+- [x] `it('does not update detail view when panic:updated event is for a different panic')`
 
 ---
 
