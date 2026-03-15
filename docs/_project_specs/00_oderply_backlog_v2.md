@@ -246,35 +246,35 @@
 **I want** to claim a panic event on behalf of one of my responders,
 **so that** ODERP-ly knows who is responding and can route subsequent notifications correctly.
 
-- [ ] 🟢 TASK-04.1.1 — Implement `POST /api/v1/panics/:id/claim`
+- [x] 🟢 TASK-04.1.1 — Implement `POST /api/v1/panics/:id/claim`
 
-    - [ ] ⚪ SUB: Add claim route to `api/src/routes/panics.js`
-    - [ ] ⚪ SUB: Apply `apiKeyGuard` with type assertion `RESPONDER_SYSTEM`
-    - [ ] ⚪ SUB: Fetch the `PanicEvent` by `:id`; return 404 if not found
-    - [ ] ⚪ SUB: Return 409 if `claimedByPartnerId` is already set (panic already claimed)
-    - [ ] ⚪ SUB: Return 400 if panic status is not `PENDING` (cannot claim a non-pending panic)
+    - [x] ⚪ SUB: Add claim route to `api/src/routes/panics.js`
+    - [x] ⚪ SUB: Apply `apiKeyGuard` with type assertion `RESPONDER_SYSTEM`
+    - [x] ⚪ SUB: Fetch the `PanicEvent` by `:id`; return 404 if not found
+    - [x] ⚪ SUB: Return 409 if `claimedByPartnerId` is already set (panic already claimed)
+    - [x] ⚪ SUB: Return 400 if panic status is not `PENDING` (cannot claim a non-pending panic)
 
-- [ ] 🟢 TASK-04.1.2 — Implement atomic claim with pessimistic locking
+- [x] 🟢 TASK-04.1.2 — Implement atomic claim with pessimistic locking
 
-    - [ ] ⚪ SUB: Use `prisma.$queryRaw` with `SELECT ... FOR UPDATE` to lock the `PanicEvent` row
-    - [ ] ⚪ SUB: Inside the same transaction: update `status → ACKNOWLEDGED`, set `claimedByPartnerId`
-    - [ ] ⚪ SUB: Inside the same transaction: create `PanicEventLog` with `triggeredBy: PARTNER_CLAIM`, `partnerId` set, `operatorId: null`
-    - [ ] ⚪ SUB: Confirm the entire claim is atomic — no partial writes possible
+    - [x] ⚪ SUB: Use `prisma.$queryRaw` with `SELECT ... FOR UPDATE` to lock the `PanicEvent` row
+    - [x] ⚪ SUB: Inside the same transaction: update `status → ACKNOWLEDGED`, set `claimedByPartnerId`
+    - [x] ⚪ SUB: Inside the same transaction: create `PanicEventLog` with `triggeredBy: PARTNER_CLAIM`, `partnerId` set, `operatorId: null`
+    - [x] ⚪ SUB: Confirm the entire claim is atomic — no partial writes possible
 
-- [ ] 🟢 TASK-04.1.3 — Trigger post-claim notifications
+- [x] 🟢 TASK-04.1.3 — Trigger post-claim notifications
 
-    - [ ] ⚪ SUB: Emit `panic:updated` via Socket.io to all operator clients after successful claim
-    - [ ] ⚪ SUB: Enqueue targeted webhook notification to the `PANIC_SOURCE` partner (`panicEvent.partner.webhookUrl`)
-    - [ ] ⚪ SUB: Webhook payload includes `event: "panic.status_updated"`, `panicId`, `previousStatus`, `newStatus`, `updatedAt`
-    - [ ] ⚪ SUB: Skip webhook if `PANIC_SOURCE` has no `webhookUrl` (log warning, do not throw)
+    - [x] ⚪ SUB: Emit `panic:updated` via Socket.io to all operator clients after successful claim
+    - [x] ⚪ SUB: Enqueue targeted webhook notification to the `PANIC_SOURCE` partner (`panicEvent.partner.webhookUrl`)
+    - [x] ⚪ SUB: Webhook payload includes `event: "panic.status_updated"`, `panicId`, `previousStatus`, `newStatus`, `updatedAt`
+    - [x] ⚪ SUB: Skip webhook if `PANIC_SOURCE` has no `webhookUrl` (log warning, do not throw)
 
-- [ ] 🟢 TASK-04.1.4 — Test claim flow
+- [x] 🟢 TASK-04.1.4 — Test claim flow
 
-    - [ ] ⚪ SUB: Test PANIC_SOURCE API key on claim route → 403
-    - [ ] ⚪ SUB: Test claim on non-existent panic → 404
-    - [ ] ⚪ SUB: Test claim on already-claimed panic → 409
-    - [ ] ⚪ SUB: Test valid claim → status is ACKNOWLEDGED, `claimedByPartnerId` set, log written
-    - [ ] ⚪ SUB: Test race condition: two simultaneous claims → exactly one succeeds, one gets 409
+    - [x] ⚪ SUB: Test PANIC_SOURCE API key on claim route → 403
+    - [x] ⚪ SUB: Test claim on non-existent panic → 404
+    - [x] ⚪ SUB: Test claim on already-claimed panic → 409
+    - [x] ⚪ SUB: Test valid claim → status is ACKNOWLEDGED, `claimedByPartnerId` set, log written
+    - [x] ⚪ SUB: Test race condition: two simultaneous claims → exactly one succeeds, one gets 409
 
 ---
 
