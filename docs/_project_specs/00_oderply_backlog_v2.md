@@ -529,21 +529,21 @@
 **I want** to log in with my email and password,
 **so that** I can access the secure control room dashboard.
 
-- [ ] TASK-09.1.1 — Build login page
+- [x] TASK-09.1.1 — Build login page
 
-    - [ ] SUB: Create `client/src/pages/Login.jsx`
-    - [ ] SUB: Build email + password form (no HTML `<form>` tags — use `onClick` + `onChange` handlers)
-    - [ ] SUB: On submit: call `POST /api/auth/login`, store JWT in memory (React state or context)
-    - [ ] SUB: On success: redirect to dashboard
-    - [ ] SUB: On failure: display inline error message
-    - [ ] SUB: Style with Tailwind CSS
+    - [x] SUB: Create `client/src/pages/Login.jsx`
+    - [x] SUB: Build email + password form (no HTML `<form>` tags — use `onClick` + `onChange` handlers)
+    - [x] SUB: On submit: call `POST /api/auth/login`, store JWT in memory (React state or context)
+    - [x] SUB: On success: redirect to dashboard
+    - [x] SUB: On failure: display inline error message
+    - [x] SUB: Style with Tailwind CSS
 
-- [ ] TASK-09.1.2 — Implement auth context and protected routes
+- [x] TASK-09.1.2 — Implement auth context and protected routes
 
-    - [ ] SUB: Create `client/src/context/AuthContext.jsx` with `token`, `operator`, `login()`, `logout()`
-    - [ ] SUB: Create `ProtectedRoute` component that redirects to `/login` if no token
-    - [ ] SUB: Wrap dashboard routes in `ProtectedRoute`
-    - [ ] SUB: Add logout button that clears auth context and redirects to login
+    - [x] SUB: Create `client/src/context/AuthContext.jsx` with `token`, `operator`, `login()`, `logout()`
+    - [x] SUB: Create `ProtectedRoute` component that redirects to `/login` if no token
+    - [x] SUB: Wrap dashboard routes in `ProtectedRoute`
+    - [x] SUB: Add logout button that clears auth context and redirects to login
 
 ---
 
