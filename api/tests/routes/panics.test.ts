@@ -42,4 +42,47 @@ describe('POST /api/v1/panics', () => {
     })
     expect(res.statusCode).toBe(400)
   })
+
+  it('returns 400 when latitude is missing', async () => {
+    const app = await createApp()
+    const { latitude: _omit, ...body } = validBody
+    const res = await app.inject({ method: 'POST', url: '/api/v1/panics', headers: psHeaders, payload: body })
+    expect(res.statusCode).toBe(400)
+  })
+
+  it('returns 400 when longitude is missing', async () => {
+    const app = await createApp()
+    const { longitude: _omit, ...body } = validBody
+    const res = await app.inject({ method: 'POST', url: '/api/v1/panics', headers: psHeaders, payload: body })
+    expect(res.statusCode).toBe(400)
+  })
+
+  it('returns 400 when idempotencyKey is missing', async () => {
+    const app = await createApp()
+    const { idempotencyKey: _omit, ...body } = validBody
+    const res = await app.inject({ method: 'POST', url: '/api/v1/panics', headers: psHeaders, payload: body })
+    expect(res.statusCode).toBe(400)
+  })
+
+  it('returns 400 when latitude is out of range (e.g. 91)', async () => {
+    const app = await createApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/v1/panics',
+      headers: psHeaders,
+      payload: { ...validBody, latitude: 91 },
+    })
+    expect(res.statusCode).toBe(400)
+  })
+
+  it('returns 400 when longitude is out of range (e.g. -181)', async () => {
+    const app = await createApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/v1/panics',
+      headers: psHeaders,
+      payload: { ...validBody, longitude: -181 },
+    })
+    expect(res.statusCode).toBe(400)
+  })
 })
