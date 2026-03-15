@@ -940,4 +940,25 @@ describe('GET /api/v1/panics/:id/logs', () => {
     expect(body.data[0].fromStatus).toBe('PENDING')
     expect(body.data[1].fromStatus).toBe('ACKNOWLEDGED')
   })
+
+  it('each log entry includes operator inline when triggeredBy is OPERATOR', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    const operator = await prisma.operator.findFirstOrThrow()
+    const panic = await prisma.panicEvent.create({
+      data: { externalUserId: 'u1', latitude: 0, longitude: 0, idempotencyKey: 'idem-logs-op-inline-1', partnerId: source.id },
+    })
+    await prisma.panicEventLog.create({ data: { panicId: panic.id, triggeredBy: 'OPERATOR', operatorId: operator.id, fromStatus: 'PENDING', toStatus: 'ACKNOWLEDGED' } })
+
+    const res = await app.inject({
+      method: 'GET',
+      url: `/api/v1/panics/${panic.id}/logs`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    const body = res.json<{ data: { operator: { id: string; name: string } | null }[] }>()
+    expect(body.data[0].operator).not.toBeNull()
+    expect(body.data[0].operator?.id).toBe(operator.id)
+    expect(body.data[0].operator?.name).toBe(operator.name)
+  })
 })
