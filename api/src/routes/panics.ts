@@ -1,7 +1,9 @@
 import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 
+import { Prisma } from '../generated/prisma/client.js'
 import { apiKeyGuard } from '../hooks/apiKeyGuard.js'
+import prisma from '../lib/prisma.js'
 
 const createPanicSchema = z.object({
   externalUserId: z.string().min(1),
@@ -20,7 +22,22 @@ export function panicRoutes(fastify: FastifyInstance) {
       if (!result.success) {
         return reply.code(400).send({ error: 'Invalid request body' })
       }
-      return reply.code(501).send()
+
+      const { externalUserId, latitude, longitude, idempotencyKey, metadata } = result.data
+
+      const panic = await prisma.panicEvent.create({
+        data: {
+          externalUserId,
+          latitude,
+          longitude,
+          idempotencyKey,
+          metadata: metadata !== undefined ? (metadata as Prisma.InputJsonValue) : Prisma.JsonNull,
+          partnerId: request.partner.id,
+        },
+        include: { partner: true },
+      })
+
+      return reply.code(201).send(panic)
     },
   )
 }
