@@ -118,6 +118,20 @@ describe('GET /api/v1/partners/:id', () => {
     expect(res.statusCode).toBe(404)
   })
 
+  it('does not include apiKeyHash', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    const res = await app.inject({
+      method: 'GET',
+      url: `/api/v1/partners/${source.id}`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    expect(res.statusCode).toBe(200)
+    const body = res.json<Record<string, unknown>>()
+    expect(body).not.toHaveProperty('apiKeyHash')
+  })
+
   it('returns partner with _count aggregations', async () => {
     const app = await createApp()
     const token = await getToken()
