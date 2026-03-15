@@ -1,4 +1,7 @@
+import { jest } from '@jest/globals'
+
 import { createApp } from '../../src/app.js'
+import { webhookQueue, type WebhookJob } from '../../src/lib/webhookQueue.js'
 import prisma from '../../src/lib/prisma.js'
 
 afterAll(async () => {
@@ -6,6 +9,17 @@ afterAll(async () => {
 })
 
 describe('POST /api/v1/panics', () => {
+  // Prevent real HTTP calls from the webhook queue in every test
+  let enqueueSpy: ReturnType<typeof jest.spyOn>
+  beforeEach(() => {
+    enqueueSpy = jest.spyOn(webhookQueue, 'enqueue').mockImplementation(() => {})
+  })
+
+  afterEach(async () => {
+    jest.restoreAllMocks()
+    await prisma.panicEvent.deleteMany()
+  })
+
   it('returns 401 when x-api-key header is missing', async () => {
     const app = await createApp()
     const res = await app.inject({ method: 'POST', url: '/api/v1/panics' })
@@ -84,10 +98,6 @@ describe('POST /api/v1/panics', () => {
       payload: { ...validBody, longitude: -181 },
     })
     expect(res.statusCode).toBe(400)
-  })
-
-  afterEach(async () => {
-    await prisma.panicEvent.deleteMany()
   })
 
   it('returns 201 with the created PanicEvent on valid request', async () => {
@@ -174,5 +184,25 @@ describe('POST /api/v1/panics', () => {
     })
     expect(second.statusCode).toBe(201)
     expect(second.json<{ id: string }>().id).not.toBe(first.json<{ id: string }>().id)
+  })
+
+  it('enqueues a broadcast to all RESPONDER_SYSTEM partners on panic creation', async () => {
+    const app = await createApp()
+    await app.inject({ method: 'POST', url: '/api/v1/panics', headers: psHeaders, payload: validBody })
+    const responderPartners = await prisma.partner.findMany({ where: { type: 'RESPONDER_SYSTEM', webhookUrl: { not: null } } })
+    const enqueuedUrls = enqueueSpy.mock.calls.map((args: [WebhookJob]) => args[0].url)
+    for (const partner of responderPartners) {
+      expect(enqueuedUrls).toContain(partner.webhookUrl)
+    }
+  })
+
+  it('does not enqueue a broadcast to PANIC_SOURCE partners on panic creation', async () => {
+    const app = await createApp()
+    await app.inject({ method: 'POST', url: '/api/v1/panics', headers: psHeaders, payload: validBody })
+    const panicSourcePartners = await prisma.partner.findMany({ where: { type: 'PANIC_SOURCE' } })
+    const enqueuedUrls = enqueueSpy.mock.calls.map((args: [WebhookJob]) => args[0].url)
+    for (const partner of panicSourcePartners) {
+      expect(enqueuedUrls).not.toContain(partner.webhookUrl)
+    }
   })
 })
