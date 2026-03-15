@@ -15,5 +15,5 @@ interface PanicCardProps {
 }
 
 export default function PanicCard({ panic }: PanicCardProps) {
-  return <div data-testid="panic-card">{panic.id}</div>;
+  return <div data-testid="panic-card" data-status={panic.status}>{panic.id}</div>;
 }

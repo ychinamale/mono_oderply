@@ -85,6 +85,23 @@ describe('PanicFeed', () => {
     expect(await screen.findAllByTestId('panic-card')).toHaveLength(2);
   });
 
+  it('updates the correct PanicCard when panic:updated socket event is received', async () => {
+    (axios.get as Mock).mockResolvedValueOnce({
+      data: { data: [panicA, panicB] },
+    });
+
+    renderFeed();
+
+    await screen.findAllByTestId('panic-card');
+
+    const updatedA = { ...panicA, status: 'ACKNOWLEDGED' };
+    act(() => emitSocket('panic:updated', updatedA));
+
+    const cards = screen.getAllByTestId('panic-card');
+    expect(cards).toHaveLength(2);
+    expect(cards[0]).toHaveAttribute('data-status', 'ACKNOWLEDGED');
+  });
+
   it('prepends a new PanicCard when panic:new socket event is received', async () => {
     (axios.get as Mock).mockResolvedValueOnce({
       data: { data: [panicA, panicB] },
