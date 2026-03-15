@@ -961,4 +961,62 @@ describe('GET /api/v1/panics/:id/logs', () => {
     expect(body.data[0].operator?.id).toBe(operator.id)
     expect(body.data[0].operator?.name).toBe(operator.name)
   })
+
+  it('each log entry includes partner inline when triggeredBy is PARTNER_CLAIM', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    const responder = await prisma.partner.findFirstOrThrow({ where: { type: 'RESPONDER_SYSTEM' } })
+    const panic = await prisma.panicEvent.create({
+      data: { externalUserId: 'u1', latitude: 0, longitude: 0, idempotencyKey: 'idem-logs-partner-inline-1', partnerId: source.id },
+    })
+    await prisma.panicEventLog.create({ data: { panicId: panic.id, triggeredBy: 'PARTNER_CLAIM', partnerId: responder.id, fromStatus: 'PENDING', toStatus: 'ACKNOWLEDGED' } })
+
+    const res = await app.inject({
+      method: 'GET',
+      url: `/api/v1/panics/${panic.id}/logs`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    const body = res.json<{ data: { partner: { id: string } | null }[] }>()
+    expect(body.data[0].partner).not.toBeNull()
+    expect(body.data[0].partner?.id).toBe(responder.id)
+  })
+
+  it('operator is null when triggeredBy is PARTNER_CLAIM', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    const responder = await prisma.partner.findFirstOrThrow({ where: { type: 'RESPONDER_SYSTEM' } })
+    const panic = await prisma.panicEvent.create({
+      data: { externalUserId: 'u1', latitude: 0, longitude: 0, idempotencyKey: 'idem-logs-op-null-1', partnerId: source.id },
+    })
+    await prisma.panicEventLog.create({ data: { panicId: panic.id, triggeredBy: 'PARTNER_CLAIM', partnerId: responder.id, fromStatus: 'PENDING', toStatus: 'ACKNOWLEDGED' } })
+
+    const res = await app.inject({
+      method: 'GET',
+      url: `/api/v1/panics/${panic.id}/logs`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    const body = res.json<{ data: { operator: unknown }[] }>()
+    expect(body.data[0].operator).toBeNull()
+  })
+
+  it('partner is null when triggeredBy is OPERATOR', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    const operator = await prisma.operator.findFirstOrThrow()
+    const panic = await prisma.panicEvent.create({
+      data: { externalUserId: 'u1', latitude: 0, longitude: 0, idempotencyKey: 'idem-logs-partner-null-1', partnerId: source.id },
+    })
+    await prisma.panicEventLog.create({ data: { panicId: panic.id, triggeredBy: 'OPERATOR', operatorId: operator.id, fromStatus: 'PENDING', toStatus: 'ACKNOWLEDGED' } })
+
+    const res = await app.inject({
+      method: 'GET',
+      url: `/api/v1/panics/${panic.id}/logs`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    const body = res.json<{ data: { partner: unknown }[] }>()
+    expect(body.data[0].partner).toBeNull()
+  })
 })
