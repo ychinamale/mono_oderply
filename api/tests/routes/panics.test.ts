@@ -242,25 +242,42 @@ describe('POST /api/v1/panics/:id/claim', () => {
     expect(res.statusCode).toBe(404)
   })
 
+  async function createPanic(overrides: Record<string, unknown> = {}) {
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    return prisma.panicEvent.create({
+      data: {
+        externalUserId: 'user-test',
+        latitude: -26.1,
+        longitude: 28.0,
+        idempotencyKey: `idem-${Date.now()}-${Math.random()}`,
+        partnerId: source.id,
+        ...overrides,
+      },
+    })
+  }
+
   it('returns 409 when panic has already been claimed by another partner', async () => {
     const app = await createApp()
     const responder = await prisma.partner.findFirstOrThrow({ where: { type: 'RESPONDER_SYSTEM' } })
-    const panic = await prisma.panicEvent.create({
-      data: {
-        externalUserId: 'user-409',
-        latitude: -26.1,
-        longitude: 28.0,
-        idempotencyKey: 'idem-409-test',
-        partnerId: (await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })).id,
-        claimedByPartnerId: responder.id,
-        status: 'ACKNOWLEDGED',
-      },
-    })
+    const panic = await createPanic({ claimedByPartnerId: responder.id, status: 'ACKNOWLEDGED' })
     const res = await app.inject({
       method: 'POST',
       url: `/api/v1/panics/${panic.id}/claim`,
       headers: rsHeaders,
     })
     expect(res.statusCode).toBe(409)
+  })
+
+  it('returns 400 when panic status is not PENDING', async () => {
+    const app = await createApp()
+    for (const status of ['ACKNOWLEDGED', 'DISPATCHED', 'RESOLVED'] as const) {
+      const panic = await createPanic({ status })
+      const res = await app.inject({
+        method: 'POST',
+        url: `/api/v1/panics/${panic.id}/claim`,
+        headers: rsHeaders,
+      })
+      expect(res.statusCode).toBe(400)
+    }
   })
 })
