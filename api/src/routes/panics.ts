@@ -34,7 +34,7 @@ export function panicRoutes(fastify: FastifyInstance) {
           metadata: metadata !== undefined ? (metadata as Prisma.InputJsonValue) : Prisma.JsonNull,
           partnerId: request.partner.id,
         },
-        include: { partner: true },
+        include: { partner: { omit: { apiKeyHash: true } } },
       })
 
       return reply.code(201).send(panic)
