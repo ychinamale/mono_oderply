@@ -158,34 +158,34 @@
 **I want** to log in with my credentials and receive a JWT,
 **so that** I can make authenticated requests to the operator API.
 
-- [ ] 🟢 TASK-02.2.1 — Register `@fastify/jwt` plugin
+- [x] 🟢 TASK-02.2.1 — Register `@fastify/jwt` plugin
 
-    - [ ] ⚪ SUB: Register plugin in `api/src/index.js` with `JWT_SECRET` from env
-    - [ ] ⚪ SUB: Confirm `fastify.jwt.sign()` and `fastify.jwt.verify()` are available
+    - [x] ⚪ SUB: Register plugin in `api/src/index.js` with `JWT_SECRET` from env
+    - [x] ⚪ SUB: Confirm `fastify.jwt.sign()` and `fastify.jwt.verify()` are available
 
-- [ ] 🟢 TASK-02.2.2 — Implement `POST /api/auth/login`
+- [x] 🟢 TASK-02.2.2 — Implement `POST /api/auth/login`
 
-    - [ ] ⚪ SUB: Create `api/src/routes/auth.js`
-    - [ ] ⚪ SUB: Define Zod schema: `{ email: z.string().email(), password: z.string() }`
-    - [ ] ⚪ SUB: Query `Operator` by email; return 401 if not found
-    - [ ] ⚪ SUB: Compare password against `passwordHash` with bcrypt; return 401 if mismatch
-    - [ ] ⚪ SUB: Sign and return JWT containing `{ operatorId, email, name }`
-    - [ ] ⚪ SUB: Return operator object alongside token in response
+    - [x] ⚪ SUB: Create `api/src/routes/auth.js`
+    - [x] ⚪ SUB: Define Zod schema: `{ email: z.string().email(), password: z.string() }`
+    - [x] ⚪ SUB: Query `Operator` by email; return 401 if not found
+    - [x] ⚪ SUB: Compare password against `passwordHash` with bcrypt; return 401 if mismatch
+    - [x] ⚪ SUB: Sign and return JWT containing `{ operatorId, email, name }`
+    - [x] ⚪ SUB: Return operator object alongside token in response
 
-- [ ] 🟢 TASK-02.2.3 — Implement `jwtGuard` preHandler hook
+- [x] 🟢 TASK-02.2.3 — Implement `jwtGuard` preHandler hook
 
-    - [ ] ⚪ SUB: Create `api/src/hooks/jwtGuard.js`
-    - [ ] ⚪ SUB: Read `Authorization: Bearer <token>` header; return 401 if missing
-    - [ ] ⚪ SUB: Verify token with `fastify.jwt.verify()`; return 401 if invalid or expired
-    - [ ] ⚪ SUB: Attach decoded payload to `request.operator`
+    - [x] ⚪ SUB: Create `api/src/hooks/jwtGuard.js`
+    - [x] ⚪ SUB: Read `Authorization: Bearer <token>` header; return 401 if missing
+    - [x] ⚪ SUB: Verify token with `fastify.jwt.verify()`; return 401 if invalid or expired
+    - [x] ⚪ SUB: Attach decoded payload to `request.operator`
 
-- [ ] 🟢 TASK-02.2.4 — Test JWT auth flow
+- [x] 🟢 TASK-02.2.4 — Test JWT auth flow
 
-    - [ ] ⚪ SUB: Test login with invalid credentials → 401
-    - [ ] ⚪ SUB: Test login with valid credentials → token + operator object returned
-    - [ ] ⚪ SUB: Test protected route with no token → 401
-    - [ ] ⚪ SUB: Test protected route with expired/malformed token → 401
-    - [ ] ⚪ SUB: Test protected route with valid token → passes, `request.operator` populated
+    - [x] ⚪ SUB: Test login with invalid credentials → 401
+    - [x] ⚪ SUB: Test login with valid credentials → token + operator object returned
+    - [x] ⚪ SUB: Test protected route with no token → 401
+    - [x] ⚪ SUB: Test protected route with expired/malformed token → 401
+    - [x] ⚪ SUB: Test protected route with valid token → passes, `request.operator` populated
 
 ---
 
