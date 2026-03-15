@@ -298,4 +298,12 @@ describe('POST /api/v1/panics/:id/claim', () => {
     const res = await app.inject({ method: 'POST', url: `/api/v1/panics/${panic.id}/claim`, headers: rsHeaders })
     expect(res.json<{ status: string }>().status).toBe('ACKNOWLEDGED')
   })
+
+  it('sets claimedByPartnerId to the claiming partner after successful claim', async () => {
+    const app = await createApp()
+    const panic = await createPanic()
+    const responder = await prisma.partner.findFirstOrThrow({ where: { type: 'RESPONDER_SYSTEM' } })
+    const res = await app.inject({ method: 'POST', url: `/api/v1/panics/${panic.id}/claim`, headers: rsHeaders })
+    expect(res.json<{ claimedByPartnerId: string }>().claimedByPartnerId).toBe(responder.id)
+  })
 })
