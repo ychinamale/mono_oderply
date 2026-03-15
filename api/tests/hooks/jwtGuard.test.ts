@@ -33,6 +33,20 @@ describe('jwtGuard', () => {
     expect(res.statusCode).toBe(401)
   })
 
+  it('returns 401 when token is expired', async () => {
+    const signer = Fastify()
+    await signer.register(jwt, { secret: 'test-secret' })
+    const token = signer.jwt.sign({ operatorId: 'x', email: 'x@x.com', name: 'X' }, { expiresIn: -1 })
+
+    const app = await buildGuardApp()
+    const res = await app.inject({
+      method: 'GET',
+      url: '/protected',
+      headers: { authorization: `Bearer ${token}` },
+    })
+    expect(res.statusCode).toBe(401)
+  })
+
   it('returns 401 when token is signed with a different secret', async () => {
     const signer = Fastify()
     await signer.register(jwt, { secret: 'wrong-secret' })
