@@ -15,5 +15,10 @@ interface PanicCardProps {
 }
 
 export default function PanicCard({ panic }: PanicCardProps) {
-  return <div data-testid="panic-card" data-status={panic.status}>{panic.id}</div>;
+  const className = panic.status === 'PENDING' ? 'panic-card panic-card--pending' : 'panic-card';
+  return (
+    <div data-testid="panic-card" data-status={panic.status} className={className}>
+      {panic.id}
+    </div>
+  );
 }
