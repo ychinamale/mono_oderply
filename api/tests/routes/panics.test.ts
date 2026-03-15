@@ -431,4 +431,17 @@ describe('POST /api/v1/panics/:id/acknowledge', () => {
       expect(res.statusCode).toBe(400)
     }
   })
+
+  it('returns 200 and sets status to ACKNOWLEDGED', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const panic = await createPanic()
+    const res = await app.inject({
+      method: 'POST',
+      url: `/api/v1/panics/${panic.id}/acknowledge`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    expect(res.statusCode).toBe(200)
+    expect(res.json<{ status: string }>().status).toBe('ACKNOWLEDGED')
+  })
 })
