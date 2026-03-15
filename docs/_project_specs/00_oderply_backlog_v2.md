@@ -399,11 +399,11 @@
     - [x] SUB: Apply pagination with `page` and `limit` query params
     - [x] SUB: Return `{ data, pagination }`
 
-- [ ] TASK-06.2.2 — Implement `GET /api/v1/panics/:id/logs/:logId`
+- [x] TASK-06.2.2 — Implement `GET /api/v1/panics/:id/logs/:logId`
 
-    - [ ] SUB: Apply `jwtGuard`
-    - [ ] SUB: Return 404 if log not found or does not belong to the specified panic
-    - [ ] SUB: Return single log entry with operator and partner inline
+    - [x] SUB: Apply `jwtGuard`
+    - [x] SUB: Return 404 if log not found or does not belong to the specified panic
+    - [x] SUB: Return single log entry with operator and partner inline
 
 ---
 

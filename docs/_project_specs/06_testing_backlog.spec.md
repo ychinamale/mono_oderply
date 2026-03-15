@@ -195,9 +195,9 @@ Each section covers a testable concern. Within each section, tests are grouped b
 
 ### `GET /api/v1/panics/:id/logs/:logId`
 
-- [ ] `it('returns 404 when logId does not exist')`
-- [ ] `it('returns 404 when logId exists but belongs to a different panic')`
-- [ ] `it('returns the log entry with operator or partner inline')`
+- [x] `it('returns 404 when logId does not exist')`
+- [x] `it('returns 404 when logId exists but belongs to a different panic')`
+- [x] `it('returns the log entry with operator or partner inline')`
 
 ### `GET /api/v1/partners`
 
