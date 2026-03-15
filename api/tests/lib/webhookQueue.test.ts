@@ -26,4 +26,15 @@ describe('webhookQueue', () => {
     await new Promise(resolve => setTimeout(resolve, 50))
     expect(order).toEqual(['http://example.com/first', 'http://example.com/second', 'http://example.com/third'])
   })
+
+  it('a failed webhook delivery does not throw or crash the queue', async () => {
+    jest.spyOn(global, 'fetch').mockRejectedValue(new Error('network error'))
+    // should not throw
+    await expect(
+      new Promise<void>((resolve) => {
+        webhookQueue.enqueue({ url: 'http://example.com/fail', payload: { event: 'panic.created', panic: {} as never } })
+        setImmediate(resolve)
+      })
+    ).resolves.toBeUndefined()
+  })
 })
