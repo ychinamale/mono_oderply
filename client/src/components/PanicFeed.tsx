@@ -46,14 +46,50 @@ export default function PanicFeed() {
     };
   }, [socket]);
 
-  if (loading) return <div data-testid="loading-skeleton" />;
-  if (fetchError) return <div role="alert">Failed to load panics</div>;
+  if (loading) {
+    return (
+      <aside className="w-80 border-r border-slate-900 flex flex-col bg-slate-950/50 h-full">
+        <div className="p-4 border-b border-slate-900 flex items-center justify-between">
+          <h2 className="text-lg font-bold text-white">Panic Feed</h2>
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-slate-700" />
+            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Live</span>
+          </div>
+        </div>
+        <div className="flex-1 p-4 space-y-2" data-testid="loading-skeleton">
+          {[1, 2, 3].map((n) => (
+            <div key={n} className="animate-pulse bg-slate-800 rounded-xl h-20" />
+          ))}
+        </div>
+      </aside>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <aside className="w-80 border-r border-slate-900 flex flex-col bg-slate-950/50 h-full">
+        <div className="p-4 border-b border-slate-900">
+          <h2 className="text-lg font-bold text-white">Panic Feed</h2>
+        </div>
+        <div role="alert" className="text-red-400 p-4 text-sm">Failed to load panics</div>
+      </aside>
+    );
+  }
 
   return (
-    <div>
-      {panics.map((p) => (
-        <PanicCard key={p.id} panic={p} />
-      ))}
-    </div>
+    <aside className="w-80 border-r border-slate-900 flex flex-col bg-slate-950/50 h-full">
+      <div className="p-4 border-b border-slate-900 flex items-center justify-between">
+        <h2 className="text-lg font-bold text-white">Panic Feed</h2>
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+          <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Live</span>
+        </div>
+      </div>
+      <div className="flex-1 overflow-y-auto p-4">
+        {panics.map((p) => (
+          <PanicCard key={p.id} panic={p} />
+        ))}
+      </div>
+    </aside>
   );
 }

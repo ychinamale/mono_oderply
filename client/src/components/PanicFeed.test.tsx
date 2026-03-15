@@ -157,6 +157,6 @@ describe('PanicFeed', () => {
 
     const cards = screen.getAllByTestId('panic-card');
     expect(cards).toHaveLength(3);
-    expect(cards[0]).toHaveTextContent('panic-c');
+    expect(cards[0]).toHaveAttribute('data-panic-id', 'panic-c');
   });
 });
