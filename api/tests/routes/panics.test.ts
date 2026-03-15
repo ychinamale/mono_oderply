@@ -795,6 +795,26 @@ describe('Shared transition assertions', () => {
       expect(typeof body.partner).toBe('object')
     }
   })
+
+  it('every transition response does not include apiKeyHash', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const cases = [
+      { action: 'acknowledge', initialStatus: 'PENDING' },
+      { action: 'dispatch', initialStatus: 'ACKNOWLEDGED' },
+      { action: 'resolve', initialStatus: 'DISPATCHED' },
+    ] as const
+    for (const { action, initialStatus } of cases) {
+      const panic = await createPanic({ status: initialStatus })
+      const res = await app.inject({
+        method: 'POST',
+        url: `/api/v1/panics/${panic.id}/${action}`,
+        headers: { authorization: `Bearer ${token}` },
+      })
+      const body = res.json<{ partner: Record<string, unknown> }>()
+      expect(body.partner.apiKeyHash).toBeUndefined()
+    }
+  })
 })
 
 describe('GET /api/v1/panics', () => {
