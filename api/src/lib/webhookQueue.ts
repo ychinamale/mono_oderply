@@ -7,8 +7,43 @@ export interface WebhookJob {
   payload: WebhookPayload
 }
 
+type QueueState = {
+  jobs: WebhookJob[]
+  running: boolean
+}
+
+const state: QueueState = { jobs: [], running: false }
+
+async function processNext(): Promise<void> {
+  const job = state.jobs.shift()
+  if (!job) {
+    state.running = false
+    return
+  }
+
+  try {
+    const res = await fetch(job.url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(job.payload),
+      signal: AbortSignal.timeout(5000),
+    })
+    if (!res.ok) {
+      console.error(`[webhookQueue] delivery failed: ${job.url} → ${res.status}`)
+    }
+  } catch (err) {
+    console.error(`[webhookQueue] delivery error: ${job.url}`, err)
+  }
+
+  void processNext()
+}
+
 export const webhookQueue = {
   enqueue(job: WebhookJob): void {
-    void job
+    state.jobs.push(job)
+    if (!state.running) {
+      state.running = true
+      setImmediate(() => void processNext())
+    }
   },
 }
