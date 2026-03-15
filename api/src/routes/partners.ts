@@ -18,7 +18,7 @@ export function partnerRoutes(fastify: FastifyInstance) {
     const { page, limit, type } = parsed.data
     const where = type ? { type } : {}
 
-    const [partners, total] = await Promise.all([
+    const [partners, total, activeCounts] = await Promise.all([
       prisma.partner.findMany({
         where,
         skip: (page - 1) * limit,
@@ -27,10 +27,21 @@ export function partnerRoutes(fastify: FastifyInstance) {
         include: { _count: { select: { panicEvents: true } } },
       }),
       prisma.partner.count({ where }),
+      prisma.panicEvent.groupBy({
+        by: ['partnerId'],
+        where: { status: { in: ['PENDING', 'ACKNOWLEDGED', 'DISPATCHED'] } },
+        _count: { id: true },
+      }),
     ])
 
+    const activeByPartnerId = new Map(activeCounts.map((r) => [r.partnerId, r._count.id]))
+    const data = partners.map((p) => ({
+      ...p,
+      _count: { panicEvents: p._count.panicEvents, activePanicEvents: activeByPartnerId.get(p.id) ?? 0 },
+    }))
+
     return reply.send({
-      data: partners,
+      data,
       pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
     })
   })
