@@ -21,4 +21,14 @@ describe('jwtGuard', () => {
     const res = await app.inject({ method: 'GET', url: '/protected' })
     expect(res.statusCode).toBe(401)
   })
+
+  it('returns 401 when Authorization header is present but token is malformed', async () => {
+    const app = await buildGuardApp()
+    const res = await app.inject({
+      method: 'GET',
+      url: '/protected',
+      headers: { authorization: 'Bearer not.a.jwt' },
+    })
+    expect(res.statusCode).toBe(401)
+  })
 })
