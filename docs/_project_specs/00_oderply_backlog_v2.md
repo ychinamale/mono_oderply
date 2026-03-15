@@ -366,14 +366,14 @@
 **I want** to fetch a paginated list of panic events with filtering,
 **so that** I can build and populate the dashboard without loading all records.
 
-- [ ] TASK-06.1.1 — Implement `GET /api/v1/panics`
+- [x] TASK-06.1.1 — Implement `GET /api/v1/panics`
 
-    - [ ] SUB: Apply `jwtGuard`
-    - [ ] SUB: Define Zod query schema: `page` (default 1), `limit` (default 20), `status?`, `partnerId?`
-    - [ ] SUB: Query with `prisma.panicEvent.findMany` + `include: { partner: true }`
-    - [ ] SUB: Apply `skip` and `take` for pagination
-    - [ ] SUB: Run `prisma.panicEvent.count` with same filters for total
-    - [ ] SUB: Return `{ data, pagination: { page, limit, total, totalPages } }`
+    - [x] SUB: Apply `jwtGuard`
+    - [x] SUB: Define Zod query schema: `page` (default 1), `limit` (default 20), `status?`, `partnerId?`
+    - [x] SUB: Query with `prisma.panicEvent.findMany` + `include: { partner: true }`
+    - [x] SUB: Apply `skip` and `take` for pagination
+    - [x] SUB: Run `prisma.panicEvent.count` with same filters for total
+    - [x] SUB: Return `{ data, pagination: { page, limit, total, totalPages } }`
 
 - [ ] TASK-06.1.2 — Implement `GET /api/v1/panics/:id`
 
