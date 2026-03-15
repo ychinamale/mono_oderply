@@ -200,12 +200,14 @@ Commit:
 
 ### GREEN
 Write the minimum implementation to make that one test pass. Nothing more.
-The implementation must cover exactly the behavior exercised by the current test —
-no more. Do not add logic for cases covered by future tests. If a future test covers
-input validation, do not add that validation now. If a future test covers a different
-error path, do not add that path now. Each future RED will fail precisely because
-that behavior is missing, which is correct. Hardcoded return values are not valid —
-implement the real mechanism the test exercises.
+Hardcoded return values are not valid — implement the real mechanism the test exercises.
+
+For every line or block you add, apply this check: would removing it cause the current
+test to fail and at the same time not cause future tests to pass? If the answer to
+that question is no, it may be too broad to go in this GREEN. This prevents
+implementations that are broad enough to make future tests pass for free — which would
+rob those tests of a genuine RED phase and hide gaps in behaviour. The implementation must target the precise behaviour exercised by the current test.
+
 Run the suite and confirm it passes.
 
     npm test --workspace=api
