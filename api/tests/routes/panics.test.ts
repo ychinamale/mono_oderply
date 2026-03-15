@@ -659,3 +659,26 @@ describe('POST /api/v1/panics/:id/resolve', () => {
     expect(log?.partnerId).toBeNull()
   })
 })
+
+describe('GET /api/v1/panics', () => {
+  afterEach(async () => {
+    await prisma.panicEventLog.deleteMany()
+    await prisma.panicEvent.deleteMany()
+  })
+
+  async function getToken() {
+    const app = await createApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/auth/login',
+      payload: { email: 'admin@oderply.com', password: 'Admin1234!' },
+    })
+    return res.json<{ token: string }>().token
+  }
+
+  it('returns 401 when JWT is missing', async () => {
+    const app = await createApp()
+    const res = await app.inject({ method: 'GET', url: '/api/v1/panics' })
+    expect(res.statusCode).toBe(401)
+  })
+})
