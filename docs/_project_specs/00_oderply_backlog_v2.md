@@ -443,33 +443,33 @@
 **I want** my dashboard to update automatically when new panics arrive or statuses change,
 **so that** I never need to manually refresh to see the current state.
 
-- [ ] TASK-07.1.1 — Set up Socket.io server alongside Fastify
+- [x] TASK-07.1.1 — Set up Socket.io server alongside Fastify
 
-    - [ ] SUB: Create `api/src/gateway.js`
-    - [ ] SUB: Attach Socket.io to the Fastify HTTP server instance
-    - [ ] SUB: Register `@fastify/cors` before Socket.io to avoid CORS issues on handshake
-    - [ ] SUB: Export the `io` instance so route modules can emit events
+    - [x] SUB: Create `api/src/gateway.js`
+    - [x] SUB: Attach Socket.io to the Fastify HTTP server instance
+    - [x] SUB: Register `@fastify/cors` before Socket.io to avoid CORS issues on handshake
+    - [x] SUB: Export the `io` instance so route modules can emit events
 
-- [ ] TASK-07.1.2 — Implement WebSocket authentication guard
+- [x] TASK-07.1.2 — Implement WebSocket authentication guard
 
-    - [ ] SUB: Use `io.use()` middleware to intercept every new connection
-    - [ ] SUB: Read `socket.handshake.auth.token`
-    - [ ] SUB: Verify the JWT using the same secret as the REST guard
-    - [ ] SUB: Call `next(new Error('Unauthorised'))` if token is missing or invalid
-    - [ ] SUB: Attach decoded operator payload to `socket.data.operator`
+    - [x] SUB: Use `io.use()` middleware to intercept every new connection
+    - [x] SUB: Read `socket.handshake.auth.token`
+    - [x] SUB: Verify the JWT using the same secret as the REST guard
+    - [x] SUB: Call `next(new Error('Unauthorised'))` if token is missing or invalid
+    - [x] SUB: Attach decoded operator payload to `socket.data.operator`
 
-- [ ] TASK-07.1.3 — Emit `panic:new` on panic creation
+- [x] TASK-07.1.3 — Emit `panic:new` on panic creation
 
-    - [ ] SUB: Import `io` in the panic ingestion route
-    - [ ] SUB: After DB write, call `io.emit('panic:new', panicPayload)`
-    - [ ] SUB: Confirm payload shape matches `GET /api/v1/panics/:id` response exactly
-    - [ ] SUB: Test: POST a panic → connected operator client receives `panic:new`
+    - [x] SUB: Import `io` in the panic ingestion route
+    - [x] SUB: After DB write, call `io.emit('panic:new', panicPayload)`
+    - [x] SUB: Confirm payload shape matches `GET /api/v1/panics/:id` response exactly
+    - [x] SUB: Test: POST a panic → connected operator client receives `panic:new`
 
-- [ ] TASK-07.1.4 — Emit `panic:updated` on every status transition
+- [x] TASK-07.1.4 — Emit `panic:updated` on every status transition
 
-    - [ ] SUB: Call `io.emit('panic:updated', panicPayload)` after every successful transition (acknowledge, dispatch, resolve, claim)
-    - [ ] SUB: Confirm payload mirrors REST response shape
-    - [ ] SUB: Test: transition a panic status → connected operator client receives `panic:updated`
+    - [x] SUB: Call `io.emit('panic:updated', panicPayload)` after every successful transition (acknowledge, dispatch, resolve, claim)
+    - [x] SUB: Confirm payload mirrors REST response shape
+    - [x] SUB: Test: transition a panic status → connected operator client receives `panic:updated`
 
 ---
 
