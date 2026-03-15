@@ -26,6 +26,24 @@ describe('GET /api/v1/partners', () => {
     expect(res.statusCode).toBe(401)
   })
 
+  it('_count.activePanicEvents excludes RESOLVED panics', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    await prisma.panicEvent.createMany({
+      data: [
+        { externalUserId: 'u1', latitude: 0, longitude: 0, idempotencyKey: 'active-idem-1', partnerId: source.id, status: 'PENDING' },
+        { externalUserId: 'u2', latitude: 0, longitude: 0, idempotencyKey: 'active-idem-2', partnerId: source.id, status: 'DISPATCHED' },
+        { externalUserId: 'u3', latitude: 0, longitude: 0, idempotencyKey: 'active-idem-3', partnerId: source.id, status: 'RESOLVED' },
+      ],
+    })
+    const res = await app.inject({ method: 'GET', url: '/api/v1/partners', headers: { authorization: `Bearer ${token}` } })
+    const body = res.json<{ data: { id: string; _count: { panicEvents: number; activePanicEvents: number } }[] }>()
+    const partner = body.data.find((p) => p.id === source.id)
+    expect(partner?._count.activePanicEvents).toBe(2)
+    expect(partner?._count.panicEvents).toBe(3)
+  })
+
   it('returns paginated list with _count.panicEvents on each partner', async () => {
     const app = await createApp()
     const token = await getToken()
