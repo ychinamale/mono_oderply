@@ -37,4 +37,17 @@ describe('webhookQueue', () => {
       })
     ).resolves.toBeUndefined()
   })
+
+  it('queue continues processing subsequent jobs after a delivery failure', async () => {
+    const delivered: string[] = []
+    jest.spyOn(global, 'fetch').mockImplementation((url) => {
+      if (url === 'http://example.com/fail') return Promise.reject(new Error('network error'))
+      delivered.push(url as string)
+      return Promise.resolve(new Response(null, { status: 200 }))
+    })
+    webhookQueue.enqueue({ url: 'http://example.com/fail', payload: { event: 'panic.created', panic: {} as never } })
+    webhookQueue.enqueue({ url: 'http://example.com/after-fail', payload: { event: 'panic.created', panic: {} as never } })
+    await new Promise(resolve => setTimeout(resolve, 50))
+    expect(delivered).toContain('http://example.com/after-fail')
+  })
 })
