@@ -60,6 +60,18 @@ describe('jwtGuard', () => {
     expect(res.json<{ operatorId: string }>().operatorId).toBe('op-123')
   })
 
+  it('allows request to proceed to route handler when token is valid', async () => {
+    const app = await buildGuardApp()
+    const token = app.jwt.sign({ operatorId: 'op-456', email: 'op@example.com', name: 'Op' })
+
+    const res = await app.inject({
+      method: 'GET',
+      url: '/protected',
+      headers: { authorization: `Bearer ${token}` },
+    })
+    expect(res.statusCode).toBe(200)
+  })
+
   it('returns 401 when token is signed with a different secret', async () => {
     const signer = Fastify()
     await signer.register(jwt, { secret: 'wrong-secret' })
