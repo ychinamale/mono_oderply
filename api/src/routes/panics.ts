@@ -3,6 +3,7 @@ import { z } from 'zod'
 
 import * as Prisma from '../generated/prisma/internal/prismaNamespace.js'
 import { apiKeyGuard } from '../hooks/apiKeyGuard.js'
+import { jwtGuard } from '../hooks/jwtGuard.js'
 import { getIo } from '../lib/gateway.js'
 import prisma from '../lib/prisma.js'
 import { webhookQueue } from '../lib/webhookQueue.js'
@@ -16,6 +17,14 @@ const createPanicSchema = z.object({
 })
 
 export function panicRoutes(fastify: FastifyInstance) {
+  fastify.post(
+    '/api/v1/panics/:id/acknowledge',
+    { preHandler: jwtGuard() },
+    async (_request, reply) => {
+      return reply.code(501).send()
+    },
+  )
+
   fastify.post(
     '/api/v1/panics/:id/claim',
     { preHandler: apiKeyGuard('RESPONDER_SYSTEM') },
