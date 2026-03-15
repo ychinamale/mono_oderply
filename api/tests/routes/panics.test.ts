@@ -586,3 +586,48 @@ describe('POST /api/v1/panics/:id/dispatch', () => {
     expect(log?.partnerId).toBeNull()
   })
 })
+
+describe('POST /api/v1/panics/:id/resolve', () => {
+  afterEach(async () => {
+    await prisma.panicEventLog.deleteMany()
+    await prisma.panicEvent.deleteMany()
+  })
+
+  async function getToken() {
+    const app = await createApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/auth/login',
+      payload: { email: 'admin@oderply.com', password: 'Admin1234!' },
+    })
+    return res.json<{ token: string }>().token
+  }
+
+  async function createPanic(overrides: Record<string, unknown> = {}) {
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    return prisma.panicEvent.create({
+      data: {
+        externalUserId: 'user-test',
+        latitude: -26.1,
+        longitude: 28.0,
+        idempotencyKey: `idem-${Date.now()}-${Math.random()}`,
+        partnerId: source.id,
+        ...overrides,
+      },
+    })
+  }
+
+  it('returns 400 when panic status is not DISPATCHED', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    for (const status of ['PENDING', 'ACKNOWLEDGED', 'RESOLVED'] as const) {
+      const panic = await createPanic({ status })
+      const res = await app.inject({
+        method: 'POST',
+        url: `/api/v1/panics/${panic.id}/resolve`,
+        headers: { authorization: `Bearer ${token}` },
+      })
+      expect(res.statusCode).toBe(400)
+    }
+  })
+})
