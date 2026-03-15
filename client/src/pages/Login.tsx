@@ -1,8 +1,19 @@
+import axios from 'axios';
 import { useState } from 'react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleSubmit() {
+    setError(null);
+    try {
+      await axios.post('/api/auth/login', { email, password });
+    } catch {
+      setError('Invalid email or password.');
+    }
+  }
 
   return (
     <div>
@@ -20,7 +31,10 @@ export default function Login() {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
-      <button type="button">Sign in</button>
+      {error && <p role="alert">{error}</p>}
+      <button type="button" onClick={() => void handleSubmit()}>
+        Sign in
+      </button>
     </div>
   );
 }
