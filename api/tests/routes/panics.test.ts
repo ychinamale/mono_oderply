@@ -796,9 +796,30 @@ describe('GET /api/v1/panics/:id', () => {
     await prisma.panicEvent.deleteMany()
   })
 
+  async function getToken() {
+    const app = await createApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/auth/login',
+      payload: { email: 'admin@oderply.com', password: 'Admin1234!' },
+    })
+    return res.json<{ token: string }>().token
+  }
+
   it('returns 401 when JWT is missing', async () => {
     const app = await createApp()
     const res = await app.inject({ method: 'GET', url: '/api/v1/panics/some-id' })
     expect(res.statusCode).toBe(401)
+  })
+
+  it('returns 404 when panic id does not exist', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/v1/panics/00000000-0000-0000-0000-000000000000',
+      headers: { authorization: `Bearer ${token}` },
+    })
+    expect(res.statusCode).toBe(404)
   })
 })
