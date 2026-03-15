@@ -85,6 +85,14 @@ describe('PanicFeed', () => {
     expect(await screen.findAllByTestId('panic-card')).toHaveLength(2);
   });
 
+  it('shows an error state when the initial fetch fails', async () => {
+    (axios.get as Mock).mockRejectedValueOnce(new Error('Network error'));
+
+    renderFeed();
+
+    expect(await screen.findByRole('alert')).toBeInTheDocument();
+  });
+
   it('shows a loading skeleton while the initial fetch is in progress', () => {
     (axios.get as Mock).mockReturnValueOnce(new Promise(() => {})); // never resolves
 

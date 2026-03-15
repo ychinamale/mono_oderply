@@ -22,6 +22,9 @@ export default function PanicFeed() {
       .then((res) => {
         setPanics(res.data.data);
         setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
       });
   }, [token]);
 
