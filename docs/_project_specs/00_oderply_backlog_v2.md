@@ -201,15 +201,15 @@
 **I want** to POST a panic event with location and user details,
 **so that** ODERP-ly receives the emergency and begins coordinating a response.
 
-- [ ] 🟢 TASK-03.1.1 — Implement `POST /api/v1/panics`
+- [x] 🟢 TASK-03.1.1 — Implement `POST /api/v1/panics`
 
-    - [ ] ⚪ SUB: Create `api/src/routes/panics.js`
-    - [ ] ⚪ SUB: Apply `apiKeyGuard` (type: `PANIC_SOURCE`) as preHandler
-    - [ ] ⚪ SUB: Define Zod request schema: `externalUserId`, `latitude`, `longitude`, `idempotencyKey` (required), `metadata?`
-    - [ ] ⚪ SUB: Validate `latitude` range (-90 to 90) and `longitude` range (-180 to 180)
-    - [ ] ⚪ SUB: Write `PanicEvent` to DB with `partnerId` from `request.partner.id`
-    - [ ] ⚪ SUB: Include partner inline in response (`prisma.panicEvent.create({ include: { partner: true } })`)
-    - [ ] ⚪ SUB: Return 201 with full panic response shape
+    - [x] ⚪ SUB: Create `api/src/routes/panics.js`
+    - [x] ⚪ SUB: Apply `apiKeyGuard` (type: `PANIC_SOURCE`) as preHandler
+    - [x] ⚪ SUB: Define Zod request schema: `externalUserId`, `latitude`, `longitude`, `idempotencyKey` (required), `metadata?`
+    - [x] ⚪ SUB: Validate `latitude` range (-90 to 90) and `longitude` range (-180 to 180)
+    - [x] ⚪ SUB: Write `PanicEvent` to DB with `partnerId` from `request.partner.id`
+    - [x] ⚪ SUB: Include partner inline in response (`prisma.panicEvent.create({ include: { partner: true } })`)
+    - [x] ⚪ SUB: Return 201 with full panic response shape
 
 - [ ] 🟢 TASK-03.1.2 — Enforce idempotency
 
