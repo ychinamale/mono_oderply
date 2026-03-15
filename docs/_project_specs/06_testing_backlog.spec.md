@@ -537,5 +537,3 @@ git commit -m "refactor(auth): consolidate guard error responses into single hel
 git push -u origin feature/TASK-02.1.1-api-key-guard
 # Open PR: [TASK-02.1.1] Implement apiKeyGuard preHandler hook → develop
 ```
-
-A reviewer opening this PR sees 13 commits that tell a complete, verified story. Every behaviour is proven before it exists. Nothing is implemented without a test. That is the signal AURA's reviewers are looking for.
