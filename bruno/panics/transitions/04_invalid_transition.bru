@@ -1,0 +1,19 @@
+meta {
+  name: Invalid transition - dispatch a PENDING panic
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/v1/panics/{{panicId}}/dispatch
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+assert {
+  res.status: eq 400
+}

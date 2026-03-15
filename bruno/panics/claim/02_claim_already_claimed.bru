@@ -1,0 +1,19 @@
+meta {
+  name: Claim panic - already claimed (409)
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/panics/{{panicId}}/claim
+  body: none
+  auth: none
+}
+
+headers {
+  x-api-key: {{responderKey}}
+}
+
+assert {
+  res.status: eq 409
+}

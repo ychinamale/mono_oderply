@@ -1,0 +1,28 @@
+meta {
+  name: Submit panic - invalid coordinates
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/v1/panics
+  body: json
+  auth: none
+}
+
+headers {
+  x-api-key: {{panicSourceKey}}
+}
+
+body:json {
+  {
+    "externalUserId": "user-abc-123",
+    "latitude": 999,
+    "longitude": 999,
+    "idempotencyKey": "{{$randomUUID}}"
+  }
+}
+
+assert {
+  res.status: eq 400
+}

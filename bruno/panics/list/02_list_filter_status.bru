@@ -1,0 +1,23 @@
+meta {
+  name: List panics - filter by status
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/v1/panics
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+query {
+  status: PENDING
+}
+
+assert {
+  res.status: eq 200
+}

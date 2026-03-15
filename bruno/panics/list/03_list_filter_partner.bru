@@ -1,0 +1,23 @@
+meta {
+  name: List panics - filter by partnerId
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/v1/panics
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+query {
+  partnerId: {{partnerId}}
+}
+
+assert {
+  res.status: eq 200
+}

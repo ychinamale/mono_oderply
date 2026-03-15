@@ -1,0 +1,20 @@
+meta {
+  name: Acknowledge panic
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/panics/{{panicId}}/acknowledge
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq ACKNOWLEDGED
+}
