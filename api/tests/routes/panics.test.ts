@@ -681,4 +681,17 @@ describe('GET /api/v1/panics', () => {
     const res = await app.inject({ method: 'GET', url: '/api/v1/panics' })
     expect(res.statusCode).toBe(401)
   })
+
+  it('returns paginated results with data and pagination fields', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const res = await app.inject({ method: 'GET', url: '/api/v1/panics', headers: { authorization: `Bearer ${token}` } })
+    expect(res.statusCode).toBe(200)
+    const body = res.json<{ data: unknown[]; pagination: { page: number; limit: number; total: number; totalPages: number } }>()
+    expect(Array.isArray(body.data)).toBe(true)
+    expect(typeof body.pagination.page).toBe('number')
+    expect(typeof body.pagination.limit).toBe('number')
+    expect(typeof body.pagination.total).toBe('number')
+    expect(typeof body.pagination.totalPages).toBe('number')
+  })
 })
