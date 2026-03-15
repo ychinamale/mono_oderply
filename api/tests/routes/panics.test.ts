@@ -711,4 +711,13 @@ describe('GET /api/v1/panics', () => {
     expect(body.pagination.total).toBe(3)
     expect(body.data).toHaveLength(3)
   })
+
+  it('defaults to page 1 and limit 20 when query params are omitted', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const res = await app.inject({ method: 'GET', url: '/api/v1/panics', headers: { authorization: `Bearer ${token}` } })
+    const body = res.json<{ pagination: { page: number; limit: number } }>()
+    expect(body.pagination.page).toBe(1)
+    expect(body.pagination.limit).toBe(20)
+  })
 })
