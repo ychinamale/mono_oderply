@@ -231,4 +231,14 @@ describe('POST /api/v1/panics/:id/claim', () => {
     })
     expect(res.statusCode).toBe(403)
   })
+
+  it('returns 404 when panic id does not exist', async () => {
+    const app = await createApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/v1/panics/nonexistent-id/claim',
+      headers: rsHeaders,
+    })
+    expect(res.statusCode).toBe(404)
+  })
 })
