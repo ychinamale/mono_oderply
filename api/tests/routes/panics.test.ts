@@ -917,4 +917,27 @@ describe('GET /api/v1/panics/:id/logs', () => {
     })
     expect(res.statusCode).toBe(404)
   })
+
+  it('returns logs in ascending createdAt order', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    const operator = await prisma.operator.findFirstOrThrow()
+    const panic = await prisma.panicEvent.create({
+      data: { externalUserId: 'u1', latitude: 0, longitude: 0, idempotencyKey: 'idem-logs-order-1', partnerId: source.id, status: 'DISPATCHED' },
+    })
+    await prisma.panicEventLog.create({ data: { panicId: panic.id, triggeredBy: 'OPERATOR', operatorId: operator.id, fromStatus: 'PENDING', toStatus: 'ACKNOWLEDGED' } })
+    await prisma.panicEventLog.create({ data: { panicId: panic.id, triggeredBy: 'OPERATOR', operatorId: operator.id, fromStatus: 'ACKNOWLEDGED', toStatus: 'DISPATCHED' } })
+
+    const res = await app.inject({
+      method: 'GET',
+      url: `/api/v1/panics/${panic.id}/logs`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    expect(res.statusCode).toBe(200)
+    const body = res.json<{ data: { fromStatus: string; toStatus: string }[] }>()
+    expect(body.data).toHaveLength(2)
+    expect(body.data[0].fromStatus).toBe('PENDING')
+    expect(body.data[1].fromStatus).toBe('ACKNOWLEDGED')
+  })
 })
