@@ -377,10 +377,10 @@
 
 - [x] TASK-06.1.2 — Implement `GET /api/v1/panics/:id`
 
-    - [ ] SUB: Apply `jwtGuard`
-    - [ ] SUB: Query with `include: { partner: true, claimedByPartner: true }`
-    - [ ] SUB: Return 404 if not found
-    - [ ] SUB: Return full panic object
+    - [x] SUB: Apply `jwtGuard`
+    - [x] SUB: Query with `include: { partner: true, claimedByPartner: true }`
+    - [x] SUB: Return 404 if not found
+    - [x] SUB: Return full panic object
 
 ---
 

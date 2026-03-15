@@ -165,22 +165,22 @@ Each section covers a testable concern. Within each section, tests are grouped b
 
 ### `GET /api/v1/panics`
 
-- [ ] `it('returns 401 when JWT is missing')`
-- [ ] `it('returns paginated results with data and pagination fields')`
-- [ ] `it('pagination.total reflects the actual count of matching records')`
-- [ ] `it('defaults to page 1 and limit 20 when query params are omitted')`
-- [ ] `it('filters by status when status query param is provided')`
-- [ ] `it('filters by partnerId when partnerId query param is provided')`
-- [ ] `it('each panic in data includes partner inline')`
-- [ ] `it('does not include apiKeyHash on any inline partner')`
+- [x] `it('returns 401 when JWT is missing')`
+- [x] `it('returns paginated results with data and pagination fields')`
+- [x] `it('pagination.total reflects the actual count of matching records')`
+- [x] `it('defaults to page 1 and limit 20 when query params are omitted')`
+- [x] `it('filters by status when status query param is provided')`
+- [x] `it('filters by partnerId when partnerId query param is provided')`
+- [x] `it('each panic in data includes partner inline')`
+- [x] `it('does not include apiKeyHash on any inline partner')`
 
 ### `GET /api/v1/panics/:id`
 
-- [ ] `it('returns 401 when JWT is missing')`
-- [ ] `it('returns 404 when panic id does not exist')`
-- [ ] `it('returns the panic with partner and claimedByPartner inline')`
-- [ ] `it('claimedByPartner is null when panic has not been claimed')`
-- [ ] `it('claimedByPartner is populated when panic has been claimed')`
+- [x] `it('returns 401 when JWT is missing')`
+- [x] `it('returns 404 when panic id does not exist')`
+- [x] `it('returns the panic with partner and claimedByPartner inline')`
+- [x] `it('claimedByPartner is null when panic has not been claimed')`
+- [x] `it('claimedByPartner is populated when panic has been claimed')`
 
 ### `GET /api/v1/panics/:id/logs`
 
