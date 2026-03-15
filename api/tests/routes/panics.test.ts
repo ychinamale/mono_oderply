@@ -205,6 +205,16 @@ describe('POST /api/v1/panics', () => {
       expect(enqueuedUrls).not.toContain(partner.webhookUrl)
     }
   })
+
+  it('skips enqueue for a partner with no webhookUrl and logs a warning', async () => {
+    const app = await createApp()
+    const responders = await prisma.partner.findMany({ where: { type: 'RESPONDER_SYSTEM' } })
+    await Promise.all(responders.map((r) => prisma.partner.update({ where: { id: r.id }, data: { webhookUrl: null } })))
+    jest.spyOn(console, 'warn').mockImplementation(() => {})
+    await app.inject({ method: 'POST', url: '/api/v1/panics', headers: psHeaders, payload: validBody })
+    expect(enqueueSpy).not.toHaveBeenCalled()
+    await Promise.all(responders.map((r) => prisma.partner.update({ where: { id: r.id }, data: { webhookUrl: r.webhookUrl } })))
+  })
 })
 
 describe('POST /api/v1/panics/:id/claim', () => {
