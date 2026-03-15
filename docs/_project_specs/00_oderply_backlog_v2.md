@@ -413,21 +413,21 @@
 **I want** to browse registered partners with their panic event counts,
 **so that** I can understand which systems are connected and how active they are.
 
-- [ ] TASK-06.3.1 — Implement `GET /api/v1/partners`
+- [x] TASK-06.3.1 — Implement `GET /api/v1/partners`
 
-    - [ ] SUB: Apply `jwtGuard`
-    - [ ] SUB: Define Zod query schema: `page`, `limit`, `type?`
-    - [ ] SUB: Query with `include: { _count: { select: { panicEvents: true } } }`
-    - [ ] SUB: Compute `activePanicEvents` count (status IN [PENDING, ACKNOWLEDGED, DISPATCHED]) as a separate aggregation
-    - [ ] SUB: Return `{ data, pagination }`
-    - [ ] SUB: Never return `apiKeyHash` in any partner response
+    - [x] SUB: Apply `jwtGuard`
+    - [x] SUB: Define Zod query schema: `page`, `limit`, `type?`
+    - [x] SUB: Query with `include: { _count: { select: { panicEvents: true } } }`
+    - [x] SUB: Compute `activePanicEvents` count (status IN [PENDING, ACKNOWLEDGED, DISPATCHED]) as a separate aggregation
+    - [x] SUB: Return `{ data, pagination }`
+    - [x] SUB: Never return `apiKeyHash` in any partner response
 
-- [ ] TASK-06.3.2 — Implement `GET /api/v1/partners/:id`
+- [x] TASK-06.3.2 — Implement `GET /api/v1/partners/:id`
 
-    - [ ] SUB: Apply `jwtGuard`
-    - [ ] SUB: Return 404 if not found
-    - [ ] SUB: Return partner with `_count` aggregations
-    - [ ] SUB: Never return `apiKeyHash`
+    - [x] SUB: Apply `jwtGuard`
+    - [x] SUB: Return 404 if not found
+    - [x] SUB: Return partner with `_count` aggregations
+    - [x] SUB: Never return `apiKeyHash`
 
 ---
 
