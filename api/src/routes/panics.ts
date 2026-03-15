@@ -18,6 +18,14 @@ const createPanicSchema = z.object({
 })
 
 export function panicRoutes(fastify: FastifyInstance) {
+  fastify.get(
+    '/api/v1/panics',
+    { preHandler: jwtGuard() },
+    async (_request, reply) => {
+      return reply.code(200).send({ data: [], pagination: { page: 1, limit: 20, total: 0, totalPages: 0 } })
+    },
+  )
+
   fastify.post(
     '/api/v1/panics/:id/acknowledge',
     { preHandler: jwtGuard() },
