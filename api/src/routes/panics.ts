@@ -97,12 +97,12 @@ export function panicRoutes(fastify: FastifyInstance) {
         })
 
         const responders = await prisma.partner.findMany({
-          where: { type: 'RESPONDER_SYSTEM' },
+          where: { type: 'RESPONDER_SYSTEM', webhookUrl: { not: null } },
           select: { webhookUrl: true },
         })
 
         for (const responder of responders) {
-          webhookQueue.enqueue({ url: responder.webhookUrl ?? '', payload: { event: 'panic.created', panic } })
+          webhookQueue.enqueue({ url: responder.webhookUrl!, payload: { event: 'panic.created', panic } })
         }
 
         getIo()?.emit('panic:new', panic)
