@@ -70,4 +70,14 @@ describe('POST /api/auth/login', () => {
     expect(payload.email).toBe('admin@oderply.com')
     expect(payload.name).toBe('Admin')
   })
+
+  it('returns 400 when email field is not a valid email format', async () => {
+    const app = await createApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/auth/login',
+      payload: { email: 'not-an-email', password: 'Admin1234!' },
+    })
+    expect(res.statusCode).toBe(400)
+  })
 })
