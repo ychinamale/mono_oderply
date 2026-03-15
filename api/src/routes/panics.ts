@@ -44,6 +44,23 @@ export function panicRoutes(fastify: FastifyInstance) {
     },
   )
 
+  fastify.get(
+    '/api/v1/panics/:id',
+    { preHandler: jwtGuard() },
+    async (request, reply) => {
+      const { id } = request.params as { id: string }
+      const panic = await prisma.panicEvent.findUnique({
+        where: { id },
+        include: {
+          partner: { omit: { apiKeyHash: true } },
+          claimedByPartner: { omit: { apiKeyHash: true } },
+        },
+      })
+      if (!panic) return reply.code(404).send({ error: 'Panic not found' })
+      return reply.code(200).send(panic)
+    },
+  )
+
   fastify.post(
     '/api/v1/panics/:id/acknowledge',
     { preHandler: jwtGuard() },
