@@ -1,15 +1,27 @@
 import axios from 'axios';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+import { useAuth } from '../context/AuthContext.tsx';
+
+interface LoginResponse {
+  token: string;
+  operator: { id: string; email: string; name: string };
+}
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   async function handleSubmit() {
     setError(null);
     try {
-      await axios.post('/api/auth/login', { email, password });
+      const { data } = await axios.post<LoginResponse>('/api/auth/login', { email, password });
+      login(data.token, data.operator);
+      navigate('/dashboard');
     } catch {
       setError('Invalid email or password.');
     }
