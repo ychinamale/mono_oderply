@@ -31,6 +31,51 @@ describe('WebSocket Gateway', () => {
     await prisma.panicEvent.deleteMany()
   })
 
+  it('panic:new payload matches the shape of POST /api/v1/panics 201 response', async () => {
+    const app = await createApp()
+    await app.listen({ port: 0 })
+    const { port } = app.server.address() as { port: number }
+
+    const token = app.jwt.sign({ operatorId: 'test-op', email: 'op@test.com', name: 'Test Op' })
+
+    let postBody: Record<string, unknown> | null = null
+    const emitted = await new Promise<Record<string, unknown>>((resolve, reject) => {
+      const client: Socket = ioc(`http://localhost:${port}`, { auth: { token } })
+
+      const timeout = setTimeout(() => {
+        client.disconnect()
+        reject(new Error('panic:new not received within timeout'))
+      }, 3000)
+
+      client.on('panic:new', (data: Record<string, unknown>) => {
+        clearTimeout(timeout)
+        client.disconnect()
+        resolve(data)
+      })
+
+      client.on('connect', () => {
+        void app
+          .inject({
+            method: 'POST',
+            url: '/api/v1/panics',
+            headers: { 'x-api-key': 'ps-test-api-key-001' },
+            payload: {
+              externalUserId: 'user-ws-shape',
+              latitude: -26.1052,
+              longitude: 28.056,
+              idempotencyKey: 'ws-shape-key-00000001',
+            },
+          })
+          .then((res) => {
+            postBody = res.json<Record<string, unknown>>()
+          })
+      })
+    })
+
+    await app.close()
+    expect(emitted).toEqual(postBody)
+  })
+
   it('emits panic:new to connected operator clients when a panic is submitted', async () => {
     const app = await createApp()
     await app.listen({ port: 0 })
