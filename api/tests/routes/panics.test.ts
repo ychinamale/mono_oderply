@@ -280,4 +280,15 @@ describe('POST /api/v1/panics/:id/claim', () => {
       expect(res.statusCode).toBe(400)
     }
   })
+
+  it('returns 200 on successful claim', async () => {
+    const app = await createApp()
+    const panic = await createPanic()
+    const res = await app.inject({
+      method: 'POST',
+      url: `/api/v1/panics/${panic.id}/claim`,
+      headers: rsHeaders,
+    })
+    expect(res.statusCode).toBe(200)
+  })
 })
