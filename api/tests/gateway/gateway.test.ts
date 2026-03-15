@@ -32,6 +32,36 @@ describe('WebSocket Gateway', () => {
     await prisma.panicEvent.deleteMany()
   })
 
+  it('rejects connection when no auth token is provided', async () => {
+    const app = await createApp()
+    await app.listen({ port: 0 })
+    const { port } = app.server.address() as { port: number }
+
+    const error = await new Promise<Error>((resolve, reject) => {
+      const client: Socket = ioc(`http://localhost:${port}`, { auth: {} })
+
+      const timeout = setTimeout(() => {
+        client.disconnect()
+        reject(new Error('Expected connect_error but did not receive one'))
+      }, 3000)
+
+      client.on('connect_error', (err: Error) => {
+        clearTimeout(timeout)
+        client.disconnect()
+        resolve(err)
+      })
+
+      client.on('connect', () => {
+        clearTimeout(timeout)
+        client.disconnect()
+        reject(new Error('Expected connection to be rejected but it connected'))
+      })
+    })
+
+    await app.close()
+    expect(error.message).toMatch(/unauthorised/i)
+  })
+
   it('panic:new payload matches the shape of POST /api/v1/panics 201 response', async () => {
     const app = await createApp()
     await app.listen({ port: 0 })
