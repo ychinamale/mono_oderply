@@ -73,4 +73,15 @@ describe('apiKeyGuard', () => {
     })
     expect(res.statusCode).toBe(403)
   })
+
+  it('returns 403 with a descriptive message when partner type assertion fails', async () => {
+    const app = buildApp('RESPONDER_SYSTEM')
+    const res = await app.inject({
+      method: 'GET',
+      url: '/test',
+      headers: { 'x-api-key': 'ps-test-api-key-001' },
+    })
+    expect(res.statusCode).toBe(403)
+    expect(res.json<{ error: string }>().error).toMatch(/RESPONDER_SYSTEM/)
+  })
 })
