@@ -100,4 +100,32 @@ describe('POST /api/v1/panics', () => {
     })
     expect(res.statusCode).toBe(201)
   })
+
+  it('created PanicEvent has status PENDING', async () => {
+    const app = await createApp()
+    const res = await app.inject({ method: 'POST', url: '/api/v1/panics', headers: psHeaders, payload: validBody })
+    expect(res.json<{ status: string }>().status).toBe('PENDING')
+  })
+
+  it('created PanicEvent has partnerId matching the authenticated partner', async () => {
+    const app = await createApp()
+    const res = await app.inject({ method: 'POST', url: '/api/v1/panics', headers: psHeaders, payload: validBody })
+    const body = res.json<{ partnerId: string; partner: { name: string } }>()
+    expect(body.partner.name).toBe('Test Panic Source')
+  })
+
+  it('response includes partner object inline — not just partnerId', async () => {
+    const app = await createApp()
+    const res = await app.inject({ method: 'POST', url: '/api/v1/panics', headers: psHeaders, payload: validBody })
+    const body = res.json<{ partner: unknown }>()
+    expect(body.partner).toBeDefined()
+    expect(typeof body.partner).toBe('object')
+  })
+
+  it('response does not include apiKeyHash on the inline partner', async () => {
+    const app = await createApp()
+    const res = await app.inject({ method: 'POST', url: '/api/v1/panics', headers: psHeaders, payload: validBody })
+    const body = res.json<{ partner: Record<string, unknown> }>()
+    expect(body.partner.apiKeyHash).toBeUndefined()
+  })
 })
