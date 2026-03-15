@@ -81,4 +81,13 @@ describe('PanicDetail', () => {
 
     expect(await screen.findByText(/ResponderCo/)).toBeInTheDocument();
   });
+
+  it('does not render claimedByPartner section when panic is unclaimed', async () => {
+    (axios.get as Mock).mockResolvedValueOnce({ data: panic }); // claimedByPartner: null
+
+    renderDetail();
+
+    await screen.findByText('PENDING');
+    expect(screen.queryByText(/Claimed by:/i)).not.toBeInTheDocument();
+  });
 });
