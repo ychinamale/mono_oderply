@@ -29,7 +29,31 @@ export function panicRoutes(fastify: FastifyInstance) {
 
       if (panic.status !== 'PENDING') return reply.code(400).send({ error: 'Cannot claim a panic with status ' + panic.status })
 
-      return reply.code(501).send()
+      const updated = await prisma.$transaction(async (tx) => {
+        await tx.$queryRaw`SELECT id FROM "PanicEvent" WHERE id = ${id} FOR UPDATE`
+
+        return tx.panicEvent.update({
+          where: { id },
+          data: {
+            status: 'ACKNOWLEDGED',
+            claimedByPartnerId: request.partner.id,
+            logs: {
+              create: {
+                triggeredBy: 'PARTNER_CLAIM',
+                partnerId: request.partner.id,
+                fromStatus: 'PENDING',
+                toStatus: 'ACKNOWLEDGED',
+              },
+            },
+          },
+          include: {
+            partner: { omit: { apiKeyHash: true } },
+            claimedByPartner: { omit: { apiKeyHash: true } },
+          },
+        })
+      })
+
+      return reply.code(200).send(updated)
     },
   )
 
