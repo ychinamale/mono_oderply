@@ -218,13 +218,13 @@
     - [x] ⚪ SUB: On duplicate key: fetch and return the original `PanicEvent` with 200 (not an error)
     - [x] ⚪ SUB: Test: submit same `idempotencyKey` twice → second response is 200 with original event
 
-- [ ] 🟢 TASK-03.1.3 — Trigger async webhook broadcast on creation
+- [x] 🟢 TASK-03.1.3 — Trigger async webhook broadcast on creation
 
-    - [ ] ⚪ SUB: After successful DB write, enqueue a broadcast job
-    - [ ] ⚪ SUB: Queue fetches all `RESPONDER_SYSTEM` partners with a `webhookUrl`
-    - [ ] ⚪ SUB: POST the new `PanicEvent` payload to each `webhookUrl` asynchronously
-    - [ ] ⚪ SUB: Confirm broadcast does not block the 201 response
-    - [ ] ⚪ SUB: Log webhook delivery failures without throwing (fire-and-forget with error logging)
+    - [x] ⚪ SUB: After successful DB write, enqueue a broadcast job
+    - [x] ⚪ SUB: Queue fetches all `RESPONDER_SYSTEM` partners with a `webhookUrl`
+    - [x] ⚪ SUB: POST the new `PanicEvent` payload to each `webhookUrl` asynchronously
+    - [x] ⚪ SUB: Confirm broadcast does not block the 201 response
+    - [x] ⚪ SUB: Log webhook delivery failures without throwing (fire-and-forget with error logging)
 
 - [ ] 🟢 TASK-03.1.4 — Emit `panic:new` Socket.io event
 
