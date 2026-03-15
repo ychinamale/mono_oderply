@@ -70,8 +70,13 @@ export function panicRoutes(fastify: FastifyInstance) {
     '/api/v1/panics/:id/logs',
     { preHandler: jwtGuard() },
     async (request, reply) => {
+      const { id } = request.params as { id: string }
       const parsed = listLogsQuerySchema.safeParse(request.query)
       if (!parsed.success) return reply.code(400).send({ error: 'Invalid query params' })
+
+      const panic = await prisma.panicEvent.findUnique({ where: { id }, select: { id: true } })
+      if (!panic) return reply.code(404).send({ error: 'Panic not found' })
+
       return reply.code(501).send()
     },
   )
