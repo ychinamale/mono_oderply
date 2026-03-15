@@ -15,4 +15,14 @@ describe('POST /api/auth/login', () => {
     })
     expect(res.statusCode).toBe(401)
   })
+
+  it('returns 401 when password is incorrect', async () => {
+    const app = await createApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/auth/login',
+      payload: { email: 'admin@oderply.com', password: 'wrong-password' },
+    })
+    expect(res.statusCode).toBe(401)
+  })
 })
