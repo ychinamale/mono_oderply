@@ -1,4 +1,7 @@
+import { jest } from '@jest/globals'
+
 import { createApp } from '../../src/app.js'
+import { webhookQueue } from '../../src/lib/webhookQueue.js'
 import prisma from '../../src/lib/prisma.js'
 
 afterAll(async () => {
@@ -174,5 +177,17 @@ describe('POST /api/v1/panics', () => {
     })
     expect(second.statusCode).toBe(201)
     expect(second.json<{ id: string }>().id).not.toBe(first.json<{ id: string }>().id)
+  })
+
+  it('enqueues a broadcast to all RESPONDER_SYSTEM partners on panic creation', async () => {
+    const enqueueSpy = jest.spyOn(webhookQueue, 'enqueue')
+    const app = await createApp()
+    await app.inject({ method: 'POST', url: '/api/v1/panics', headers: psHeaders, payload: validBody })
+    const responderPartners = await prisma.partner.findMany({ where: { type: 'RESPONDER_SYSTEM', webhookUrl: { not: null } } })
+    const enqueuedUrls = enqueueSpy.mock.calls.map(([job]) => job.url)
+    for (const partner of responderPartners) {
+      expect(enqueuedUrls).toContain(partner.webhookUrl)
+    }
+    enqueueSpy.mockRestore()
   })
 })
