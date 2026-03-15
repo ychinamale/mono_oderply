@@ -634,7 +634,12 @@ describe('POST /api/v1/panics/:id/dispatch', () => {
 })
 
 describe('POST /api/v1/panics/:id/resolve', () => {
+  let enqueueSpy: ReturnType<typeof jest.spyOn>
+  beforeEach(() => {
+    enqueueSpy = jest.spyOn(webhookQueue, 'enqueue').mockImplementation(() => {})
+  })
   afterEach(async () => {
+    jest.restoreAllMocks()
     await prisma.panicEventLog.deleteMany()
     await prisma.panicEvent.deleteMany()
   })
@@ -703,6 +708,26 @@ describe('POST /api/v1/panics/:id/resolve', () => {
     expect(log?.triggeredBy).toBe('OPERATOR')
     expect(log?.operatorId).not.toBeNull()
     expect(log?.partnerId).toBeNull()
+  })
+
+  it('enqueues a status update to both PANIC_SOURCE and claimedByPartner on resolve', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    await prisma.partner.update({ where: { id: source.id }, data: { webhookUrl: 'http://source.example.com/webhook' } })
+    const responder = await prisma.partner.findFirstOrThrow({ where: { type: 'RESPONDER_SYSTEM' } })
+    await prisma.partner.update({ where: { id: responder.id }, data: { webhookUrl: 'http://responder.example.com/webhook' } })
+    const panic = await createPanic({ status: 'DISPATCHED', claimedByPartnerId: responder.id })
+    await app.inject({
+      method: 'POST',
+      url: `/api/v1/panics/${panic.id}/resolve`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    const enqueuedUrls = (enqueueSpy.mock.calls as [{ url: string }][]).map((args) => args[0].url)
+    expect(enqueuedUrls).toContain('http://source.example.com/webhook')
+    expect(enqueuedUrls).toContain('http://responder.example.com/webhook')
+    await prisma.partner.update({ where: { id: source.id }, data: { webhookUrl: null } })
+    await prisma.partner.update({ where: { id: responder.id }, data: { webhookUrl: null } })
   })
 })
 
