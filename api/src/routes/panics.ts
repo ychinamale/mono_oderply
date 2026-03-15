@@ -332,7 +332,10 @@ export function panicRoutes(fastify: FastifyInstance) {
             metadata: metadata !== undefined ? (metadata as Prisma.InputJsonValue) : Prisma.JsonNull,
             partnerId: request.partner.id,
           },
-          include: { partner: { omit: { apiKeyHash: true } } },
+          include: {
+            partner: { omit: { apiKeyHash: true } },
+            claimedByPartner: { omit: { apiKeyHash: true } },
+          },
         })
 
         const responders = await prisma.partner.findMany({
