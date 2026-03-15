@@ -26,10 +26,15 @@ export default function PanicFeed() {
     if (!socket) return;
 
     const onNew = (panic: Panic) => setPanics((prev) => [panic, ...prev]);
+    const onUpdated = (panic: Panic) =>
+      setPanics((prev) => prev.map((p) => (p.id === panic.id ? panic : p)));
+
     socket.on('panic:new', onNew);
+    socket.on('panic:updated', onUpdated);
 
     return () => {
       socket.off('panic:new', onNew);
+      socket.off('panic:updated', onUpdated);
     };
   }, [socket]);
 
