@@ -66,6 +66,8 @@ export function panicRoutes(fastify: FastifyInstance) {
         webhookQueue.enqueue({ url: panicSource.webhookUrl, payload: { event: 'panic.status_updated', panic: result.panic } })
       }
 
+      getIo()?.emit('panic:updated', result.panic)
+
       return reply.code(200).send(result.panic)
     },
   )
