@@ -505,4 +505,60 @@ describe('WebSocket Gateway', () => {
     await app.close()
     expect(received).toBeDefined()
   })
+
+  it('does not emit panic:updated to clients that connected with an invalid token', async () => {
+    const app = await createApp()
+    await app.listen({ port: 0 })
+    const { port } = app.server.address() as { port: number }
+
+    // A valid token to drive the acknowledge action
+    const validToken = await getRealOperatorToken(app)
+
+    // Create a panic to acknowledge
+    const createRes = await app.inject({
+      method: 'POST',
+      url: '/api/v1/panics',
+      headers: { 'x-api-key': 'ps-test-api-key-001' },
+      payload: {
+        externalUserId: 'user-ws-invalid-token',
+        latitude: -26.1,
+        longitude: 28.0,
+        idempotencyKey: `ws-invalid-token-key-${Date.now()}`,
+      },
+    })
+    const panicId = createRes.json<{ id: string }>().id
+
+    // A client with an invalid token that should be rejected before receiving any events
+    const connectionRejected = await new Promise<boolean>((resolve) => {
+      const client: Socket = ioc(`http://localhost:${port}`, { auth: { token: 'invalid-token' } })
+
+      const timeout = setTimeout(() => {
+        client.disconnect()
+        // Connection was not rejected within timeout — treat as failure to reject
+        resolve(false)
+      }, 1000)
+
+      client.on('connect_error', () => {
+        clearTimeout(timeout)
+        client.disconnect()
+        resolve(true)
+      })
+
+      client.on('panic:updated', () => {
+        clearTimeout(timeout)
+        client.disconnect()
+        resolve(false)
+      })
+    })
+
+    // Trigger panic:updated to verify the invalid client isn't receiving it
+    await app.inject({
+      method: 'POST',
+      url: `/api/v1/panics/${panicId}/acknowledge`,
+      headers: { authorization: `Bearer ${validToken}` },
+    })
+
+    await app.close()
+    expect(connectionRejected).toBe(true)
+  })
 })
