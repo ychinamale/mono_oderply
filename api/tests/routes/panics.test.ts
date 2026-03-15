@@ -777,4 +777,16 @@ describe('GET /api/v1/panics', () => {
     expect(typeof body.data[0].partner).toBe('object')
     expect(body.data[0].partner.id).toBe(source.id)
   })
+
+  it('does not include apiKeyHash on any inline partner', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    await prisma.panicEvent.create({
+      data: { externalUserId: 'u1', latitude: 0, longitude: 0, idempotencyKey: `idem-nohash-1`, partnerId: source.id },
+    })
+    const res = await app.inject({ method: 'GET', url: '/api/v1/panics', headers: { authorization: `Bearer ${token}` } })
+    const body = res.json<{ data: { partner: Record<string, unknown> }[] }>()
+    expect(body.data[0].partner.apiKeyHash).toBeUndefined()
+  })
 })
