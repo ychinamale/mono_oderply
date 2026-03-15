@@ -586,14 +586,14 @@
 **I want** to acknowledge, dispatch, and resolve panics directly from the dashboard,
 **so that** I can manage the full emergency lifecycle without leaving the UI.
 
-- [ ] TASK-09.3.1 — Build status action buttons
+- [x] TASK-09.3.1 — Build status action buttons
 
-    - [ ] SUB: Create `client/src/components/PanicActions.jsx`
-    - [ ] SUB: Render the correct action button(s) based on current status: PENDING → Acknowledge, ACKNOWLEDGED → Dispatch, DISPATCHED → Resolve
-    - [ ] SUB: On click: call the appropriate `POST /api/v1/panics/:id/[action]` endpoint
-    - [ ] SUB: Show loading state on the button while request is in-flight
-    - [ ] SUB: On success: local state updates via `panic:updated` Socket.io event (no manual re-fetch needed)
-    - [ ] SUB: On error: display inline error with the server's error message
+    - [x] SUB: Create `client/src/components/PanicActions.jsx`
+    - [x] SUB: Render the correct action button(s) based on current status: PENDING → Acknowledge, ACKNOWLEDGED → Dispatch, DISPATCHED → Resolve
+    - [x] SUB: On click: call the appropriate `POST /api/v1/panics/:id/[action]` endpoint
+    - [x] SUB: Show loading state on the button while request is in-flight
+    - [x] SUB: On success: local state updates via `panic:updated` Socket.io event (no manual re-fetch needed)
+    - [x] SUB: On error: display inline error with the server's error message
 
 ---
 
