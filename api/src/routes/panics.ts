@@ -77,7 +77,23 @@ export function panicRoutes(fastify: FastifyInstance) {
       const panic = await prisma.panicEvent.findUnique({ where: { id }, select: { id: true } })
       if (!panic) return reply.code(404).send({ error: 'Panic not found' })
 
-      return reply.code(501).send()
+      const { page, limit } = parsed.data
+      const where = { panicId: id }
+      const [data, total] = await Promise.all([
+        prisma.panicEventLog.findMany({
+          where,
+          orderBy: { createdAt: 'asc' },
+          skip: (page - 1) * limit,
+          take: limit,
+          include: {
+            operator: { omit: { passwordHash: true } },
+            partner: { omit: { apiKeyHash: true } },
+          },
+        }),
+        prisma.panicEventLog.count({ where }),
+      ])
+
+      return reply.code(200).send({ data, pagination: { page, limit, total, totalPages: Math.ceil(total / limit) } })
     },
   )
 
