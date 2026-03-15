@@ -101,8 +101,8 @@ export function panicRoutes(fastify: FastifyInstance) {
     '/api/v1/panics/:id/logs/:logId',
     { preHandler: jwtGuard() },
     async (request, reply) => {
-      const { logId } = request.params as { id: string; logId: string }
-      const log = await prisma.panicEventLog.findFirst({ where: { id: logId } })
+      const { id, logId } = request.params as { id: string; logId: string }
+      const log = await prisma.panicEventLog.findFirst({ where: { id: logId, panicId: id } })
       if (!log) return reply.code(404).send({ error: 'Log not found' })
       return reply.code(200).send(log)
     },
