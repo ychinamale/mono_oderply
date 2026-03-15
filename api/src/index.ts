@@ -1,18 +1,13 @@
-import Fastify from 'fastify';
-
-const app = Fastify({ logger: true });
-
-app.get('/health', () => {
-  return { status: 'ok' };
-});
+import { createApp } from './app.js'
 
 const start = async () => {
+  const app = await createApp()
   try {
-    await app.listen({ port: 3000 });
+    await app.listen({ port: Number(process.env.PORT ?? 3000), host: '0.0.0.0' })
   } catch (err) {
-    app.log.error(err);
-    process.exit(1);
+    app.log.error(err)
+    process.exit(1)
   }
-};
+}
 
-void start();
+void start()
