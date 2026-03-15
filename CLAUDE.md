@@ -107,7 +107,10 @@ When asked "what is the next task":
 3. Present the epic, story, task, and its sub-tasks clearly
 4. Before writing any test, search docs/_project_specs/06_testing_backlog.spec.md for
    sections that reference the current TASK ID (e.g. `> Covers: TASK-02.1.1`). Those
-   pre-specified tests are the TDD cases to implement — use them in the order they appear.
+   pre-specified tests are the TDD cases to implement — use them in the order they appear,
+   one at a time. Being pre-specified does not exempt them from the vertical slice rule:
+   write one test, make it pass, refactor if needed, commit all three phases, then and
+   only then move on to the next test.
 5. Implement it following the TDD cycle and git workflow in this file,
    and referencing section 17 of docs/_project_specs/06_testing_backlog.spec.md
    for the step-by-step development loop and branching strategy
@@ -188,8 +191,16 @@ Commit (only if changes were made):
 
     git commit -m "refactor(scope): description"
 
-Repeat this loop for every test. Never write more than one test at a time.
-Never write implementation code without a failing test in front of it.
+Repeat this loop for every test. The complete cycle for a single test is:
+
+  1. RED — write one test, confirm it fails with a meaningful assertion error, commit
+  2. GREEN — write minimum implementation to pass that test, confirm it passes, commit
+  3. REFACTOR — clean up if needed, confirm still green, commit (skip if nothing to clean)
+  4. Only after all three phases are committed, move on to the next test
+
+Never write more than one test at a time. Never write implementation code without a
+failing test in front of it. Never start the next RED until the current cycle (RED +
+GREEN + REFACTOR) is fully committed.
 
 When designing new modules, see .claude/skills/tdd/interface-design.md and
 .claude/skills/tdd/deep-modules.md.
