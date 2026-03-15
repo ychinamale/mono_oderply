@@ -444,4 +444,32 @@ describe('POST /api/v1/panics/:id/acknowledge', () => {
     expect(res.statusCode).toBe(200)
     expect(res.json<{ status: string }>().status).toBe('ACKNOWLEDGED')
   })
+
+  it('creates a PanicEventLog with triggeredBy OPERATOR and operatorId set', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const panic = await createPanic()
+    await app.inject({
+      method: 'POST',
+      url: `/api/v1/panics/${panic.id}/acknowledge`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    const log = await prisma.panicEventLog.findFirst({ where: { panicId: panic.id } })
+    expect(log?.triggeredBy).toBe('OPERATOR')
+    expect(log?.operatorId).not.toBeNull()
+  })
+
+  it('PanicEventLog has operatorId set and partnerId null', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const panic = await createPanic()
+    await app.inject({
+      method: 'POST',
+      url: `/api/v1/panics/${panic.id}/acknowledge`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    const log = await prisma.panicEventLog.findFirst({ where: { panicId: panic.id } })
+    expect(log?.operatorId).not.toBeNull()
+    expect(log?.partnerId).toBeNull()
+  })
 })
