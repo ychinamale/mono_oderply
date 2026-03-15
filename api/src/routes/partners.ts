@@ -45,4 +45,8 @@ export function partnerRoutes(fastify: FastifyInstance) {
       pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
     })
   })
+
+  fastify.get('/api/v1/partners/:id', { preHandler: jwtGuard() }, async (_req, reply) => {
+    return reply.code(501).send()
+  })
 }
