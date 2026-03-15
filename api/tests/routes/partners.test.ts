@@ -113,4 +113,26 @@ describe('GET /api/v1/partners/:id', () => {
     })
     expect(res.statusCode).toBe(404)
   })
+
+  it('returns partner with _count aggregations', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    await prisma.panicEvent.createMany({
+      data: [
+        { externalUserId: 'u1', latitude: 0, longitude: 0, idempotencyKey: 'byid-idem-1', partnerId: source.id, status: 'PENDING' },
+        { externalUserId: 'u2', latitude: 0, longitude: 0, idempotencyKey: 'byid-idem-2', partnerId: source.id, status: 'RESOLVED' },
+      ],
+    })
+    const res = await app.inject({
+      method: 'GET',
+      url: `/api/v1/partners/${source.id}`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    expect(res.statusCode).toBe(200)
+    const body = res.json<{ id: string; _count: { panicEvents: number; activePanicEvents: number } }>()
+    expect(body.id).toBe(source.id)
+    expect(body._count.panicEvents).toBe(2)
+    expect(body._count.activePanicEvents).toBe(1)
+  })
 })
