@@ -17,7 +17,9 @@ export default {
   },
   testMatch: ['<rootDir>/tests/**/*.test.ts'],
   forceExit: true,
-  // Test files share a single PostgreSQL database — run sequentially to prevent
-  // one file's afterEach deleteMany() from deleting records mid-test in another file
-  runInBand: true,
+  // Run test files sequentially to prevent parallel workers from racing on the
+  // shared PostgreSQL database (e.g. one file's deleteMany wiping another's records).
+  // Unlike runInBand, maxWorkers:1 keeps module isolation between files so each
+  // file gets a fresh Prisma client and connection pool.
+  maxWorkers: 1,
 }
