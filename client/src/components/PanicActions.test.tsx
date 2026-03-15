@@ -68,6 +68,50 @@ describe('PanicActions', () => {
     expect(screen.getByRole('button')).toHaveAttribute('data-loading', 'true');
   });
 
+  it('calls the correct endpoint for each action button', async () => {
+    const postSpy = vi.spyOn(axios, 'post').mockResolvedValue({});
+
+    const { rerender } = renderActions(pending);
+    await userEvent.click(screen.getByRole('button', { name: /acknowledge/i }));
+    expect(postSpy).toHaveBeenCalledWith(
+      '/api/v1/panics/panic-1/acknowledge',
+      null,
+      expect.objectContaining({ headers: { Authorization: 'Bearer test-token' } }),
+    );
+
+    rerender(
+      <MemoryRouter>
+        <AuthContext.Provider
+          value={{ token: 'test-token', operator: null, login: vi.fn(), logout: vi.fn() }}
+        >
+          <PanicActions panic={acknowledged} />
+        </AuthContext.Provider>
+      </MemoryRouter>,
+    );
+    await userEvent.click(screen.getByRole('button', { name: /dispatch/i }));
+    expect(postSpy).toHaveBeenCalledWith(
+      '/api/v1/panics/panic-2/dispatch',
+      null,
+      expect.objectContaining({ headers: { Authorization: 'Bearer test-token' } }),
+    );
+
+    rerender(
+      <MemoryRouter>
+        <AuthContext.Provider
+          value={{ token: 'test-token', operator: null, login: vi.fn(), logout: vi.fn() }}
+        >
+          <PanicActions panic={dispatched} />
+        </AuthContext.Provider>
+      </MemoryRouter>,
+    );
+    await userEvent.click(screen.getByRole('button', { name: /resolve/i }));
+    expect(postSpy).toHaveBeenCalledWith(
+      '/api/v1/panics/panic-3/resolve',
+      null,
+      expect.objectContaining({ headers: { Authorization: 'Bearer test-token' } }),
+    );
+  });
+
   it('displays inline error when the API returns an error response', async () => {
     (axios.post as Mock).mockRejectedValueOnce({
       response: { data: { message: 'Cannot acknowledge a panic with status ACKNOWLEDGED' } },
