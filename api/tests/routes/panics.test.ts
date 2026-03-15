@@ -333,4 +333,14 @@ describe('POST /api/v1/panics/:id/claim', () => {
     expect(log?.fromStatus).toBe('PENDING')
     expect(log?.toStatus).toBe('ACKNOWLEDGED')
   })
+
+  it('response includes claimedByPartner object inline', async () => {
+    const app = await createApp()
+    const panic = await createPanic()
+    const res = await app.inject({ method: 'POST', url: `/api/v1/panics/${panic.id}/claim`, headers: rsHeaders })
+    const body = res.json<{ claimedByPartner: Record<string, unknown> }>()
+    expect(body.claimedByPartner).toBeDefined()
+    expect(typeof body.claimedByPartner).toBe('object')
+    expect(body.claimedByPartner.apiKeyHash).toBeUndefined()
+  })
 })
