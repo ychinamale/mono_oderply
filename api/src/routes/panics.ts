@@ -17,6 +17,14 @@ const createPanicSchema = z.object({
 
 export function panicRoutes(fastify: FastifyInstance) {
   fastify.post(
+    '/api/v1/panics/:id/claim',
+    { preHandler: apiKeyGuard('RESPONDER_SYSTEM') },
+    async (_request, reply) => {
+      return reply.code(501).send()
+    },
+  )
+
+  fastify.post(
     '/api/v1/panics',
     { preHandler: apiKeyGuard('PANIC_SOURCE') },
     async (request, reply) => {
