@@ -472,4 +472,31 @@ describe('POST /api/v1/panics/:id/acknowledge', () => {
     expect(log?.operatorId).not.toBeNull()
     expect(log?.partnerId).toBeNull()
   })
+
+  it('response includes partner inline', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const panic = await createPanic()
+    const res = await app.inject({
+      method: 'POST',
+      url: `/api/v1/panics/${panic.id}/acknowledge`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    const body = res.json<{ partner: unknown }>()
+    expect(body.partner).toBeDefined()
+    expect(typeof body.partner).toBe('object')
+  })
+
+  it('response does not include apiKeyHash on the inline partner', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const panic = await createPanic()
+    const res = await app.inject({
+      method: 'POST',
+      url: `/api/v1/panics/${panic.id}/acknowledge`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    const body = res.json<{ partner: Record<string, unknown> }>()
+    expect(body.partner.apiKeyHash).toBeUndefined()
+  })
 })
