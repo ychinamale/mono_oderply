@@ -28,6 +28,7 @@ describe('WebSocket Gateway', () => {
 
   afterEach(async () => {
     jest.restoreAllMocks()
+    await prisma.panicEventLog.deleteMany()
     await prisma.panicEvent.deleteMany()
   })
 
@@ -108,6 +109,51 @@ describe('WebSocket Gateway', () => {
             longitude: 28.056,
             idempotencyKey: 'ws-test-key-00000001',
           },
+        })
+      })
+    })
+
+    await app.close()
+    expect(received).toBeDefined()
+  })
+
+  it('emits panic:updated to operator clients after a successful claim', async () => {
+    const app = await createApp()
+    await app.listen({ port: 0 })
+    const { port } = app.server.address() as { port: number }
+
+    const token = app.jwt.sign({ operatorId: 'test-op', email: 'op@test.com', name: 'Test Op' })
+
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    const panic = await prisma.panicEvent.create({
+      data: {
+        externalUserId: 'user-ws-claim',
+        latitude: -26.1,
+        longitude: 28.0,
+        idempotencyKey: `ws-claim-key-${Date.now()}`,
+        partnerId: source.id,
+      },
+    })
+
+    const received = await new Promise<unknown>((resolve, reject) => {
+      const client: Socket = ioc(`http://localhost:${port}`, { auth: { token } })
+
+      const timeout = setTimeout(() => {
+        client.disconnect()
+        reject(new Error('panic:updated not received within timeout'))
+      }, 3000)
+
+      client.on('panic:updated', (data: unknown) => {
+        clearTimeout(timeout)
+        client.disconnect()
+        resolve(data)
+      })
+
+      client.on('connect', () => {
+        void app.inject({
+          method: 'POST',
+          url: `/api/v1/panics/${panic.id}/claim`,
+          headers: { 'x-api-key': 'rs-test-api-key-001' },
         })
       })
     })
