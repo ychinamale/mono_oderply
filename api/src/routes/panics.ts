@@ -4,6 +4,7 @@ import { z } from 'zod'
 import * as Prisma from '../generated/prisma/internal/prismaNamespace.js'
 import { apiKeyGuard } from '../hooks/apiKeyGuard.js'
 import { jwtGuard } from '../hooks/jwtGuard.js'
+import { assertTransition } from '../lib/assertTransition.js'
 import { getIo } from '../lib/gateway.js'
 import prisma from '../lib/prisma.js'
 import { webhookQueue } from '../lib/webhookQueue.js'
@@ -24,7 +25,9 @@ export function panicRoutes(fastify: FastifyInstance) {
       const { id } = request.params as { id: string }
       const panic = await prisma.panicEvent.findUnique({ where: { id }, select: { id: true, status: true } })
       if (!panic) return reply.code(404).send({ error: 'Panic not found' })
-      if (panic.status !== 'PENDING') return reply.code(400).send({ error: `Cannot acknowledge a panic with status ${panic.status}` })
+      try { assertTransition(panic.status, 'PENDING', 'acknowledge') } catch (err) {
+        return reply.code(400).send({ error: (err as Error).message })
+      }
 
       const updated = await prisma.$transaction(async (tx) => {
         return tx.panicEvent.update({
@@ -65,7 +68,9 @@ export function panicRoutes(fastify: FastifyInstance) {
       const { id } = request.params as { id: string }
       const panic = await prisma.panicEvent.findUnique({ where: { id }, select: { id: true, status: true } })
       if (!panic) return reply.code(404).send({ error: 'Panic not found' })
-      if (panic.status !== 'ACKNOWLEDGED') return reply.code(400).send({ error: `Cannot dispatch a panic with status ${panic.status}` })
+      try { assertTransition(panic.status, 'ACKNOWLEDGED', 'dispatch') } catch (err) {
+        return reply.code(400).send({ error: (err as Error).message })
+      }
 
       const updated = await prisma.$transaction(async (tx) => {
         return tx.panicEvent.update({
@@ -112,7 +117,9 @@ export function panicRoutes(fastify: FastifyInstance) {
       const { id } = request.params as { id: string }
       const panic = await prisma.panicEvent.findUnique({ where: { id }, select: { id: true, status: true } })
       if (!panic) return reply.code(404).send({ error: 'Panic not found' })
-      if (panic.status !== 'DISPATCHED') return reply.code(400).send({ error: `Cannot resolve a panic with status ${panic.status}` })
+      try { assertTransition(panic.status, 'DISPATCHED', 'resolve') } catch (err) {
+        return reply.code(400).send({ error: (err as Error).message })
+      }
 
       const updated = await prisma.$transaction(async (tx) => {
         return tx.panicEvent.update({
