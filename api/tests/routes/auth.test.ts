@@ -42,6 +42,17 @@ describe('POST /api/auth/login', () => {
     expect(typeof body.operator.id).toBe('string')
   })
 
+  it('does not return passwordHash in the response', async () => {
+    const app = await createApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/auth/login',
+      payload: { email: 'admin@oderply.com', password: 'Admin1234!' },
+    })
+    const body = res.json<Record<string, unknown>>()
+    expect(JSON.stringify(body)).not.toMatch(/passwordHash/)
+  })
+
   it('returned JWT payload contains operatorId, email, and name', async () => {
     const app = await createApp()
     const res = await app.inject({
