@@ -241,4 +241,26 @@ describe('POST /api/v1/panics/:id/claim', () => {
     })
     expect(res.statusCode).toBe(404)
   })
+
+  it('returns 409 when panic has already been claimed by another partner', async () => {
+    const app = await createApp()
+    const responder = await prisma.partner.findFirstOrThrow({ where: { type: 'RESPONDER_SYSTEM' } })
+    const panic = await prisma.panicEvent.create({
+      data: {
+        externalUserId: 'user-409',
+        latitude: -26.1,
+        longitude: 28.0,
+        idempotencyKey: 'idem-409-test',
+        partnerId: (await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })).id,
+        claimedByPartnerId: responder.id,
+        status: 'ACKNOWLEDGED',
+      },
+    })
+    const res = await app.inject({
+      method: 'POST',
+      url: `/api/v1/panics/${panic.id}/claim`,
+      headers: rsHeaders,
+    })
+    expect(res.statusCode).toBe(409)
+  })
 })
