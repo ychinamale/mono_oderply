@@ -285,12 +285,13 @@ Each section covers a testable concern. Within each section, tests are grouped b
 
 **Type:** Unit (React Testing Library)
 
-- [ ] `it('renders email and password inputs')`
-- [ ] `it('displays an inline error message on failed login')`
-- [ ] `it('redirects to dashboard on successful login')`
-- [ ] `it('ProtectedRoute redirects to /login when no token is in AuthContext')`
-- [ ] `it('ProtectedRoute renders children when token is present in AuthContext')`
-- [ ] `it('logout clears token from AuthContext and redirects to /login')`
+- [x] `it('renders email and password inputs')`
+- [x] `it('displays an inline error message on failed login')`
+- [x] `it('redirects to dashboard on successful login')`
+- [x] `it('ProtectedRoute redirects to /login when no token is in AuthContext')`
+- [x] `it('ProtectedRoute renders children when token is present in AuthContext')`
+- [x] `it('logout clears token from AuthContext and redirects to /login')`
+- [x] `it('renders 404 page for unknown routes')`
 
 ---
 
