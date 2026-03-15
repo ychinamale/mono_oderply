@@ -63,4 +63,14 @@ describe('apiKeyGuard', () => {
     expect(body.partnerName).toBe('Test Responder System')
     expect(body.partnerType).toBe('RESPONDER_SYSTEM')
   })
+
+  it('returns 403 when x-api-key is a valid key but belongs to wrong partner type', async () => {
+    const app = buildApp('RESPONDER_SYSTEM')
+    const res = await app.inject({
+      method: 'GET',
+      url: '/test',
+      headers: { 'x-api-key': 'ps-test-api-key-001' },
+    })
+    expect(res.statusCode).toBe(403)
+  })
 })
