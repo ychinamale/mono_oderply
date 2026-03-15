@@ -17,4 +17,7 @@ export default {
   },
   testMatch: ['<rootDir>/tests/**/*.test.ts'],
   forceExit: true,
+  // Test files share a single PostgreSQL database — run sequentially to prevent
+  // one file's afterEach deleteMany() from deleting records mid-test in another file
+  runInBand: true,
 }

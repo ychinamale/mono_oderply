@@ -124,17 +124,6 @@ describe('WebSocket Gateway', () => {
 
     const token = app.jwt.sign({ operatorId: 'test-op', email: 'op@test.com', name: 'Test Op' })
 
-    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
-    const panic = await prisma.panicEvent.create({
-      data: {
-        externalUserId: 'user-ws-claim',
-        latitude: -26.1,
-        longitude: 28.0,
-        idempotencyKey: `ws-claim-key-${Date.now()}`,
-        partnerId: source.id,
-      },
-    })
-
     const received = await new Promise<unknown>((resolve, reject) => {
       const client: Socket = ioc(`http://localhost:${port}`, { auth: { token } })
 
@@ -150,10 +139,41 @@ describe('WebSocket Gateway', () => {
       })
 
       client.on('connect', () => {
-        void app.inject({
+        // Create then claim in sequence inside the connect handler to avoid
+        // any window where the panic could be deleted by another test's afterEach
+        app.inject({
           method: 'POST',
-          url: `/api/v1/panics/${panic.id}/claim`,
-          headers: { 'x-api-key': 'rs-test-api-key-001' },
+          url: '/api/v1/panics',
+          headers: { 'x-api-key': 'ps-test-api-key-001' },
+          payload: {
+            externalUserId: 'user-ws-claim',
+            latitude: -26.1,
+            longitude: 28.0,
+            idempotencyKey: `ws-claim-key-${Date.now()}`,
+          },
+        }).then((createRes) => {
+          if (createRes.statusCode !== 201) {
+            clearTimeout(timeout)
+            client.disconnect()
+            reject(new Error(`Panic creation failed: ${createRes.statusCode}`))
+            return
+          }
+          const panicId = createRes.json<{ id: string }>().id
+          return app.inject({
+            method: 'POST',
+            url: `/api/v1/panics/${panicId}/claim`,
+            headers: { 'x-api-key': 'rs-test-api-key-001' },
+          })
+        }).then((claimRes) => {
+          if (claimRes && claimRes.statusCode !== 200) {
+            clearTimeout(timeout)
+            client.disconnect()
+            reject(new Error(`Claim failed: ${claimRes.statusCode} ${claimRes.body}`))
+          }
+        }).catch((err: unknown) => {
+          clearTimeout(timeout)
+          client.disconnect()
+          reject(err)
         })
       })
     })
