@@ -377,9 +377,44 @@ describe('POST /api/v1/panics/:id/acknowledge', () => {
     await prisma.panicEvent.deleteMany()
   })
 
+  async function getToken() {
+    const app = await createApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/auth/login',
+      payload: { email: 'admin@oderply.com', password: 'Admin1234!' },
+    })
+    return res.json<{ token: string }>().token
+  }
+
+  async function createPanic(overrides: Record<string, unknown> = {}) {
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    return prisma.panicEvent.create({
+      data: {
+        externalUserId: 'user-test',
+        latitude: -26.1,
+        longitude: 28.0,
+        idempotencyKey: `idem-${Date.now()}-${Math.random()}`,
+        partnerId: source.id,
+        ...overrides,
+      },
+    })
+  }
+
   it('returns 401 when JWT is missing', async () => {
     const app = await createApp()
     const res = await app.inject({ method: 'POST', url: '/api/v1/panics/some-id/acknowledge' })
     expect(res.statusCode).toBe(401)
+  })
+
+  it('returns 404 when panic id does not exist', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/v1/panics/nonexistent-id/acknowledge',
+      headers: { authorization: `Bearer ${token}` },
+    })
+    expect(res.statusCode).toBe(404)
   })
 })
