@@ -80,4 +80,14 @@ describe('POST /api/auth/login', () => {
     })
     expect(res.statusCode).toBe(400)
   })
+
+  it('returns 400 when password field is missing', async () => {
+    const app = await createApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/auth/login',
+      payload: { email: 'admin@oderply.com' },
+    })
+    expect(res.statusCode).toBe(400)
+  })
 })
