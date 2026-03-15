@@ -1,4 +1,5 @@
-import { createContext, useContext, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface Operator {
   id: string;
@@ -21,8 +22,23 @@ export const AuthContext = createContext<AuthContextValue>({
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const [token, setToken] = useState<string | null>(null);
+  const [operator, setOperator] = useState<Operator | null>(null);
+  const navigate = useNavigate();
+
+  function login(newToken: string, newOperator: Operator) {
+    setToken(newToken);
+    setOperator(newOperator);
+  }
+
+  function logout() {
+    setToken(null);
+    setOperator(null);
+    navigate('/login');
+  }
+
   return (
-    <AuthContext.Provider value={{ token: null, operator: null, login: () => {}, logout: () => {} }}>
+    <AuthContext.Provider value={{ token, operator, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
