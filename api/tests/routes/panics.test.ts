@@ -790,3 +790,97 @@ describe('GET /api/v1/panics', () => {
     expect(body.data[0].partner.apiKeyHash).toBeUndefined()
   })
 })
+
+describe('GET /api/v1/panics/:id', () => {
+  afterEach(async () => {
+    await prisma.panicEvent.deleteMany()
+  })
+
+  async function getToken() {
+    const app = await createApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/auth/login',
+      payload: { email: 'admin@oderply.com', password: 'Admin1234!' },
+    })
+    return res.json<{ token: string }>().token
+  }
+
+  it('returns 401 when JWT is missing', async () => {
+    const app = await createApp()
+    const res = await app.inject({ method: 'GET', url: '/api/v1/panics/some-id' })
+    expect(res.statusCode).toBe(401)
+  })
+
+  it('returns 404 when panic id does not exist', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/v1/panics/00000000-0000-0000-0000-000000000000',
+      headers: { authorization: `Bearer ${token}` },
+    })
+    expect(res.statusCode).toBe(404)
+  })
+
+  it('returns the panic with partner and claimedByPartner inline', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    const panic = await prisma.panicEvent.create({
+      data: { externalUserId: 'u1', latitude: 0, longitude: 0, idempotencyKey: 'idem-get-by-id-1', partnerId: source.id },
+    })
+    const res = await app.inject({
+      method: 'GET',
+      url: `/api/v1/panics/${panic.id}`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    expect(res.statusCode).toBe(200)
+    const body = res.json<Record<string, unknown>>()
+    expect(body.id).toBe(panic.id)
+    expect(body.partner).toBeDefined()
+    expect(body.claimedByPartner).toBeDefined()
+  })
+
+  it('claimedByPartner is null when panic has not been claimed', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    const panic = await prisma.panicEvent.create({
+      data: { externalUserId: 'u1', latitude: 0, longitude: 0, idempotencyKey: 'idem-unclaimed-1', partnerId: source.id },
+    })
+    const res = await app.inject({
+      method: 'GET',
+      url: `/api/v1/panics/${panic.id}`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    const body = res.json<{ claimedByPartner: unknown }>()
+    expect(body.claimedByPartner).toBeNull()
+  })
+
+  it('claimedByPartner is populated when panic has been claimed', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    const responder = await prisma.partner.findFirstOrThrow({ where: { type: 'RESPONDER_SYSTEM' } })
+    const panic = await prisma.panicEvent.create({
+      data: {
+        externalUserId: 'u1',
+        latitude: 0,
+        longitude: 0,
+        idempotencyKey: 'idem-claimed-1',
+        partnerId: source.id,
+        status: 'ACKNOWLEDGED',
+        claimedByPartnerId: responder.id,
+      },
+    })
+    const res = await app.inject({
+      method: 'GET',
+      url: `/api/v1/panics/${panic.id}`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    const body = res.json<{ claimedByPartner: { id: string } | null }>()
+    expect(body.claimedByPartner).not.toBeNull()
+    expect(body.claimedByPartner?.id).toBe(responder.id)
+  })
+})

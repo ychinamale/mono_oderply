@@ -375,7 +375,7 @@
     - [x] SUB: Run `prisma.panicEvent.count` with same filters for total
     - [x] SUB: Return `{ data, pagination: { page, limit, total, totalPages } }`
 
-- [ ] TASK-06.1.2 — Implement `GET /api/v1/panics/:id`
+- [x] TASK-06.1.2 — Implement `GET /api/v1/panics/:id`
 
     - [ ] SUB: Apply `jwtGuard`
     - [ ] SUB: Query with `include: { partner: true, claimedByPartner: true }`
