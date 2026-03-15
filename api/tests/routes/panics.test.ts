@@ -741,6 +741,62 @@ describe('POST /api/v1/panics/:id/resolve', () => {
   })
 })
 
+describe('Shared transition assertions', () => {
+  beforeEach(() => {
+    jest.spyOn(webhookQueue, 'enqueue').mockImplementation(() => {})
+  })
+  afterEach(async () => {
+    jest.restoreAllMocks()
+    await prisma.panicEventLog.deleteMany()
+    await prisma.panicEvent.deleteMany()
+  })
+
+  async function getToken() {
+    const app = await createApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/auth/login',
+      payload: { email: 'admin@oderply.com', password: 'Admin1234!' },
+    })
+    return res.json<{ token: string }>().token
+  }
+
+  async function createPanic(overrides: Record<string, unknown> = {}) {
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    return prisma.panicEvent.create({
+      data: {
+        externalUserId: 'user-test',
+        latitude: -26.1,
+        longitude: 28.0,
+        idempotencyKey: `idem-${Date.now()}-${Math.random()}`,
+        partnerId: source.id,
+        ...overrides,
+      },
+    })
+  }
+
+  it('every transition response includes partner inline', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const cases = [
+      { action: 'acknowledge', initialStatus: 'PENDING' },
+      { action: 'dispatch', initialStatus: 'ACKNOWLEDGED' },
+      { action: 'resolve', initialStatus: 'DISPATCHED' },
+    ] as const
+    for (const { action, initialStatus } of cases) {
+      const panic = await createPanic({ status: initialStatus })
+      const res = await app.inject({
+        method: 'POST',
+        url: `/api/v1/panics/${panic.id}/${action}`,
+        headers: { authorization: `Bearer ${token}` },
+      })
+      const body = res.json<{ partner: unknown }>()
+      expect(body.partner).toBeDefined()
+      expect(typeof body.partner).toBe('object')
+    }
+  })
+})
+
 describe('GET /api/v1/panics', () => {
   afterEach(async () => {
     await prisma.panicEventLog.deleteMany()
