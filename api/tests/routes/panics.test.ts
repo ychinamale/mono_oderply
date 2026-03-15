@@ -1045,3 +1045,35 @@ describe('GET /api/v1/panics/:id/logs', () => {
     expect(body.pagination.totalPages).toBe(2)
   })
 })
+
+describe('GET /api/v1/panics/:id/logs/:logId', () => {
+  afterEach(async () => {
+    await prisma.panicEventLog.deleteMany()
+    await prisma.panicEvent.deleteMany()
+  })
+
+  async function getToken() {
+    const app = await createApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/auth/login',
+      payload: { email: 'admin@oderply.com', password: 'Admin1234!' },
+    })
+    return res.json<{ token: string }>().token
+  }
+
+  it('returns 404 when logId does not exist', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    const panic = await prisma.panicEvent.create({
+      data: { externalUserId: 'u1', latitude: 0, longitude: 0, idempotencyKey: 'idem-log-404-1', partnerId: source.id },
+    })
+    const res = await app.inject({
+      method: 'GET',
+      url: `/api/v1/panics/${panic.id}/logs/00000000-0000-0000-0000-000000000000`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    expect(res.statusCode).toBe(404)
+  })
+})

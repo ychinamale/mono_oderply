@@ -97,6 +97,14 @@ export function panicRoutes(fastify: FastifyInstance) {
     },
   )
 
+  fastify.get(
+    '/api/v1/panics/:id/logs/:logId',
+    { preHandler: jwtGuard() },
+    async (_request, reply) => {
+      return reply.code(501).send()
+    },
+  )
+
   fastify.post(
     '/api/v1/panics/:id/acknowledge',
     { preHandler: jwtGuard() },
