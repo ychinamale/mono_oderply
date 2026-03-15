@@ -1,3 +1,14 @@
+import { useAuth } from '../context/AuthContext.tsx';
+
 export default function Dashboard() {
-  return <div>Dashboard</div>;
+  const { logout } = useAuth();
+
+  return (
+    <div>
+      <span>Dashboard</span>
+      <button type="button" onClick={logout}>
+        Logout
+      </button>
+    </div>
+  );
 }
