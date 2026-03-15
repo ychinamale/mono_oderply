@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
@@ -89,5 +89,30 @@ describe('PanicDetail', () => {
 
     await screen.findByText('PENDING');
     expect(screen.queryByText(/Claimed by:/i)).not.toBeInTheDocument();
+  });
+
+  it('updates detail view when panic:updated event is received for the current panic', async () => {
+    (axios.get as Mock).mockResolvedValueOnce({ data: panic });
+
+    renderDetail();
+    await screen.findByText('PENDING');
+
+    const updated = { ...panic, status: 'ACKNOWLEDGED' };
+    act(() => emitSocket('panic:updated', updated));
+
+    expect(await screen.findByText('ACKNOWLEDGED')).toBeInTheDocument();
+  });
+
+  it('does not update detail view when panic:updated event is for a different panic', async () => {
+    (axios.get as Mock).mockResolvedValueOnce({ data: panic });
+
+    renderDetail();
+    await screen.findByText('PENDING');
+
+    const other = { ...panic, id: 'panic-other', status: 'RESOLVED' };
+    act(() => emitSocket('panic:updated', other));
+
+    expect(screen.getByText('PENDING')).toBeInTheDocument();
+    expect(screen.queryByText('RESOLVED')).not.toBeInTheDocument();
   });
 });
