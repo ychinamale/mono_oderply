@@ -25,19 +25,30 @@ export function panicRoutes(fastify: FastifyInstance) {
 
       const { externalUserId, latitude, longitude, idempotencyKey, metadata } = result.data
 
-      const panic = await prisma.panicEvent.create({
-        data: {
-          externalUserId,
-          latitude,
-          longitude,
-          idempotencyKey,
-          metadata: metadata !== undefined ? (metadata as Prisma.InputJsonValue) : Prisma.JsonNull,
-          partnerId: request.partner.id,
-        },
-        include: { partner: { omit: { apiKeyHash: true } } },
-      })
+      try {
+        const panic = await prisma.panicEvent.create({
+          data: {
+            externalUserId,
+            latitude,
+            longitude,
+            idempotencyKey,
+            metadata: metadata !== undefined ? (metadata as Prisma.InputJsonValue) : Prisma.JsonNull,
+            partnerId: request.partner.id,
+          },
+          include: { partner: { omit: { apiKeyHash: true } } },
+        })
 
-      return reply.code(201).send(panic)
+        return reply.code(201).send(panic)
+      } catch (err) {
+        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+          const existing = await prisma.panicEvent.findUnique({
+            where: { idempotencyKey },
+            include: { partner: { omit: { apiKeyHash: true } } },
+          })
+          return reply.code(200).send(existing)
+        }
+        throw err
+      }
     },
   )
 }

@@ -146,4 +146,33 @@ describe('POST /api/v1/panics', () => {
     const res = await app.inject({ method: 'POST', url: '/api/v1/panics', headers: psHeaders, payload: validBody })
     expect(res.json<{ metadata: unknown }>().metadata).toBeNull()
   })
+
+  it('returns 200 with the original event when idempotencyKey is submitted a second time', async () => {
+    const app = await createApp()
+    const first = await app.inject({ method: 'POST', url: '/api/v1/panics', headers: psHeaders, payload: validBody })
+    const second = await app.inject({ method: 'POST', url: '/api/v1/panics', headers: psHeaders, payload: validBody })
+    expect(second.statusCode).toBe(200)
+    expect(second.json<{ id: string }>().id).toBe(first.json<{ id: string }>().id)
+  })
+
+  it('does not create a second PanicEvent row on duplicate idempotencyKey', async () => {
+    const app = await createApp()
+    await app.inject({ method: 'POST', url: '/api/v1/panics', headers: psHeaders, payload: validBody })
+    await app.inject({ method: 'POST', url: '/api/v1/panics', headers: psHeaders, payload: validBody })
+    const count = await prisma.panicEvent.count({ where: { idempotencyKey: validBody.idempotencyKey } })
+    expect(count).toBe(1)
+  })
+
+  it('returns a different event for a different idempotencyKey', async () => {
+    const app = await createApp()
+    const first = await app.inject({ method: 'POST', url: '/api/v1/panics', headers: psHeaders, payload: validBody })
+    const second = await app.inject({
+      method: 'POST',
+      url: '/api/v1/panics',
+      headers: psHeaders,
+      payload: { ...validBody, idempotencyKey: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890' },
+    })
+    expect(second.statusCode).toBe(201)
+    expect(second.json<{ id: string }>().id).not.toBe(first.json<{ id: string }>().id)
+  })
 })
