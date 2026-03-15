@@ -5,6 +5,7 @@ import { z } from 'zod'
 import prisma from '../lib/prisma.js'
 
 const emailSchema = z.object({ email: z.email() })
+const passwordSchema = z.object({ password: z.string().min(1) })
 
 export function authRoutes(fastify: FastifyInstance) {
   fastify.post('/api/auth/login', async (request, reply) => {
@@ -13,7 +14,11 @@ export function authRoutes(fastify: FastifyInstance) {
       return reply.code(400).send({ error: 'Invalid request body' })
     }
     const { email } = emailResult.data
-    const password = (request.body as { password: string }).password
+    const passwordResult = passwordSchema.safeParse(request.body)
+    if (!passwordResult.success) {
+      return reply.code(400).send({ error: 'Invalid request body' })
+    }
+    const { password } = passwordResult.data
     const operator = await prisma.operator.findUnique({ where: { email } })
     if (!operator) {
       return reply.code(401).send({ error: 'Invalid credentials' })
