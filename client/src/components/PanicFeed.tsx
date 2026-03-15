@@ -10,15 +10,18 @@ export default function PanicFeed() {
   const { token } = useAuth();
   const { socket } = useSocket(token);
   const [panics, setPanics] = useState<Panic[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!token) return;
+    setLoading(true);
     void axios
       .get<{ data: Panic[] }>('/api/v1/panics', {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
         setPanics(res.data.data);
+        setLoading(false);
       });
   }, [token]);
 
@@ -37,6 +40,8 @@ export default function PanicFeed() {
       socket.off('panic:updated', onUpdated);
     };
   }, [socket]);
+
+  if (loading) return <div data-testid="loading-skeleton" />;
 
   return (
     <div>
