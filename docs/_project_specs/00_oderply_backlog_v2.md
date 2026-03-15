@@ -553,30 +553,30 @@
 **I want** to see all active panic events update in real time without refreshing,
 **so that** I always have the current picture of ongoing emergencies.
 
-- [ ] TASK-09.2.1 — Implement Socket.io client connection
+- [x] TASK-09.2.1 — Implement Socket.io client connection
 
-    - [ ] SUB: Install `socket.io-client` in `client/`
-    - [ ] SUB: Create `client/src/hooks/useSocket.js`
-    - [ ] SUB: Connect with `auth: { token }` from auth context on mount
-    - [ ] SUB: Disconnect cleanly on unmount
-    - [ ] SUB: Handle connection errors (display reconnecting state)
+    - [x] SUB: Install `socket.io-client` in `client/`
+    - [x] SUB: Create `client/src/hooks/useSocket.js`
+    - [x] SUB: Connect with `auth: { token }` from auth context on mount
+    - [x] SUB: Disconnect cleanly on unmount
+    - [x] SUB: Handle connection errors (display reconnecting state)
 
-- [ ] TASK-09.2.2 — Build panic feed state management
+- [x] TASK-09.2.2 — Build panic feed state management
 
-    - [ ] SUB: Create `client/src/hooks/usePanics.js`
-    - [ ] SUB: On mount: fetch `GET /api/v1/panics?status=PENDING,ACKNOWLEDGED,DISPATCHED` for initial state
-    - [ ] SUB: On `panic:new` event: prepend new panic to the list
-    - [ ] SUB: On `panic:updated` event: replace the matching panic in the list by id
-    - [ ] SUB: Expose `panics`, `loading`, `error`
+    - [x] SUB: Create `client/src/hooks/usePanics.js`
+    - [x] SUB: On mount: fetch `GET /api/v1/panics?status=PENDING,ACKNOWLEDGED,DISPATCHED` for initial state
+    - [x] SUB: On `panic:new` event: prepend new panic to the list
+    - [x] SUB: On `panic:updated` event: replace the matching panic in the list by id
+    - [x] SUB: Expose `panics`, `loading`, `error`
 
-- [ ] TASK-09.2.3 — Build panic feed UI
+- [x] TASK-09.2.3 — Build panic feed UI
 
-    - [ ] SUB: Create `client/src/pages/Dashboard.jsx`
-    - [ ] SUB: Create `client/src/components/PanicCard.jsx` — displays status, partner name, location, time received
-    - [ ] SUB: Render a list of `PanicCard` components from `usePanics`
-    - [ ] SUB: Highlight PENDING panics visually (colour, badge)
-    - [ ] SUB: Show loading skeleton while initial fetch is in progress
-    - [ ] SUB: Style with Tailwind CSS
+    - [x] SUB: Create `client/src/pages/Dashboard.jsx`
+    - [x] SUB: Create `client/src/components/PanicCard.jsx` — displays status, partner name, location, time received
+    - [x] SUB: Render a list of `PanicCard` components from `usePanics`
+    - [x] SUB: Highlight PENDING panics visually (colour, badge)
+    - [x] SUB: Show loading skeleton while initial fetch is in progress
+    - [x] SUB: Style with Tailwind CSS
 
 ---
 
