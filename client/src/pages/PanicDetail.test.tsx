@@ -50,10 +50,15 @@ function renderDetail(id = 'panic-1') {
   );
 }
 
+const emptyLogs = { data: { data: [], pagination: { totalPages: 1 } } };
+
 beforeEach(() => {
   vi.clearAllMocks();
   for (const key of Object.keys(socketHandlers)) delete socketHandlers[key];
   (io as Mock).mockReturnValue(mockSocket);
+  // AuditLog is rendered inside PanicDetail; queue a default empty-logs response
+  // so every test's second axios.get (for /logs) resolves cleanly.
+  (axios.get as Mock).mockResolvedValue(emptyLogs);
 });
 
 describe('PanicDetail', () => {

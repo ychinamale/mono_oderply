@@ -4,6 +4,7 @@ import axios from 'axios';
 
 import { useAuth } from '../context/AuthContext.tsx';
 import { useSocket } from '../hooks/useSocket.tsx';
+import AuditLog from '../components/AuditLog.tsx';
 import PanicActions from '../components/PanicActions.tsx';
 import { type Panic } from '../components/PanicCard.tsx';
 
@@ -72,6 +73,7 @@ export default function PanicDetail() {
           </p>
         </div>
         <PanicActions panic={panic} />
+        <AuditLog panicId={panic.id} />
       </div>
     </div>
   );
