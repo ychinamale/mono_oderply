@@ -308,15 +308,15 @@
 **I want** to mark a panic as dispatched when a responder is en route,
 **so that** all parties know a response is actively underway.
 
-- [ ] TASK-05.2.1 — Implement `POST /api/v1/panics/:id/dispatch`
+- [x] TASK-05.2.1 — Implement `POST /api/v1/panics/:id/dispatch`
 
-    - [ ] SUB: Add dispatch route with `jwtGuard` preHandler
-    - [ ] SUB: Fetch `PanicEvent`; return 404 if not found
-    - [ ] SUB: Return 400 if status is not `ACKNOWLEDGED`
-    - [ ] SUB: Prisma transaction: update `status → DISPATCHED`, create `PanicEventLog` with `triggeredBy: OPERATOR`
-    - [ ] SUB: Emit `panic:updated` via Socket.io
-    - [ ] SUB: Enqueue targeted webhooks to `PANIC_SOURCE` and `claimedByPartner` (if set)
-    - [ ] SUB: Return updated panic with partner inline
+    - [x] SUB: Add dispatch route with `jwtGuard` preHandler
+    - [x] SUB: Fetch `PanicEvent`; return 404 if not found
+    - [x] SUB: Return 400 if status is not `ACKNOWLEDGED`
+    - [x] SUB: Prisma transaction: update `status → DISPATCHED`, create `PanicEventLog` with `triggeredBy: OPERATOR`
+    - [x] SUB: Emit `panic:updated` via Socket.io
+    - [x] SUB: Enqueue targeted webhooks to `PANIC_SOURCE` and `claimedByPartner` (if set)
+    - [x] SUB: Return updated panic with partner inline
 
 ---
 
@@ -326,15 +326,15 @@
 **I want** to mark a panic as resolved when the emergency is closed,
 **so that** the event is removed from the active queue and archived.
 
-- [ ] TASK-05.3.1 — Implement `POST /api/v1/panics/:id/resolve`
+- [x] TASK-05.3.1 — Implement `POST /api/v1/panics/:id/resolve`
 
-    - [ ] SUB: Add resolve route with `jwtGuard` preHandler
-    - [ ] SUB: Fetch `PanicEvent`; return 404 if not found
-    - [ ] SUB: Return 400 if status is not `DISPATCHED`
-    - [ ] SUB: Prisma transaction: update `status → RESOLVED`, create `PanicEventLog` with `triggeredBy: OPERATOR`
-    - [ ] SUB: Emit `panic:updated` via Socket.io
-    - [ ] SUB: Enqueue targeted webhooks to `PANIC_SOURCE` and `claimedByPartner` (if set)
-    - [ ] SUB: Return updated panic with partner inline
+    - [x] SUB: Add resolve route with `jwtGuard` preHandler
+    - [x] SUB: Fetch `PanicEvent`; return 404 if not found
+    - [x] SUB: Return 400 if status is not `DISPATCHED`
+    - [x] SUB: Prisma transaction: update `status → RESOLVED`, create `PanicEventLog` with `triggeredBy: OPERATOR`
+    - [x] SUB: Emit `panic:updated` via Socket.io
+    - [x] SUB: Enqueue targeted webhooks to `PANIC_SOURCE` and `claimedByPartner` (if set)
+    - [x] SUB: Return updated panic with partner inline
 
 ---
 

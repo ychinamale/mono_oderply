@@ -513,3 +513,149 @@ describe('POST /api/v1/panics/:id/acknowledge', () => {
     expect(res.json<{ error: string }>().error).toBe('Cannot acknowledge a panic with status ACKNOWLEDGED')
   })
 })
+
+describe('POST /api/v1/panics/:id/dispatch', () => {
+  afterEach(async () => {
+    await prisma.panicEventLog.deleteMany()
+    await prisma.panicEvent.deleteMany()
+  })
+
+  async function getToken() {
+    const app = await createApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/auth/login',
+      payload: { email: 'admin@oderply.com', password: 'Admin1234!' },
+    })
+    return res.json<{ token: string }>().token
+  }
+
+  async function createPanic(overrides: Record<string, unknown> = {}) {
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    return prisma.panicEvent.create({
+      data: {
+        externalUserId: 'user-test',
+        latitude: -26.1,
+        longitude: 28.0,
+        idempotencyKey: `idem-${Date.now()}-${Math.random()}`,
+        partnerId: source.id,
+        ...overrides,
+      },
+    })
+  }
+
+  it('returns 400 when panic status is not ACKNOWLEDGED', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    for (const status of ['PENDING', 'DISPATCHED', 'RESOLVED'] as const) {
+      const panic = await createPanic({ status })
+      const res = await app.inject({
+        method: 'POST',
+        url: `/api/v1/panics/${panic.id}/dispatch`,
+        headers: { authorization: `Bearer ${token}` },
+      })
+      expect(res.statusCode).toBe(400)
+    }
+  })
+
+  it('returns 200 and sets status to DISPATCHED', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const panic = await createPanic({ status: 'ACKNOWLEDGED' })
+    const res = await app.inject({
+      method: 'POST',
+      url: `/api/v1/panics/${panic.id}/dispatch`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    expect(res.statusCode).toBe(200)
+    expect(res.json<{ status: string }>().status).toBe('DISPATCHED')
+  })
+
+  it('creates a PanicEventLog with triggeredBy OPERATOR', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const panic = await createPanic({ status: 'ACKNOWLEDGED' })
+    await app.inject({
+      method: 'POST',
+      url: `/api/v1/panics/${panic.id}/dispatch`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    const log = await prisma.panicEventLog.findFirst({ where: { panicId: panic.id } })
+    expect(log?.triggeredBy).toBe('OPERATOR')
+    expect(log?.operatorId).not.toBeNull()
+    expect(log?.partnerId).toBeNull()
+  })
+})
+
+describe('POST /api/v1/panics/:id/resolve', () => {
+  afterEach(async () => {
+    await prisma.panicEventLog.deleteMany()
+    await prisma.panicEvent.deleteMany()
+  })
+
+  async function getToken() {
+    const app = await createApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/auth/login',
+      payload: { email: 'admin@oderply.com', password: 'Admin1234!' },
+    })
+    return res.json<{ token: string }>().token
+  }
+
+  async function createPanic(overrides: Record<string, unknown> = {}) {
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    return prisma.panicEvent.create({
+      data: {
+        externalUserId: 'user-test',
+        latitude: -26.1,
+        longitude: 28.0,
+        idempotencyKey: `idem-${Date.now()}-${Math.random()}`,
+        partnerId: source.id,
+        ...overrides,
+      },
+    })
+  }
+
+  it('returns 400 when panic status is not DISPATCHED', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    for (const status of ['PENDING', 'ACKNOWLEDGED', 'RESOLVED'] as const) {
+      const panic = await createPanic({ status })
+      const res = await app.inject({
+        method: 'POST',
+        url: `/api/v1/panics/${panic.id}/resolve`,
+        headers: { authorization: `Bearer ${token}` },
+      })
+      expect(res.statusCode).toBe(400)
+    }
+  })
+
+  it('returns 200 and sets status to RESOLVED', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const panic = await createPanic({ status: 'DISPATCHED' })
+    const res = await app.inject({
+      method: 'POST',
+      url: `/api/v1/panics/${panic.id}/resolve`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    expect(res.statusCode).toBe(200)
+    expect(res.json<{ status: string }>().status).toBe('RESOLVED')
+  })
+
+  it('creates a PanicEventLog with triggeredBy OPERATOR', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const panic = await createPanic({ status: 'DISPATCHED' })
+    await app.inject({
+      method: 'POST',
+      url: `/api/v1/panics/${panic.id}/resolve`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    const log = await prisma.panicEventLog.findFirst({ where: { panicId: panic.id } })
+    expect(log?.triggeredBy).toBe('OPERATOR')
+    expect(log?.operatorId).not.toBeNull()
+    expect(log?.partnerId).toBeNull()
+  })
+})

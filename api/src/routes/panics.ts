@@ -59,6 +59,100 @@ export function panicRoutes(fastify: FastifyInstance) {
   )
 
   fastify.post(
+    '/api/v1/panics/:id/dispatch',
+    { preHandler: jwtGuard() },
+    async (request, reply) => {
+      const { id } = request.params as { id: string }
+      const panic = await prisma.panicEvent.findUnique({ where: { id }, select: { id: true, status: true } })
+      if (!panic) return reply.code(404).send({ error: 'Panic not found' })
+      if (panic.status !== 'ACKNOWLEDGED') return reply.code(400).send({ error: `Cannot dispatch a panic with status ${panic.status}` })
+
+      const updated = await prisma.$transaction(async (tx) => {
+        return tx.panicEvent.update({
+          where: { id },
+          data: {
+            status: 'DISPATCHED',
+            logs: {
+              create: {
+                triggeredBy: 'OPERATOR',
+                operatorId: request.operator.operatorId,
+                fromStatus: 'ACKNOWLEDGED',
+                toStatus: 'DISPATCHED',
+              },
+            },
+          },
+          include: {
+            partner: { omit: { apiKeyHash: true } },
+            claimedByPartner: { omit: { apiKeyHash: true } },
+          },
+        })
+      })
+
+      const panicSource = await prisma.partner.findUnique({ where: { id: updated.partnerId }, select: { webhookUrl: true } })
+      if (panicSource?.webhookUrl) {
+        webhookQueue.enqueue({ url: panicSource.webhookUrl, payload: { event: 'panic.status_updated', panic: updated } })
+      }
+      if (updated.claimedByPartnerId) {
+        const responder = await prisma.partner.findUnique({ where: { id: updated.claimedByPartnerId }, select: { webhookUrl: true } })
+        if (responder?.webhookUrl) {
+          webhookQueue.enqueue({ url: responder.webhookUrl, payload: { event: 'panic.status_updated', panic: updated } })
+        }
+      }
+
+      getIo()?.emit('panic:updated', updated)
+
+      return reply.code(200).send(updated)
+    },
+  )
+
+  fastify.post(
+    '/api/v1/panics/:id/resolve',
+    { preHandler: jwtGuard() },
+    async (request, reply) => {
+      const { id } = request.params as { id: string }
+      const panic = await prisma.panicEvent.findUnique({ where: { id }, select: { id: true, status: true } })
+      if (!panic) return reply.code(404).send({ error: 'Panic not found' })
+      if (panic.status !== 'DISPATCHED') return reply.code(400).send({ error: `Cannot resolve a panic with status ${panic.status}` })
+
+      const updated = await prisma.$transaction(async (tx) => {
+        return tx.panicEvent.update({
+          where: { id },
+          data: {
+            status: 'RESOLVED',
+            logs: {
+              create: {
+                triggeredBy: 'OPERATOR',
+                operatorId: request.operator.operatorId,
+                fromStatus: 'DISPATCHED',
+                toStatus: 'RESOLVED',
+              },
+            },
+          },
+          include: {
+            partner: { omit: { apiKeyHash: true } },
+            claimedByPartner: { omit: { apiKeyHash: true } },
+          },
+        })
+      })
+
+      const panicSource = await prisma.partner.findUnique({ where: { id: updated.partnerId }, select: { webhookUrl: true } })
+      if (panicSource?.webhookUrl) {
+        webhookQueue.enqueue({ url: panicSource.webhookUrl, payload: { event: 'panic.status_updated', panic: updated } })
+      }
+      if (updated.claimedByPartnerId) {
+        const responder = await prisma.partner.findUnique({ where: { id: updated.claimedByPartnerId }, select: { webhookUrl: true } })
+        if (responder?.webhookUrl) {
+          webhookQueue.enqueue({ url: responder.webhookUrl, payload: { event: 'panic.status_updated', panic: updated } })
+        }
+      }
+
+      getIo()?.emit('panic:updated', updated)
+
+      return reply.code(200).send(updated)
+    },
+  )
+
+  fastify.post(
     '/api/v1/panics/:id/claim',
     { preHandler: apiKeyGuard('RESPONDER_SYSTEM') },
     async (request, reply) => {
