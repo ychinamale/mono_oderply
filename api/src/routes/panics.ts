@@ -22,8 +22,9 @@ export function panicRoutes(fastify: FastifyInstance) {
     { preHandler: jwtGuard() },
     async (request, reply) => {
       const { id } = request.params as { id: string }
-      const panic = await prisma.panicEvent.findUnique({ where: { id }, select: { id: true } })
+      const panic = await prisma.panicEvent.findUnique({ where: { id }, select: { id: true, status: true } })
       if (!panic) return reply.code(404).send({ error: 'Panic not found' })
+      if (panic.status !== 'PENDING') return reply.code(400).send({ error: `Cannot acknowledge a panic with status ${panic.status}` })
       return reply.code(501).send()
     },
   )
