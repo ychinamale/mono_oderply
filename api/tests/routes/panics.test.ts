@@ -822,4 +822,23 @@ describe('GET /api/v1/panics/:id', () => {
     })
     expect(res.statusCode).toBe(404)
   })
+
+  it('returns the panic with partner and claimedByPartner inline', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    const panic = await prisma.panicEvent.create({
+      data: { externalUserId: 'u1', latitude: 0, longitude: 0, idempotencyKey: 'idem-get-by-id-1', partnerId: source.id },
+    })
+    const res = await app.inject({
+      method: 'GET',
+      url: `/api/v1/panics/${panic.id}`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    expect(res.statusCode).toBe(200)
+    const body = res.json<Record<string, unknown>>()
+    expect(body.id).toBe(panic.id)
+    expect(body.partner).toBeDefined()
+    expect(body.claimedByPartner).toBeDefined()
+  })
 })
