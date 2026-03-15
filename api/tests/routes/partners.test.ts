@@ -85,3 +85,21 @@ describe('GET /api/v1/partners', () => {
     }
   })
 })
+
+describe('GET /api/v1/partners/:id', () => {
+  async function getToken() {
+    const app = await createApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/auth/login',
+      payload: { email: 'admin@oderply.com', password: 'Admin1234!' },
+    })
+    return res.json<{ token: string }>().token
+  }
+
+  it('returns 401 when JWT is missing', async () => {
+    const app = await createApp()
+    const res = await app.inject({ method: 'GET', url: '/api/v1/partners/some-id' })
+    expect(res.statusCode).toBe(401)
+  })
+})
