@@ -19,6 +19,10 @@ const pending: Panic = {
   createdAt: '2026-03-10T10:00:00.000Z',
 };
 
+const acknowledged: Panic = { ...pending, id: 'panic-2', status: 'ACKNOWLEDGED' };
+const dispatched: Panic = { ...pending, id: 'panic-3', status: 'DISPATCHED' };
+const resolved: Panic = { ...pending, id: 'panic-4', status: 'RESOLVED' };
+
 function renderActions(panic: Panic) {
   return render(
     <MemoryRouter>
@@ -35,5 +39,20 @@ describe('PanicActions', () => {
   it('renders Acknowledge button for a PENDING panic', () => {
     renderActions(pending);
     expect(screen.getByRole('button', { name: /acknowledge/i })).toBeInTheDocument();
+  });
+
+  it('renders Dispatch button for an ACKNOWLEDGED panic', () => {
+    renderActions(acknowledged);
+    expect(screen.getByRole('button', { name: /dispatch/i })).toBeInTheDocument();
+  });
+
+  it('renders Resolve button for a DISPATCHED panic', () => {
+    renderActions(dispatched);
+    expect(screen.getByRole('button', { name: /resolve/i })).toBeInTheDocument();
+  });
+
+  it('renders no action button for a RESOLVED panic', () => {
+    renderActions(resolved);
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 });
