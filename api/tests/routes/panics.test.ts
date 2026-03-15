@@ -12,6 +12,15 @@ describe('POST /api/v1/panics', () => {
     expect(res.statusCode).toBe(401)
   })
 
+  const validBody = {
+    externalUserId: 'user-123',
+    latitude: -26.1052,
+    longitude: 28.056,
+    idempotencyKey: '550e8400-e29b-41d4-a716-446655440000',
+  }
+
+  const psHeaders = { 'x-api-key': 'ps-test-api-key-001' }
+
   it('returns 403 when API key belongs to a RESPONDER_SYSTEM partner', async () => {
     const app = await createApp()
     const res = await app.inject({
@@ -20,5 +29,17 @@ describe('POST /api/v1/panics', () => {
       headers: { 'x-api-key': 'rs-test-api-key-001' },
     })
     expect(res.statusCode).toBe(403)
+  })
+
+  it('returns 400 when externalUserId is missing', async () => {
+    const app = await createApp()
+    const { externalUserId: _omit, ...body } = validBody
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/v1/panics',
+      headers: psHeaders,
+      payload: body,
+    })
+    expect(res.statusCode).toBe(400)
   })
 })
