@@ -499,4 +499,17 @@ describe('POST /api/v1/panics/:id/acknowledge', () => {
     const body = res.json<{ partner: Record<string, unknown> }>()
     expect(body.partner.apiKeyHash).toBeUndefined()
   })
+
+  it('400 error message follows "Cannot acknowledge a panic with status [currentStatus]" format', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const panic = await createPanic({ status: 'ACKNOWLEDGED' })
+    const res = await app.inject({
+      method: 'POST',
+      url: `/api/v1/panics/${panic.id}/acknowledge`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    expect(res.statusCode).toBe(400)
+    expect(res.json<{ error: string }>().error).toBe('Cannot acknowledge a panic with status ACKNOWLEDGED')
+  })
 })
