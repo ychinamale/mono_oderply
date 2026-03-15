@@ -2,13 +2,12 @@ import { createApp } from '../../src/app.js'
 import { jwtGuard } from '../../src/hooks/jwtGuard.js'
 import prisma from '../../src/lib/prisma.js'
 
-function buildGuardApp() {
-  return createApp().then((app) => {
-    app.get('/protected', { preHandler: jwtGuard() }, (req, reply) => {
-      reply.send({ operatorId: req.operator.operatorId })
-    })
-    return app
+async function buildGuardApp() {
+  const app = await createApp()
+  app.get('/protected', { preHandler: jwtGuard() }, (req, reply) => {
+    reply.send({ operatorId: req.operator.operatorId })
   })
+  return app
 }
 
 afterAll(async () => {
