@@ -343,4 +343,19 @@ describe('POST /api/v1/panics/:id/claim', () => {
     expect(typeof body.claimedByPartner).toBe('object')
     expect(body.claimedByPartner.apiKeyHash).toBeUndefined()
   })
+
+  it('when two claims are submitted concurrently, exactly one succeeds and one receives 409', async () => {
+    const app = await createApp()
+    const panic = await createPanic()
+    const [res1, res2] = await Promise.all([
+      app.inject({ method: 'POST', url: `/api/v1/panics/${panic.id}/claim`, headers: rsHeaders }),
+      app.inject({ method: 'POST', url: `/api/v1/panics/${panic.id}/claim`, headers: rsHeaders }),
+    ])
+    const statuses = [res1.statusCode, res2.statusCode].sort()
+    expect(statuses).toEqual([200, 409])
+    const logCount = await prisma.panicEventLog.count({ where: { panicId: panic.id } })
+    expect(logCount).toBe(1)
+    const updated = await prisma.panicEvent.findUniqueOrThrow({ where: { id: panic.id } })
+    expect(updated.claimedByPartnerId).not.toBeNull()
+  })
 })
