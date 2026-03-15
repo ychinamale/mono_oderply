@@ -25,6 +25,8 @@ export function panicRoutes(fastify: FastifyInstance) {
       const panic = await prisma.panicEvent.findUnique({ where: { id } })
       if (!panic) return reply.code(404).send({ error: 'Panic not found' })
 
+      if (panic.claimedByPartnerId) return reply.code(409).send({ error: 'Panic already claimed' })
+
       return reply.code(501).send()
     },
   )
