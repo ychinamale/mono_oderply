@@ -291,4 +291,11 @@ describe('POST /api/v1/panics/:id/claim', () => {
     })
     expect(res.statusCode).toBe(200)
   })
+
+  it('sets status to ACKNOWLEDGED after successful claim', async () => {
+    const app = await createApp()
+    const panic = await createPanic()
+    const res = await app.inject({ method: 'POST', url: `/api/v1/panics/${panic.id}/claim`, headers: rsHeaders })
+    expect(res.json<{ status: string }>().status).toBe('ACKNOWLEDGED')
+  })
 })
