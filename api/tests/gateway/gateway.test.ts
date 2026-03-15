@@ -123,6 +123,54 @@ describe('WebSocket Gateway', () => {
     await app.close()
   })
 
+  it('panic:new payload matches the shape of GET /api/v1/panics/:id response', async () => {
+    const app = await createApp()
+    await app.listen({ port: 0 })
+    const { port } = app.server.address() as { port: number }
+
+    const token = app.jwt.sign({ operatorId: 'test-op', email: 'op@test.com', name: 'Test Op' })
+
+    let panicId: string | null = null
+    const emitted = await new Promise<Record<string, unknown>>((resolve, reject) => {
+      const client: Socket = ioc(`http://localhost:${port}`, { auth: { token } })
+
+      const timeout = setTimeout(() => {
+        client.disconnect()
+        reject(new Error('panic:new not received within timeout'))
+      }, 3000)
+
+      client.on('panic:new', (data: Record<string, unknown>) => {
+        clearTimeout(timeout)
+        client.disconnect()
+        panicId = data.id as string
+        resolve(data)
+      })
+
+      client.on('connect', () => {
+        void app.inject({
+          method: 'POST',
+          url: '/api/v1/panics',
+          headers: { 'x-api-key': 'ps-test-api-key-001' },
+          payload: {
+            externalUserId: 'user-ws-get-shape',
+            latitude: -26.1052,
+            longitude: 28.056,
+            idempotencyKey: `ws-get-shape-${Date.now()}`,
+          },
+        })
+      })
+    })
+
+    const getRes = await app.inject({
+      method: 'GET',
+      url: `/api/v1/panics/${panicId}`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+
+    await app.close()
+    expect(emitted).toEqual(getRes.json())
+  })
+
   it('panic:new payload matches the shape of POST /api/v1/panics 201 response', async () => {
     const app = await createApp()
     await app.listen({ port: 0 })
