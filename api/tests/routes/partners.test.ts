@@ -60,6 +60,16 @@ describe('GET /api/v1/partners', () => {
     }
   })
 
+  it('does not include apiKeyHash on any partner in the response', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const res = await app.inject({ method: 'GET', url: '/api/v1/partners', headers: { authorization: `Bearer ${token}` } })
+    const body = res.json<{ data: Record<string, unknown>[] }>()
+    for (const partner of body.data) {
+      expect(partner).not.toHaveProperty('apiKeyHash')
+    }
+  })
+
   it('returns paginated list with _count.panicEvents on each partner', async () => {
     const app = await createApp()
     const token = await getToken()
