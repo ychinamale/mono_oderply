@@ -306,4 +306,12 @@ describe('POST /api/v1/panics/:id/claim', () => {
     const res = await app.inject({ method: 'POST', url: `/api/v1/panics/${panic.id}/claim`, headers: rsHeaders })
     expect(res.json<{ claimedByPartnerId: string }>().claimedByPartnerId).toBe(responder.id)
   })
+
+  it('creates a PanicEventLog entry with triggeredBy PARTNER_CLAIM', async () => {
+    const app = await createApp()
+    const panic = await createPanic()
+    await app.inject({ method: 'POST', url: `/api/v1/panics/${panic.id}/claim`, headers: rsHeaders })
+    const log = await prisma.panicEventLog.findFirst({ where: { panicId: panic.id } })
+    expect(log?.triggeredBy).toBe('PARTNER_CLAIM')
+  })
 })
