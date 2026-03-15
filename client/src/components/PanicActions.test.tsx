@@ -1,6 +1,8 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import axios from 'axios';
 import { MemoryRouter } from 'react-router-dom';
-import { vi } from 'vitest';
+import { vi, type Mock } from 'vitest';
 
 import { AuthContext } from '../context/AuthContext.tsx';
 
@@ -54,5 +56,15 @@ describe('PanicActions', () => {
   it('renders no action button for a RESOLVED panic', () => {
     renderActions(resolved);
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
+  });
+
+  it('button shows loading state while request is in-flight', async () => {
+    (axios.post as Mock).mockReturnValueOnce(new Promise(() => {})); // never resolves
+
+    renderActions(pending);
+
+    await userEvent.click(screen.getByRole('button', { name: /acknowledge/i }));
+
+    expect(screen.getByRole('button')).toHaveAttribute('data-loading', 'true');
   });
 });
