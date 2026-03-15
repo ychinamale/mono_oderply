@@ -123,11 +123,13 @@ When asked "what is the next task":
 When a task is complete:
 1. Before committing, give a brief note on how to verify the task is done — commands
    to run, things to check. Sacrifice grammar for concision. Await confirmation.
-2. Commit all changes related to the task
-3. Push to remote
-4. Only after a successful push, ask: "Shall I mark TASK-XX as complete in the backlog?"
-5. If yes: check the task's checkbox (`- [x]`) in the backlog file
+2. Commit all implementation changes and push to remote.
+3. Mark the task complete in the backlog: check the task checkbox AND all sub-task
+   checkboxes (`- [x]`) in docs/_project_specs/00_oderply_backlog_v2.md.
+4. Commit the backlog update and push.
+5. Open a PR.
 
+Do NOT open a PR before the backlog has been updated, committed, and pushed.
 Do NOT ask about marking a task complete before the work is committed and pushed.
 
 ## Git workflow
