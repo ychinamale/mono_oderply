@@ -190,4 +190,16 @@ describe('POST /api/v1/panics', () => {
     }
     enqueueSpy.mockRestore()
   })
+
+  it('does not enqueue a broadcast to PANIC_SOURCE partners on panic creation', async () => {
+    const enqueueSpy = jest.spyOn(webhookQueue, 'enqueue')
+    const app = await createApp()
+    await app.inject({ method: 'POST', url: '/api/v1/panics', headers: psHeaders, payload: validBody })
+    const panicSourcePartners = await prisma.partner.findMany({ where: { type: 'PANIC_SOURCE' } })
+    const enqueuedUrls = enqueueSpy.mock.calls.map(([job]) => job.url)
+    for (const partner of panicSourcePartners) {
+      expect(enqueuedUrls).not.toContain(partner.webhookUrl)
+    }
+    enqueueSpy.mockRestore()
+  })
 })
