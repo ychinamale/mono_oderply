@@ -211,12 +211,12 @@
     - [x] ⚪ SUB: Include partner inline in response (`prisma.panicEvent.create({ include: { partner: true } })`)
     - [x] ⚪ SUB: Return 201 with full panic response shape
 
-- [ ] 🟢 TASK-03.1.2 — Enforce idempotency
+- [x] 🟢 TASK-03.1.2 — Enforce idempotency
 
-    - [ ] ⚪ SUB: Add `idempotencyKey` as `@unique` in Prisma schema
-    - [ ] ⚪ SUB: Catch Prisma unique constraint violation (`P2002`) on `idempotencyKey`
-    - [ ] ⚪ SUB: On duplicate key: fetch and return the original `PanicEvent` with 200 (not an error)
-    - [ ] ⚪ SUB: Test: submit same `idempotencyKey` twice → second response is 200 with original event
+    - [x] ⚪ SUB: Add `idempotencyKey` as `@unique` in Prisma schema
+    - [x] ⚪ SUB: Catch Prisma unique constraint violation (`P2002`) on `idempotencyKey`
+    - [x] ⚪ SUB: On duplicate key: fetch and return the original `PanicEvent` with 200 (not an error)
+    - [x] ⚪ SUB: Test: submit same `idempotencyKey` twice → second response is 200 with original event
 
 - [ ] 🟢 TASK-03.1.3 — Trigger async webhook broadcast on creation
 
