@@ -206,3 +206,29 @@ describe('POST /api/v1/panics', () => {
     }
   })
 })
+
+describe('POST /api/v1/panics/:id/claim', () => {
+  let enqueueSpy: ReturnType<typeof jest.spyOn>
+  beforeEach(() => {
+    enqueueSpy = jest.spyOn(webhookQueue, 'enqueue').mockImplementation(() => {})
+  })
+
+  afterEach(async () => {
+    jest.restoreAllMocks()
+    await prisma.panicEventLog.deleteMany()
+    await prisma.panicEvent.deleteMany()
+  })
+
+  const rsHeaders = { 'x-api-key': 'rs-test-api-key-001' }
+  const psHeaders = { 'x-api-key': 'ps-test-api-key-001' }
+
+  it('returns 403 when API key belongs to a PANIC_SOURCE partner', async () => {
+    const app = await createApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/v1/panics/some-id/claim',
+      headers: psHeaders,
+    })
+    expect(res.statusCode).toBe(403)
+  })
+})
