@@ -67,4 +67,18 @@ describe('PanicActions', () => {
 
     expect(screen.getByRole('button')).toHaveAttribute('data-loading', 'true');
   });
+
+  it('displays inline error when the API returns an error response', async () => {
+    (axios.post as Mock).mockRejectedValueOnce({
+      response: { data: { message: 'Cannot acknowledge a panic with status ACKNOWLEDGED' } },
+    });
+
+    renderActions(pending);
+
+    await userEvent.click(screen.getByRole('button', { name: /acknowledge/i }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Cannot acknowledge a panic with status ACKNOWLEDGED',
+    );
+  });
 });
