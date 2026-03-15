@@ -344,13 +344,13 @@
 **I want** illegal status transitions to be rejected with a clear error,
 **so that** the panic lifecycle state machine is never violated.
 
-- [ ] TASK-05.4.1 — Centralise transition guard logic
+- [x] TASK-05.4.1 — Centralise transition guard logic
 
-    - [ ] SUB: Create `api/src/lib/assertTransition.js`
-    - [ ] SUB: Accept `(currentStatus, requiredStatus, endpointName)` and throw a structured 400 if mismatch
-    - [ ] SUB: Error message format: `"Cannot [action] a panic with status [currentStatus]"`
-    - [ ] SUB: Apply `assertTransition` consistently across all three transition endpoints
-    - [ ] SUB: Test all invalid transitions: e.g. resolve a PENDING, dispatch a RESOLVED, acknowledge an ACKNOWLEDGED
+    - [x] SUB: Create `api/src/lib/assertTransition.js`
+    - [x] SUB: Accept `(currentStatus, requiredStatus, endpointName)` and throw a structured 400 if mismatch
+    - [x] SUB: Error message format: `"Cannot [action] a panic with status [currentStatus]"`
+    - [x] SUB: Apply `assertTransition` consistently across all three transition endpoints
+    - [x] SUB: Test all invalid transitions: e.g. resolve a PENDING, dispatch a RESOLVED, acknowledge an ACKNOWLEDGED
 
 ---
 
