@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { Prisma } from '../generated/prisma/client.js'
 import { apiKeyGuard } from '../hooks/apiKeyGuard.js'
 import prisma from '../lib/prisma.js'
+import { webhookQueue } from '../lib/webhookQueue.js'
 
 const createPanicSchema = z.object({
   externalUserId: z.string().min(1),
@@ -37,6 +38,15 @@ export function panicRoutes(fastify: FastifyInstance) {
           },
           include: { partner: { omit: { apiKeyHash: true } } },
         })
+
+        const responders = await prisma.partner.findMany({
+          where: { type: 'RESPONDER_SYSTEM' },
+          select: { webhookUrl: true },
+        })
+
+        for (const responder of responders) {
+          webhookQueue.enqueue({ url: responder.webhookUrl ?? '', payload: { event: 'panic.created', panic } })
+        }
 
         return reply.code(201).send(panic)
       } catch (err) {
