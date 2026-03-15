@@ -128,4 +128,22 @@ describe('POST /api/v1/panics', () => {
     const body = res.json<{ partner: Record<string, unknown> }>()
     expect(body.partner.apiKeyHash).toBeUndefined()
   })
+
+  it('metadata is stored and returned when provided', async () => {
+    const app = await createApp()
+    const meta = { emergencyType: 'medical', batteryLevel: 42 }
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/v1/panics',
+      headers: psHeaders,
+      payload: { ...validBody, metadata: meta },
+    })
+    expect(res.json<{ metadata: unknown }>().metadata).toEqual(meta)
+  })
+
+  it('metadata is null when not provided', async () => {
+    const app = await createApp()
+    const res = await app.inject({ method: 'POST', url: '/api/v1/panics', headers: psHeaders, payload: validBody })
+    expect(res.json<{ metadata: unknown }>().metadata).toBeNull()
+  })
 })
