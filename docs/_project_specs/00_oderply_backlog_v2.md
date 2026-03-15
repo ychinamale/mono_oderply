@@ -226,11 +226,11 @@
     - [x] ⚪ SUB: Confirm broadcast does not block the 201 response
     - [x] ⚪ SUB: Log webhook delivery failures without throwing (fire-and-forget with error logging)
 
-- [ ] 🟢 TASK-03.1.4 — Emit `panic:new` Socket.io event
+- [x] 🟢 TASK-03.1.4 — Emit `panic:new` Socket.io event
 
-    - [ ] ⚪ SUB: After DB write, emit `panic:new` to all connected operator clients via Socket.io
-    - [ ] ⚪ SUB: Confirm Socket.io payload mirrors the REST response shape exactly
-    - [ ] ⚪ SUB: Test: submit panic → operator client receives `panic:new` event in real time
+    - [x] ⚪ SUB: After DB write, emit `panic:new` to all connected operator clients via Socket.io
+    - [x] ⚪ SUB: Confirm Socket.io payload mirrors the REST response shape exactly
+    - [x] ⚪ SUB: Test: submit panic → operator client receives `panic:new` event in real time
 
 ---
 
