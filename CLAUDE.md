@@ -150,6 +150,28 @@ Write a failing test before any implementation. Every time. No exceptions.
 
 Follow this sequence strictly. Do not skip steps.
 
+### What is permitted before the first RED (infrastructure only)
+
+Sometimes a test file cannot compile until a module exists to import. In that case,
+create the minimum scaffolding to make the file compile — nothing more.
+
+**Permitted before RED:**
+- Creating files and directories
+- Type definitions and module augmentations
+- Framework/plugin registration (e.g. `app.register(jwt, ...)`)
+- App factory skeleton (creates instance, registers plugins, returns app)
+- Function/route stubs that export a name but contain no logic — handlers must
+  return `reply.code(501).send()` or nothing; guards must be a no-op
+
+**Not permitted before RED — these belong in GREEN:**
+- Validation logic (Zod parsing, field checks)
+- Database queries
+- Password comparison, hashing, token signing
+- Any conditional branching that affects the response
+
+If the plan contains a detailed design for a module, that design is a reference for
+the GREEN phase only. Do not transcribe it into code before the first RED.
+
 ### Test quality rules
 - Tests verify behavior through public interfaces, not implementation details.
   A test that breaks during a refactor without behavior changing is a bad test.
