@@ -128,27 +128,27 @@
 **I want** to authenticate using an API key in the request header,
 **so that** ODERP-ly can identify which partner is submitting or claiming a panic.
 
-- [ ] 🟢 TASK-02.1.1 — Implement `apiKeyGuard` preHandler hook
+- [x] 🟢 TASK-02.1.1 — Implement `apiKeyGuard` preHandler hook
 
-    - [ ] ⚪ SUB: Create `api/src/hooks/apiKeyGuard.js`
-    - [ ] ⚪ SUB: Read `x-api-key` header; return 401 if missing
-    - [ ] ⚪ SUB: Hash the raw key with SHA-256
-    - [ ] ⚪ SUB: Query `Partner` table by `apiKeyHash`; return 403 if not found
-    - [ ] ⚪ SUB: Attach the resolved `Partner` record to `request.partner`
+    - [x] ⚪ SUB: Create `api/src/hooks/apiKeyGuard.js`
+    - [x] ⚪ SUB: Read `x-api-key` header; return 401 if missing
+    - [x] ⚪ SUB: Hash the raw key with SHA-256
+    - [x] ⚪ SUB: Query `Partner` table by `apiKeyHash`; return 403 if not found
+    - [x] ⚪ SUB: Attach the resolved `Partner` record to `request.partner`
 
-- [ ] 🟢 TASK-02.1.2 — Extend `apiKeyGuard` for partner type assertion
+- [x] 🟢 TASK-02.1.2 — Extend `apiKeyGuard` for partner type assertion
 
-    - [ ] ⚪ SUB: Accept an optional `requiredType` parameter (`PANIC_SOURCE` | `RESPONDER_SYSTEM`)
-    - [ ] ⚪ SUB: Return 403 with clear message if partner type does not match
-    - [ ] ⚪ SUB: Apply type assertion on the claim endpoint (`RESPONDER_SYSTEM` only)
+    - [x] ⚪ SUB: Accept an optional `requiredType` parameter (`PANIC_SOURCE` | `RESPONDER_SYSTEM`)
+    - [x] ⚪ SUB: Return 403 with clear message if partner type does not match
+    - [x] ⚪ SUB: Apply type assertion on the claim endpoint (`RESPONDER_SYSTEM` only)
 
-- [ ] 🟢 TASK-02.1.3 — Test API key guard
+- [x] 🟢 TASK-02.1.3 — Test API key guard
 
-    - [ ] ⚪ SUB: Test missing header → 401
-    - [ ] ⚪ SUB: Test invalid key → 403
-    - [ ] ⚪ SUB: Test valid PANIC_SOURCE key → request.partner populated
-    - [ ] ⚪ SUB: Test valid RESPONDER_SYSTEM key on claim route → passes
-    - [ ] ⚪ SUB: Test PANIC_SOURCE key on claim route → 403
+    - [x] ⚪ SUB: Test missing header → 401
+    - [x] ⚪ SUB: Test invalid key → 403
+    - [x] ⚪ SUB: Test valid PANIC_SOURCE key → request.partner populated
+    - [x] ⚪ SUB: Test valid RESPONDER_SYSTEM key on claim route → passes
+    - [x] ⚪ SUB: Test PANIC_SOURCE key on claim route → 403
 
 ---
 

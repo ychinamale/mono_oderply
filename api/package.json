@@ -6,7 +6,7 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "test": "node --experimental-vm-modules node_modules/.bin/jest",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
@@ -25,9 +25,12 @@
   },
   "devDependencies": {
     "@types/bcrypt": "6.0.0",
+    "@types/jest": "30.0.0",
     "@types/node": "25.5.0",
     "@types/pg": "8.18.0",
+    "jest": "29.7.0",
     "prisma": "7.5.0",
+    "ts-jest": "29.4.6",
     "tsx": "4.21.0",
     "typescript": "5.9.3"
   }
