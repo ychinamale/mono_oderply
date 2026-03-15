@@ -317,13 +317,13 @@ Each section covers a testable concern. Within each section, tests are grouped b
 
 **Type:** Unit (React Testing Library)
 
-- [ ] `it('renders Acknowledge button for a PENDING panic')`
-- [ ] `it('renders Dispatch button for an ACKNOWLEDGED panic')`
-- [ ] `it('renders Resolve button for a DISPATCHED panic')`
-- [ ] `it('renders no action button for a RESOLVED panic')`
-- [ ] `it('button shows loading state while request is in-flight')`
-- [ ] `it('displays inline error when the API returns an error response')`
-- [ ] `it('calls the correct endpoint for each action button')`
+- [x] `it('renders Acknowledge button for a PENDING panic')`
+- [x] `it('renders Dispatch button for an ACKNOWLEDGED panic')`
+- [x] `it('renders Resolve button for a DISPATCHED panic')`
+- [x] `it('renders no action button for a RESOLVED panic')`
+- [x] `it('button shows loading state while request is in-flight')`
+- [x] `it('displays inline error when the API returns an error response')`
+- [x] `it('calls the correct endpoint for each action button')`
 
 ---
 

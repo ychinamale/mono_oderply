@@ -28,12 +28,15 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="w-full max-w-sm bg-white rounded-lg shadow-md p-8 space-y-6">
-        <h1 className="text-2xl font-bold text-gray-900 text-center">ODERP&apos;ly</h1>
+    <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+      <div className="w-full max-w-sm bg-slate-900/40 border border-slate-800 rounded-2xl p-8 space-y-6 shadow-2xl backdrop-blur-sm">
+        <div className="text-center space-y-1">
+          <h1 className="text-2xl font-black text-white tracking-tight">ODERP&apos;ly</h1>
+          <p className="text-slate-500 text-xs uppercase tracking-widest font-bold">Control Room Access</p>
+        </div>
         <div className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="email" className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">
               Email
             </label>
             <input
@@ -41,11 +44,11 @@ export default function Login() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full bg-slate-900 border border-slate-800 rounded-lg py-2.5 px-3 text-sm text-slate-300 focus:outline-none focus:border-blue-500 transition-colors"
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="password" className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">
               Password
             </label>
             <input
@@ -53,21 +56,21 @@ export default function Login() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full bg-slate-900 border border-slate-800 rounded-lg py-2.5 px-3 text-sm text-slate-300 focus:outline-none focus:border-blue-500 transition-colors"
             />
           </div>
         </div>
         {error && (
-          <p role="alert" className="text-sm text-red-600">
+          <p role="alert" className="text-sm text-red-400">
             {error}
           </p>
         )}
         <button
           type="button"
           onClick={() => void handleSubmit()}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md text-sm transition-colors"
+          className="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 px-4 rounded-lg text-sm transition-all duration-200 active:scale-95 shadow-lg shadow-blue-900/20"
         >
-          Sign in
+          Sign In
         </button>
       </div>
     </div>
