@@ -205,6 +205,16 @@ describe('POST /api/v1/panics', () => {
       expect(enqueuedUrls).not.toContain(partner.webhookUrl)
     }
   })
+
+  it('skips enqueue for a partner with no webhookUrl and logs a warning', async () => {
+    const app = await createApp()
+    const responders = await prisma.partner.findMany({ where: { type: 'RESPONDER_SYSTEM' } })
+    await Promise.all(responders.map((r) => prisma.partner.update({ where: { id: r.id }, data: { webhookUrl: null } })))
+    jest.spyOn(console, 'warn').mockImplementation(() => {})
+    await app.inject({ method: 'POST', url: '/api/v1/panics', headers: psHeaders, payload: validBody })
+    expect(enqueueSpy).not.toHaveBeenCalled()
+    await Promise.all(responders.map((r) => prisma.partner.update({ where: { id: r.id }, data: { webhookUrl: r.webhookUrl } })))
+  })
 })
 
 describe('POST /api/v1/panics/:id/claim', () => {
@@ -372,7 +382,12 @@ describe('POST /api/v1/panics/:id/claim', () => {
 })
 
 describe('POST /api/v1/panics/:id/acknowledge', () => {
+  let enqueueSpy: ReturnType<typeof jest.spyOn>
+  beforeEach(() => {
+    enqueueSpy = jest.spyOn(webhookQueue, 'enqueue').mockImplementation(() => {})
+  })
   afterEach(async () => {
+    jest.restoreAllMocks()
     await prisma.panicEventLog.deleteMany()
     await prisma.panicEvent.deleteMany()
   })
@@ -500,6 +515,22 @@ describe('POST /api/v1/panics/:id/acknowledge', () => {
     expect(body.partner.apiKeyHash).toBeUndefined()
   })
 
+  it('does not enqueue a status update to RESPONDER_SYSTEM on acknowledge (no claimer)', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const panic = await createPanic()
+    const responders = await prisma.partner.findMany({ where: { type: 'RESPONDER_SYSTEM' } })
+    await app.inject({
+      method: 'POST',
+      url: `/api/v1/panics/${panic.id}/acknowledge`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    const enqueuedUrls = (enqueueSpy.mock.calls as [{ url: string }][]).map((args) => args[0].url)
+    for (const responder of responders) {
+      expect(enqueuedUrls).not.toContain(responder.webhookUrl)
+    }
+  })
+
   it('400 error message follows "Cannot acknowledge a panic with status [currentStatus]" format', async () => {
     const app = await createApp()
     const token = await getToken()
@@ -515,7 +546,12 @@ describe('POST /api/v1/panics/:id/acknowledge', () => {
 })
 
 describe('POST /api/v1/panics/:id/dispatch', () => {
+  let enqueueSpy: ReturnType<typeof jest.spyOn>
+  beforeEach(() => {
+    enqueueSpy = jest.spyOn(webhookQueue, 'enqueue').mockImplementation(() => {})
+  })
   afterEach(async () => {
+    jest.restoreAllMocks()
     await prisma.panicEventLog.deleteMany()
     await prisma.panicEvent.deleteMany()
   })
@@ -585,10 +621,35 @@ describe('POST /api/v1/panics/:id/dispatch', () => {
     expect(log?.operatorId).not.toBeNull()
     expect(log?.partnerId).toBeNull()
   })
+
+  it('enqueues a status update to both PANIC_SOURCE and claimedByPartner on dispatch', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    await prisma.partner.update({ where: { id: source.id }, data: { webhookUrl: 'http://source.example.com/webhook' } })
+    const responder = await prisma.partner.findFirstOrThrow({ where: { type: 'RESPONDER_SYSTEM' } })
+    await prisma.partner.update({ where: { id: responder.id }, data: { webhookUrl: 'http://responder.example.com/webhook' } })
+    const panic = await createPanic({ status: 'ACKNOWLEDGED', claimedByPartnerId: responder.id })
+    await app.inject({
+      method: 'POST',
+      url: `/api/v1/panics/${panic.id}/dispatch`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    const enqueuedUrls = (enqueueSpy.mock.calls as [{ url: string }][]).map((args) => args[0].url)
+    expect(enqueuedUrls).toContain('http://source.example.com/webhook')
+    expect(enqueuedUrls).toContain('http://responder.example.com/webhook')
+    await prisma.partner.update({ where: { id: source.id }, data: { webhookUrl: null } })
+    await prisma.partner.update({ where: { id: responder.id }, data: { webhookUrl: null } })
+  })
 })
 
 describe('POST /api/v1/panics/:id/resolve', () => {
+  let enqueueSpy: ReturnType<typeof jest.spyOn>
+  beforeEach(() => {
+    enqueueSpy = jest.spyOn(webhookQueue, 'enqueue').mockImplementation(() => {})
+  })
   afterEach(async () => {
+    jest.restoreAllMocks()
     await prisma.panicEventLog.deleteMany()
     await prisma.panicEvent.deleteMany()
   })
@@ -657,6 +718,26 @@ describe('POST /api/v1/panics/:id/resolve', () => {
     expect(log?.triggeredBy).toBe('OPERATOR')
     expect(log?.operatorId).not.toBeNull()
     expect(log?.partnerId).toBeNull()
+  })
+
+  it('enqueues a status update to both PANIC_SOURCE and claimedByPartner on resolve', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    await prisma.partner.update({ where: { id: source.id }, data: { webhookUrl: 'http://source.example.com/webhook' } })
+    const responder = await prisma.partner.findFirstOrThrow({ where: { type: 'RESPONDER_SYSTEM' } })
+    await prisma.partner.update({ where: { id: responder.id }, data: { webhookUrl: 'http://responder.example.com/webhook' } })
+    const panic = await createPanic({ status: 'DISPATCHED', claimedByPartnerId: responder.id })
+    await app.inject({
+      method: 'POST',
+      url: `/api/v1/panics/${panic.id}/resolve`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    const enqueuedUrls = (enqueueSpy.mock.calls as [{ url: string }][]).map((args) => args[0].url)
+    expect(enqueuedUrls).toContain('http://source.example.com/webhook')
+    expect(enqueuedUrls).toContain('http://responder.example.com/webhook')
+    await prisma.partner.update({ where: { id: source.id }, data: { webhookUrl: null } })
+    await prisma.partner.update({ where: { id: responder.id }, data: { webhookUrl: null } })
   })
 })
 
