@@ -85,4 +85,19 @@ describe('POST /api/v1/panics', () => {
     })
     expect(res.statusCode).toBe(400)
   })
+
+  afterEach(async () => {
+    await prisma.panicEvent.deleteMany()
+  })
+
+  it('returns 201 with the created PanicEvent on valid request', async () => {
+    const app = await createApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/v1/panics',
+      headers: psHeaders,
+      payload: validBody,
+    })
+    expect(res.statusCode).toBe(201)
+  })
 })
