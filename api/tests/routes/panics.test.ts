@@ -906,4 +906,15 @@ describe('GET /api/v1/panics/:id/logs', () => {
     const res = await app.inject({ method: 'GET', url: '/api/v1/panics/some-id/logs' })
     expect(res.statusCode).toBe(401)
   })
+
+  it('returns 404 when parent panic does not exist', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/v1/panics/00000000-0000-0000-0000-000000000000/logs',
+      headers: { authorization: `Bearer ${token}` },
+    })
+    expect(res.statusCode).toBe(404)
+  })
 })
