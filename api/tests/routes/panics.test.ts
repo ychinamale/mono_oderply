@@ -154,4 +154,12 @@ describe('POST /api/v1/panics', () => {
     expect(second.statusCode).toBe(200)
     expect(second.json<{ id: string }>().id).toBe(first.json<{ id: string }>().id)
   })
+
+  it('does not create a second PanicEvent row on duplicate idempotencyKey', async () => {
+    const app = await createApp()
+    await app.inject({ method: 'POST', url: '/api/v1/panics', headers: psHeaders, payload: validBody })
+    await app.inject({ method: 'POST', url: '/api/v1/panics', headers: psHeaders, payload: validBody })
+    const count = await prisma.panicEvent.count({ where: { idempotencyKey: validBody.idempotencyKey } })
+    expect(count).toBe(1)
+  })
 })
