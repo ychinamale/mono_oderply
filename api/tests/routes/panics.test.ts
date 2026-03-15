@@ -344,6 +344,17 @@ describe('POST /api/v1/panics/:id/claim', () => {
     expect(body.claimedByPartner.apiKeyHash).toBeUndefined()
   })
 
+  it('enqueues a webhook to the PANIC_SOURCE partner after successful claim', async () => {
+    const app = await createApp()
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    await prisma.partner.update({ where: { id: source.id }, data: { webhookUrl: 'http://source.example.com/webhook' } })
+    const panic = await createPanic()
+    await app.inject({ method: 'POST', url: `/api/v1/panics/${panic.id}/claim`, headers: rsHeaders })
+    const enqueuedUrls = (enqueueSpy.mock.calls as [{ url: string }][]).map((args) => args[0].url)
+    expect(enqueuedUrls).toContain('http://source.example.com/webhook')
+    await prisma.partner.update({ where: { id: source.id }, data: { webhookUrl: null } })
+  })
+
   it('when two claims are submitted concurrently, exactly one succeeds and one receives 409', async () => {
     const app = await createApp()
     const panic = await createPanic()
