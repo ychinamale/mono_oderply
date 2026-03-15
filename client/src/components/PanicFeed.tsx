@@ -11,6 +11,7 @@ export default function PanicFeed() {
   const { socket } = useSocket(token);
   const [panics, setPanics] = useState<Panic[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
 
   useEffect(() => {
     if (!token) return;
@@ -24,6 +25,7 @@ export default function PanicFeed() {
         setLoading(false);
       })
       .catch(() => {
+        setFetchError(true);
         setLoading(false);
       });
   }, [token]);
@@ -45,6 +47,7 @@ export default function PanicFeed() {
   }, [socket]);
 
   if (loading) return <div data-testid="loading-skeleton" />;
+  if (fetchError) return <div role="alert">Failed to load panics</div>;
 
   return (
     <div>
