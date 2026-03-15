@@ -162,4 +162,17 @@ describe('POST /api/v1/panics', () => {
     const count = await prisma.panicEvent.count({ where: { idempotencyKey: validBody.idempotencyKey } })
     expect(count).toBe(1)
   })
+
+  it('returns a different event for a different idempotencyKey', async () => {
+    const app = await createApp()
+    const first = await app.inject({ method: 'POST', url: '/api/v1/panics', headers: psHeaders, payload: validBody })
+    const second = await app.inject({
+      method: 'POST',
+      url: '/api/v1/panics',
+      headers: psHeaders,
+      payload: { ...validBody, idempotencyKey: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890' },
+    })
+    expect(second.statusCode).toBe(201)
+    expect(second.json<{ id: string }>().id).not.toBe(first.json<{ id: string }>().id)
+  })
 })
