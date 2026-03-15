@@ -9,6 +9,13 @@ import { getIo } from '../lib/gateway.js'
 import prisma from '../lib/prisma.js'
 import { webhookQueue } from '../lib/webhookQueue.js'
 
+const listPanicsQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  status: z.enum(['PENDING', 'ACKNOWLEDGED', 'DISPATCHED', 'RESOLVED']).optional(),
+  partnerId: z.string().optional(),
+})
+
 const createPanicSchema = z.object({
   externalUserId: z.string().min(1),
   latitude: z.number().min(-90).max(90),
@@ -18,6 +25,25 @@ const createPanicSchema = z.object({
 })
 
 export function panicRoutes(fastify: FastifyInstance) {
+  fastify.get(
+    '/api/v1/panics',
+    { preHandler: jwtGuard() },
+    async (request, reply) => {
+      const parsed = listPanicsQuerySchema.safeParse(request.query)
+      if (!parsed.success) return reply.code(400).send({ error: 'Invalid query params' })
+      const { page, limit, status, partnerId } = parsed.data
+      const where = {
+        ...(status ? { status } : {}),
+        ...(partnerId ? { partnerId } : {}),
+      }
+      const [data, total] = await Promise.all([
+        prisma.panicEvent.findMany({ where, skip: (page - 1) * limit, take: limit, include: { partner: { omit: { apiKeyHash: true } } } }),
+        prisma.panicEvent.count({ where }),
+      ])
+      return reply.code(200).send({ data, pagination: { page, limit, total, totalPages: Math.ceil(total / limit) } })
+    },
+  )
+
   fastify.post(
     '/api/v1/panics/:id/acknowledge',
     { preHandler: jwtGuard() },

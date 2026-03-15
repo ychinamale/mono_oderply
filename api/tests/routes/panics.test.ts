@@ -659,3 +659,134 @@ describe('POST /api/v1/panics/:id/resolve', () => {
     expect(log?.partnerId).toBeNull()
   })
 })
+
+describe('GET /api/v1/panics', () => {
+  afterEach(async () => {
+    await prisma.panicEventLog.deleteMany()
+    await prisma.panicEvent.deleteMany()
+  })
+
+  async function getToken() {
+    const app = await createApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/auth/login',
+      payload: { email: 'admin@oderply.com', password: 'Admin1234!' },
+    })
+    return res.json<{ token: string }>().token
+  }
+
+  it('returns 401 when JWT is missing', async () => {
+    const app = await createApp()
+    const res = await app.inject({ method: 'GET', url: '/api/v1/panics' })
+    expect(res.statusCode).toBe(401)
+  })
+
+  it('returns paginated results with data and pagination fields', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const res = await app.inject({ method: 'GET', url: '/api/v1/panics', headers: { authorization: `Bearer ${token}` } })
+    expect(res.statusCode).toBe(200)
+    const body = res.json<{ data: unknown[]; pagination: { page: number; limit: number; total: number; totalPages: number } }>()
+    expect(Array.isArray(body.data)).toBe(true)
+    expect(typeof body.pagination.page).toBe('number')
+    expect(typeof body.pagination.limit).toBe('number')
+    expect(typeof body.pagination.total).toBe('number')
+    expect(typeof body.pagination.totalPages).toBe('number')
+  })
+
+  it('pagination.total reflects the actual count of matching records', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    await prisma.panicEvent.createMany({
+      data: [
+        { externalUserId: 'u1', latitude: 0, longitude: 0, idempotencyKey: `idem-total-1`, partnerId: source.id },
+        { externalUserId: 'u2', latitude: 0, longitude: 0, idempotencyKey: `idem-total-2`, partnerId: source.id },
+        { externalUserId: 'u3', latitude: 0, longitude: 0, idempotencyKey: `idem-total-3`, partnerId: source.id },
+      ],
+    })
+    const res = await app.inject({ method: 'GET', url: '/api/v1/panics', headers: { authorization: `Bearer ${token}` } })
+    const body = res.json<{ data: unknown[]; pagination: { total: number } }>()
+    expect(body.pagination.total).toBe(3)
+    expect(body.data).toHaveLength(3)
+  })
+
+  it('defaults to page 1 and limit 20 when query params are omitted', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const res = await app.inject({ method: 'GET', url: '/api/v1/panics', headers: { authorization: `Bearer ${token}` } })
+    const body = res.json<{ pagination: { page: number; limit: number } }>()
+    expect(body.pagination.page).toBe(1)
+    expect(body.pagination.limit).toBe(20)
+  })
+
+  it('filters by status when status query param is provided', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    await prisma.panicEvent.createMany({
+      data: [
+        { externalUserId: 'u1', latitude: 0, longitude: 0, idempotencyKey: `idem-status-1`, partnerId: source.id, status: 'PENDING' },
+        { externalUserId: 'u2', latitude: 0, longitude: 0, idempotencyKey: `idem-status-2`, partnerId: source.id, status: 'RESOLVED' },
+      ],
+    })
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/v1/panics?status=PENDING',
+      headers: { authorization: `Bearer ${token}` },
+    })
+    const body = res.json<{ data: { status: string }[]; pagination: { total: number } }>()
+    expect(body.pagination.total).toBe(1)
+    expect(body.data).toHaveLength(1)
+    expect(body.data[0].status).toBe('PENDING')
+  })
+
+  it('filters by partnerId when partnerId query param is provided', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    const responder = await prisma.partner.findFirstOrThrow({ where: { type: 'RESPONDER_SYSTEM' } })
+    await prisma.panicEvent.createMany({
+      data: [
+        { externalUserId: 'u1', latitude: 0, longitude: 0, idempotencyKey: `idem-pid-1`, partnerId: source.id },
+        { externalUserId: 'u2', latitude: 0, longitude: 0, idempotencyKey: `idem-pid-2`, partnerId: responder.id },
+      ],
+    })
+    const res = await app.inject({
+      method: 'GET',
+      url: `/api/v1/panics?partnerId=${source.id}`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+    const body = res.json<{ data: { partnerId: string }[]; pagination: { total: number } }>()
+    expect(body.pagination.total).toBe(1)
+    expect(body.data).toHaveLength(1)
+    expect(body.data[0].partnerId).toBe(source.id)
+  })
+
+  it('each panic in data includes partner inline', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    await prisma.panicEvent.create({
+      data: { externalUserId: 'u1', latitude: 0, longitude: 0, idempotencyKey: `idem-inline-1`, partnerId: source.id },
+    })
+    const res = await app.inject({ method: 'GET', url: '/api/v1/panics', headers: { authorization: `Bearer ${token}` } })
+    const body = res.json<{ data: { partner: Record<string, unknown> }[] }>()
+    expect(body.data[0].partner).toBeDefined()
+    expect(typeof body.data[0].partner).toBe('object')
+    expect(body.data[0].partner.id).toBe(source.id)
+  })
+
+  it('does not include apiKeyHash on any inline partner', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    await prisma.panicEvent.create({
+      data: { externalUserId: 'u1', latitude: 0, longitude: 0, idempotencyKey: `idem-nohash-1`, partnerId: source.id },
+    })
+    const res = await app.inject({ method: 'GET', url: '/api/v1/panics', headers: { authorization: `Bearer ${token}` } })
+    const body = res.json<{ data: { partner: Record<string, unknown> }[] }>()
+    expect(body.data[0].partner.apiKeyHash).toBeUndefined()
+  })
+})
