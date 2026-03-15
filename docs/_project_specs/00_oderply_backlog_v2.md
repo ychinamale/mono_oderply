@@ -485,35 +485,35 @@
 **I want** to notify partner systems of panic events and status changes without blocking the main request cycle,
 **so that** a slow or unavailable partner system never degrades operator or ingestion performance.
 
-- [ ] TASK-08.1.1 — Implement in-process webhook queue
+- [x] TASK-08.1.1 — Implement in-process webhook queue
 
-    - [ ] SUB: Create `api/src/lib/webhookQueue.js`
-    - [ ] SUB: Implement a simple async FIFO queue using `setImmediate` or a promise chain
-    - [ ] SUB: Expose `enqueue(job)` function that accepts `{ url, payload }`
-    - [ ] SUB: Process jobs sequentially, non-blocking relative to the HTTP request cycle
+    - [x] SUB: Create `api/src/lib/webhookQueue.js`
+    - [x] SUB: Implement a simple async FIFO queue using `setImmediate` or a promise chain
+    - [x] SUB: Expose `enqueue(job)` function that accepts `{ url, payload }`
+    - [x] SUB: Process jobs sequentially, non-blocking relative to the HTTP request cycle
 
-- [ ] TASK-08.1.2 — Implement webhook delivery worker
+- [x] TASK-08.1.2 — Implement webhook delivery worker
 
-    - [ ] SUB: Worker reads each job from the queue and sends `HTTP POST` to `job.url`
-    - [ ] SUB: Set request timeout (e.g. 5 seconds) — do not wait indefinitely
-    - [ ] SUB: On success (2xx): log delivery confirmation
-    - [ ] SUB: On failure (non-2xx or timeout): log error with `panicId`, `partnerId`, `url`, and response status
-    - [ ] SUB: Do not retry on failure for MVP (log and move on)
+    - [x] SUB: Worker reads each job from the queue and sends `HTTP POST` to `job.url`
+    - [x] SUB: Set request timeout (e.g. 5 seconds) — do not wait indefinitely
+    - [x] SUB: On success (2xx): log delivery confirmation
+    - [x] SUB: On failure (non-2xx or timeout): log error with `panicId`, `partnerId`, `url`, and response status
+    - [x] SUB: Do not retry on failure for MVP (log and move on)
 
-- [ ] TASK-08.1.3 — Define webhook payload shapes
+- [x] TASK-08.1.3 — Define webhook payload shapes
 
-    - [ ] SUB: Creation broadcast payload: `{ event: "panic.created", panicId, status, latitude, longitude, metadata, createdAt }`
-    - [ ] SUB: Status change payload: `{ event: "panic.status_updated", panicId, previousStatus, newStatus, updatedAt }`
-    - [ ] SUB: Add shared Zod schemas for both payloads in `shared/src/index.js`
+    - [x] SUB: Creation broadcast payload: `{ event: "panic.created", panicId, status, latitude, longitude, metadata, createdAt }`
+    - [x] SUB: Status change payload: `{ event: "panic.status_updated", panicId, previousStatus, newStatus, updatedAt }`
+    - [x] SUB: Add shared Zod schemas for both payloads in `shared/src/index.js`
 
-- [ ] TASK-08.1.4 — Wire queue into all trigger points
+- [x] TASK-08.1.4 — Wire queue into all trigger points
 
-    - [ ] SUB: Panic creation → enqueue broadcast to ALL `RESPONDER_SYSTEM` partners with `webhookUrl`
-    - [ ] SUB: Claim → enqueue status update to `PANIC_SOURCE` only
-    - [ ] SUB: Acknowledge → enqueue status update to `PANIC_SOURCE` only
-    - [ ] SUB: Dispatch → enqueue status update to `PANIC_SOURCE` + `claimedByPartner` (if set)
-    - [ ] SUB: Resolve → enqueue status update to `PANIC_SOURCE` + `claimedByPartner` (if set)
-    - [ ] SUB: Skip silently (with warning log) if partner has no `webhookUrl`
+    - [x] SUB: Panic creation → enqueue broadcast to ALL `RESPONDER_SYSTEM` partners with `webhookUrl`
+    - [x] SUB: Claim → enqueue status update to `PANIC_SOURCE` only
+    - [x] SUB: Acknowledge → enqueue status update to `PANIC_SOURCE` only
+    - [x] SUB: Dispatch → enqueue status update to `PANIC_SOURCE` + `claimedByPartner` (if set)
+    - [x] SUB: Resolve → enqueue status update to `PANIC_SOURCE` + `claimedByPartner` (if set)
+    - [x] SUB: Skip silently (with warning log) if partner has no `webhookUrl`
 
 ---
 
