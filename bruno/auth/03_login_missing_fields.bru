@@ -1,0 +1,21 @@
+meta {
+  name: Login - missing fields
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/auth/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "notanemail"
+  }
+}
+
+assert {
+  res.status: eq 400
+}

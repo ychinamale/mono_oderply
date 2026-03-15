@@ -1,0 +1,21 @@
+meta {
+  name: List panics - all
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/panics
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.data: isDefined
+  res.body.pagination: isDefined
+}

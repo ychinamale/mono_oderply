@@ -1,0 +1,22 @@
+meta {
+  name: Claim panic - success
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/panics/{{panicId}}/claim
+  body: none
+  auth: none
+}
+
+headers {
+  x-api-key: {{responderKey}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq ACKNOWLEDGED
+  res.body.claimedByPartner: isDefined
+  res.body.claimedByPartner.apiKeyHash: isUndefined
+}

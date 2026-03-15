@@ -1,0 +1,23 @@
+meta {
+  name: List partners - filter RESPONDER_SYSTEM
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/v1/partners
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+query {
+  type: RESPONDER_SYSTEM
+}
+
+assert {
+  res.status: eq 200
+}

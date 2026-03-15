@@ -1,0 +1,19 @@
+meta {
+  name: Claim panic - wrong partner type (panic source)
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/panics/{{panicId}}/claim
+  body: none
+  auth: none
+}
+
+headers {
+  x-api-key: {{panicSourceKey}}
+}
+
+assert {
+  res.status: eq 403
+}

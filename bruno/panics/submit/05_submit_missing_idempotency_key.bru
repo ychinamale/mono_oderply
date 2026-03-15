@@ -1,0 +1,27 @@
+meta {
+  name: Submit panic - missing idempotencyKey
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/v1/panics
+  body: json
+  auth: none
+}
+
+headers {
+  x-api-key: {{panicSourceKey}}
+}
+
+body:json {
+  {
+    "externalUserId": "user-abc-123",
+    "latitude": 37.7749,
+    "longitude": -122.4194
+  }
+}
+
+assert {
+  res.status: eq 400
+}

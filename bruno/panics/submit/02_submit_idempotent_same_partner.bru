@@ -1,0 +1,28 @@
+meta {
+  name: Submit panic - idempotent same partner
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/panics
+  body: json
+  auth: none
+}
+
+headers {
+  x-api-key: {{panicSourceKey}}
+}
+
+body:json {
+  {
+    "externalUserId": "user-abc-123",
+    "latitude": 37.7749,
+    "longitude": -122.4194,
+    "idempotencyKey": "FIXED-KEY-FOR-IDEMPOTENCY-TEST-001"
+  }
+}
+
+assert {
+  res.status: eq 200
+}

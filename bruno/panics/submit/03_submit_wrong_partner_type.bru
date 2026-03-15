@@ -1,0 +1,28 @@
+meta {
+  name: Submit panic - wrong partner type (responder)
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/panics
+  body: json
+  auth: none
+}
+
+headers {
+  x-api-key: {{responderKey}}
+}
+
+body:json {
+  {
+    "externalUserId": "user-abc-123",
+    "latitude": 37.7749,
+    "longitude": -122.4194,
+    "idempotencyKey": "{{$randomUUID}}"
+  }
+}
+
+assert {
+  res.status: eq 403
+}

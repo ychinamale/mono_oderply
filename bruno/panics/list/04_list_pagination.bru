@@ -1,0 +1,25 @@
+meta {
+  name: List panics - custom pagination
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/v1/panics
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+query {
+  page: 1
+  limit: 5
+}
+
+assert {
+  res.status: eq 200
+  res.body.pagination.limit: eq 5
+}

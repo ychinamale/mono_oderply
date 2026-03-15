@@ -1,0 +1,19 @@
+meta {
+  name: Security - invalid JWT
+  type: http
+  seq: 4
+}
+
+get {
+  url:{{baseUrl}}/api/v1/panics
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer thisisnotavalidtoken
+}
+
+assert {
+  res.status: eq 401
+}
