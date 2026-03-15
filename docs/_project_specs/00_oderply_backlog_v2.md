@@ -290,15 +290,15 @@
 **I want** to manually acknowledge a panic that has not yet been claimed,
 **so that** I can signal the event is being handled directly by the control room.
 
-- [ ] TASK-05.1.1 — Implement `POST /api/v1/panics/:id/acknowledge`
+- [x] TASK-05.1.1 — Implement `POST /api/v1/panics/:id/acknowledge`
 
-    - [ ] SUB: Add acknowledge route with `jwtGuard` preHandler
-    - [ ] SUB: Fetch `PanicEvent`; return 404 if not found
-    - [ ] SUB: Return 400 if status is not `PENDING`
-    - [ ] SUB: Prisma transaction: update `status → ACKNOWLEDGED`, create `PanicEventLog` with `triggeredBy: OPERATOR`, `operatorId` set
-    - [ ] SUB: Emit `panic:updated` via Socket.io
-    - [ ] SUB: Enqueue targeted webhook to `PANIC_SOURCE`
-    - [ ] SUB: Return updated panic with partner inline
+    - [x] SUB: Add acknowledge route with `jwtGuard` preHandler
+    - [x] SUB: Fetch `PanicEvent`; return 404 if not found
+    - [x] SUB: Return 400 if status is not `PENDING`
+    - [x] SUB: Prisma transaction: update `status → ACKNOWLEDGED`, create `PanicEventLog` with `triggeredBy: OPERATOR`, `operatorId` set
+    - [x] SUB: Emit `panic:updated` via Socket.io
+    - [x] SUB: Enqueue targeted webhook to `PANIC_SOURCE`
+    - [x] SUB: Return updated panic with partner inline
 
 ---
 
