@@ -27,6 +27,8 @@ export function panicRoutes(fastify: FastifyInstance) {
 
       if (panic.claimedByPartnerId) return reply.code(409).send({ error: 'Panic already claimed' })
 
+      if (panic.status !== 'PENDING') return reply.code(400).send({ error: 'Cannot claim a panic with status ' + panic.status })
+
       return reply.code(501).send()
     },
   )
