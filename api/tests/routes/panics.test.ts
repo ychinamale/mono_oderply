@@ -146,4 +146,12 @@ describe('POST /api/v1/panics', () => {
     const res = await app.inject({ method: 'POST', url: '/api/v1/panics', headers: psHeaders, payload: validBody })
     expect(res.json<{ metadata: unknown }>().metadata).toBeNull()
   })
+
+  it('returns 200 with the original event when idempotencyKey is submitted a second time', async () => {
+    const app = await createApp()
+    const first = await app.inject({ method: 'POST', url: '/api/v1/panics', headers: psHeaders, payload: validBody })
+    const second = await app.inject({ method: 'POST', url: '/api/v1/panics', headers: psHeaders, payload: validBody })
+    expect(second.statusCode).toBe(200)
+    expect(second.json<{ id: string }>().id).toBe(first.json<{ id: string }>().id)
+  })
 })
