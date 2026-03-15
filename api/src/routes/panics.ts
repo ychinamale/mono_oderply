@@ -22,7 +22,13 @@ export function panicRoutes(fastify: FastifyInstance) {
     '/api/v1/panics',
     { preHandler: jwtGuard() },
     async (_request, reply) => {
-      return reply.code(200).send({ data: [], pagination: { page: 1, limit: 20, total: 0, totalPages: 0 } })
+      const page = 1
+      const limit = 20
+      const [data, total] = await Promise.all([
+        prisma.panicEvent.findMany({ skip: 0, take: limit, include: { partner: { omit: { apiKeyHash: true } } } }),
+        prisma.panicEvent.count(),
+      ])
+      return reply.code(200).send({ data, pagination: { page, limit, total, totalPages: Math.ceil(total / limit) } })
     },
   )
 
