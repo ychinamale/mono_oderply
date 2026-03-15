@@ -68,4 +68,17 @@ describe('PanicDetail', () => {
     expect(await screen.findByText(/28\.456/)).toBeInTheDocument();
     expect(await screen.findByText(/2026/)).toBeInTheDocument();
   });
+
+  it('renders claimedByPartner name when panic has been claimed', async () => {
+    const claimed = {
+      ...panic,
+      status: 'ACKNOWLEDGED',
+      claimedByPartner: { id: 'r1', name: 'ResponderCo', type: 'RESPONDER_SYSTEM' },
+    };
+    (axios.get as Mock).mockResolvedValueOnce({ data: claimed });
+
+    renderDetail();
+
+    expect(await screen.findByText(/ResponderCo/)).toBeInTheDocument();
+  });
 });
