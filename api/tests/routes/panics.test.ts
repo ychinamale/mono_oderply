@@ -763,4 +763,18 @@ describe('GET /api/v1/panics', () => {
     expect(body.data).toHaveLength(1)
     expect(body.data[0].partnerId).toBe(source.id)
   })
+
+  it('each panic in data includes partner inline', async () => {
+    const app = await createApp()
+    const token = await getToken()
+    const source = await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    await prisma.panicEvent.create({
+      data: { externalUserId: 'u1', latitude: 0, longitude: 0, idempotencyKey: `idem-inline-1`, partnerId: source.id },
+    })
+    const res = await app.inject({ method: 'GET', url: '/api/v1/panics', headers: { authorization: `Bearer ${token}` } })
+    const body = res.json<{ data: { partner: Record<string, unknown> }[] }>()
+    expect(body.data[0].partner).toBeDefined()
+    expect(typeof body.data[0].partner).toBe('object')
+    expect(body.data[0].partner.id).toBe(source.id)
+  })
 })
