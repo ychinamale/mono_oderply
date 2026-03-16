@@ -20,6 +20,10 @@
     "prepare": "husky",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "lint:api": "eslint api/",
+    "lint:api:fix": "eslint api/ --fix",
+    "lint:client": "eslint client/",
+    "lint:client:fix": "eslint client/ --fix",
     "test": "npm test --workspaces --if-present"
   },
   "lint-staged": {
