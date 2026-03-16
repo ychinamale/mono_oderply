@@ -9,6 +9,77 @@ import { getIo } from '../lib/gateway.js'
 import prisma from '../lib/prisma.js'
 import { webhookQueue } from '../lib/webhookQueue.js'
 
+const partnerSummary = {
+  type: 'object',
+  additionalProperties: true,
+  properties: {
+    id: { type: 'string', format: 'uuid' },
+    name: { type: 'string' },
+    type: { type: 'string', enum: ['PANIC_SOURCE', 'RESPONDER_SYSTEM'] },
+  },
+} as const
+
+const panicObject = {
+  type: 'object',
+  additionalProperties: true,
+  properties: {
+    id: { type: 'string', format: 'uuid' },
+    status: { type: 'string', enum: ['PENDING', 'ACKNOWLEDGED', 'DISPATCHED', 'RESOLVED'] },
+    externalUserId: { type: 'string' },
+    latitude: { type: 'number' },
+    longitude: { type: 'number' },
+    idempotencyKey: { type: 'string' },
+    metadata: { type: 'object', additionalProperties: true, nullable: true },
+    partnerId: { type: 'string' },
+    partner: partnerSummary,
+    claimedByPartnerId: { type: 'string', nullable: true },
+    claimedByPartner: { ...partnerSummary, nullable: true },
+    createdAt: { type: 'string', format: 'date-time' },
+  },
+} as const
+
+const operatorSummary = {
+  type: 'object',
+  additionalProperties: true,
+  properties: {
+    id: { type: 'string' },
+    name: { type: 'string' },
+    email: { type: 'string' },
+  },
+} as const
+
+const panicEventLog = {
+  type: 'object',
+  additionalProperties: true,
+  properties: {
+    id: { type: 'string' },
+    panicId: { type: 'string' },
+    triggeredBy: { type: 'string', enum: ['OPERATOR', 'PARTNER_CLAIM'] },
+    fromStatus: { type: 'string' },
+    toStatus: { type: 'string' },
+    operatorId: { type: 'string', nullable: true },
+    partnerId: { type: 'string', nullable: true },
+    operator: { ...operatorSummary, nullable: true },
+    partner: { ...partnerSummary, nullable: true },
+    createdAt: { type: 'string', format: 'date-time' },
+  },
+} as const
+
+const _paginationMeta = {
+  type: 'object',
+  properties: {
+    page: { type: 'integer' },
+    limit: { type: 'integer' },
+    total: { type: 'integer' },
+    totalPages: { type: 'integer' },
+  },
+} as const
+
+const errorResponse = {
+  type: 'object',
+  properties: { error: { type: 'string' } },
+} as const
+
 const listPanicsQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
@@ -32,7 +103,41 @@ const createPanicSchema = z.object({
 export function panicRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/api/v1/panics',
-    { preHandler: jwtGuard() },
+    {
+      preHandler: jwtGuard(),
+      schema: {
+        tags: ['Panics — Operator'],
+        summary: 'List panics (paginated)',
+        security: [{ BearerAuth: [] }],
+        querystring: {
+          type: 'object',
+          properties: {
+            page: { type: 'integer', minimum: 1, default: 1 },
+            limit: { type: 'integer', minimum: 1, maximum: 100, default: 20 },
+            status: { type: 'string', enum: ['PENDING', 'ACKNOWLEDGED', 'DISPATCHED', 'RESOLVED'] },
+            partnerId: { type: 'string' },
+          },
+        },
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              data: { type: 'array', items: panicObject },
+              pagination: {
+                type: 'object',
+                properties: {
+                  page: { type: 'integer' },
+                  limit: { type: 'integer' },
+                  total: { type: 'integer' },
+                  totalPages: { type: 'integer' },
+                },
+              },
+            },
+          },
+          400: errorResponse,
+        },
+      },
+    },
     async (request, reply) => {
       const parsed = listPanicsQuerySchema.safeParse(request.query)
       if (!parsed.success) return reply.code(400).send({ error: 'Invalid query params' })
@@ -51,7 +156,16 @@ export function panicRoutes(fastify: FastifyInstance) {
 
   fastify.get(
     '/api/v1/panics/:id',
-    { preHandler: jwtGuard() },
+    {
+      preHandler: jwtGuard(),
+      schema: {
+        tags: ['Panics — Operator'],
+        summary: 'Get a panic by ID',
+        security: [{ BearerAuth: [] }],
+        params: { type: 'object', properties: { id: { type: 'string' } } },
+        response: { 200: panicObject, 404: errorResponse },
+      },
+    },
     async (request, reply) => {
       const { id } = request.params as { id: string }
       const panic = await prisma.panicEvent.findUnique({
@@ -68,7 +182,41 @@ export function panicRoutes(fastify: FastifyInstance) {
 
   fastify.get(
     '/api/v1/panics/:id/logs',
-    { preHandler: jwtGuard() },
+    {
+      preHandler: jwtGuard(),
+      schema: {
+        tags: ['Logs'],
+        summary: 'List audit logs for a panic (paginated)',
+        security: [{ BearerAuth: [] }],
+        params: { type: 'object', properties: { id: { type: 'string' } } },
+        querystring: {
+          type: 'object',
+          properties: {
+            page: { type: 'integer', minimum: 1, default: 1 },
+            limit: { type: 'integer', minimum: 1, maximum: 100, default: 20 },
+          },
+        },
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              data: { type: 'array', items: panicEventLog },
+              pagination: {
+                type: 'object',
+                properties: {
+                  page: { type: 'integer' },
+                  limit: { type: 'integer' },
+                  total: { type: 'integer' },
+                  totalPages: { type: 'integer' },
+                },
+              },
+            },
+          },
+          400: errorResponse,
+          404: errorResponse,
+        },
+      },
+    },
     async (request, reply) => {
       const { id } = request.params as { id: string }
       const parsed = listLogsQuerySchema.safeParse(request.query)
@@ -99,7 +247,19 @@ export function panicRoutes(fastify: FastifyInstance) {
 
   fastify.get(
     '/api/v1/panics/:id/logs/:logId',
-    { preHandler: jwtGuard() },
+    {
+      preHandler: jwtGuard(),
+      schema: {
+        tags: ['Logs'],
+        summary: 'Get a single audit log entry',
+        security: [{ BearerAuth: [] }],
+        params: {
+          type: 'object',
+          properties: { id: { type: 'string' }, logId: { type: 'string' } },
+        },
+        response: { 200: panicEventLog, 404: errorResponse },
+      },
+    },
     async (request, reply) => {
       const { id, logId } = request.params as { id: string; logId: string }
       const log = await prisma.panicEventLog.findFirst({
@@ -116,7 +276,16 @@ export function panicRoutes(fastify: FastifyInstance) {
 
   fastify.post(
     '/api/v1/panics/:id/acknowledge',
-    { preHandler: jwtGuard() },
+    {
+      preHandler: jwtGuard(),
+      schema: {
+        tags: ['Panics — Operator'],
+        summary: 'Acknowledge a panic',
+        security: [{ BearerAuth: [] }],
+        params: { type: 'object', properties: { id: { type: 'string' } } },
+        response: { 200: panicObject, 400: errorResponse, 404: errorResponse },
+      },
+    },
     async (request, reply) => {
       const { id } = request.params as { id: string }
       const panic = await prisma.panicEvent.findUnique({ where: { id }, select: { id: true, status: true } })
@@ -159,7 +328,16 @@ export function panicRoutes(fastify: FastifyInstance) {
 
   fastify.post(
     '/api/v1/panics/:id/dispatch',
-    { preHandler: jwtGuard() },
+    {
+      preHandler: jwtGuard(),
+      schema: {
+        tags: ['Panics — Operator'],
+        summary: 'Dispatch a panic',
+        security: [{ BearerAuth: [] }],
+        params: { type: 'object', properties: { id: { type: 'string' } } },
+        response: { 200: panicObject, 400: errorResponse, 404: errorResponse },
+      },
+    },
     async (request, reply) => {
       const { id } = request.params as { id: string }
       const panic = await prisma.panicEvent.findUnique({ where: { id }, select: { id: true, status: true } })
@@ -208,7 +386,16 @@ export function panicRoutes(fastify: FastifyInstance) {
 
   fastify.post(
     '/api/v1/panics/:id/resolve',
-    { preHandler: jwtGuard() },
+    {
+      preHandler: jwtGuard(),
+      schema: {
+        tags: ['Panics — Operator'],
+        summary: 'Resolve a panic',
+        security: [{ BearerAuth: [] }],
+        params: { type: 'object', properties: { id: { type: 'string' } } },
+        response: { 200: panicObject, 400: errorResponse, 404: errorResponse },
+      },
+    },
     async (request, reply) => {
       const { id } = request.params as { id: string }
       const panic = await prisma.panicEvent.findUnique({ where: { id }, select: { id: true, status: true } })
@@ -257,7 +444,25 @@ export function panicRoutes(fastify: FastifyInstance) {
 
   fastify.post(
     '/api/v1/panics/:id/claim',
-    { preHandler: apiKeyGuard('RESPONDER_SYSTEM') },
+    {
+      preHandler: apiKeyGuard('RESPONDER_SYSTEM'),
+      schema: {
+        tags: ['Panics — Partner'],
+        summary: 'Claim a panic (RESPONDER_SYSTEM)',
+        security: [{ ApiKeyAuth: [] }],
+        params: {
+          type: 'object',
+          properties: { id: { type: 'string' } },
+        },
+        response: {
+          200: panicObject,
+          400: errorResponse,
+          403: errorResponse,
+          404: errorResponse,
+          409: errorResponse,
+        },
+      },
+    },
     async (request, reply) => {
       const { id } = request.params as { id: string }
 
@@ -298,7 +503,7 @@ export function panicRoutes(fastify: FastifyInstance) {
         return { panic }
       })
 
-      if (result.error) return reply.code(result.error.code).send({ error: result.error.message })
+      if (result.error) return reply.code(result.error.code as 400 | 409).send({ error: result.error.message })
 
       const panicSource = await prisma.partner.findUnique({ where: { id: result.panic.partnerId }, select: { webhookUrl: true } })
       if (panicSource?.webhookUrl) {
@@ -313,7 +518,37 @@ export function panicRoutes(fastify: FastifyInstance) {
 
   fastify.post(
     '/api/v1/panics',
-    { preHandler: apiKeyGuard('PANIC_SOURCE') },
+    {
+      preHandler: apiKeyGuard('PANIC_SOURCE'),
+      schema: {
+        tags: ['Panics — Partner'],
+        summary: 'Submit a panic (PANIC_SOURCE)',
+        security: [{ ApiKeyAuth: [] }],
+        body: {
+          anyOf: [
+            {
+              type: 'object',
+              properties: {
+                externalUserId: { type: 'string' },
+                latitude: { type: 'number', minimum: -90, maximum: 90 },
+                longitude: { type: 'number', minimum: -180, maximum: 180 },
+                idempotencyKey: { type: 'string' },
+                metadata: { type: 'object', additionalProperties: true },
+              },
+            },
+            { type: 'null' },
+          ],
+        },
+        response: {
+          200: panicObject,
+          201: panicObject,
+          400: errorResponse,
+          401: errorResponse,
+          403: errorResponse,
+          409: errorResponse,
+        },
+      },
+    },
     async (request, reply) => {
       const result = createPanicSchema.safeParse(request.body)
       if (!result.success) {
