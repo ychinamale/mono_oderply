@@ -1,13 +1,13 @@
 import { render, screen } from '@testing-library/react';
-import axios from 'axios';
 import { MemoryRouter } from 'react-router-dom';
 import { vi, type Mock } from 'vitest';
 
-import { AuthContext } from '../context/AuthContext.tsx';
+import apiClient from '../../lib/apiClient.ts';
+import { AuthContext } from '../../context/AuthContext.tsx';
 
 import AuditLog from './AuditLog.tsx';
 
-vi.mock('axios');
+vi.mock('../../lib/apiClient.ts', () => ({ default: { get: vi.fn() } }));
 
 function renderLog(panicId = 'panic-1') {
   return render(
@@ -49,7 +49,7 @@ beforeEach(() => {
 
 describe('AuditLog', () => {
   it('renders each log entry as a timeline row', async () => {
-    (axios.get as Mock).mockResolvedValueOnce({
+    (apiClient.get as Mock).mockResolvedValueOnce({
       data: { data: [logOperator, logPartner], pagination: { totalPages: 1 } },
     });
 
@@ -60,7 +60,7 @@ describe('AuditLog', () => {
   });
 
   it('log entries triggered by OPERATOR show operator name', async () => {
-    (axios.get as Mock).mockResolvedValueOnce({
+    (apiClient.get as Mock).mockResolvedValueOnce({
       data: { data: [logOperator], pagination: { totalPages: 1 } },
     });
 
@@ -71,7 +71,7 @@ describe('AuditLog', () => {
   });
 
   it('log entries triggered by PARTNER_CLAIM show partner name', async () => {
-    (axios.get as Mock).mockResolvedValueOnce({
+    (apiClient.get as Mock).mockResolvedValueOnce({
       data: { data: [logPartner], pagination: { totalPages: 1 } },
     });
 

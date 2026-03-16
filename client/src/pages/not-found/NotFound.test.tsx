@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
-import AppRoutes from '../AppRoutes.tsx';
+import AppRoutes from '../../AppRoutes.tsx';
 
 describe('NotFound', () => {
   it('renders 404 page for unknown routes', () => {

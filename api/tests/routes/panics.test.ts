@@ -17,6 +17,7 @@ describe('POST /api/v1/panics', () => {
 
   afterEach(async () => {
     jest.restoreAllMocks()
+    await prisma.panicEventLog.deleteMany()
     await prisma.panicEvent.deleteMany()
   })
 

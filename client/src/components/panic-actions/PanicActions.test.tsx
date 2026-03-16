@@ -1,15 +1,15 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import axios from 'axios';
 import { MemoryRouter } from 'react-router-dom';
 import { vi, type Mock } from 'vitest';
 
-import { AuthContext } from '../context/AuthContext.tsx';
+import apiClient from '../../lib/apiClient.ts';
+import { AuthContext } from '../../context/AuthContext.tsx';
+import { type Panic } from '../panic-card/PanicCard.tsx';
 
 import PanicActions from './PanicActions.tsx';
-import { type Panic } from './PanicCard.tsx';
 
-vi.mock('axios');
+vi.mock('../../lib/apiClient.ts', () => ({ default: { get: vi.fn(), post: vi.fn() } }));
 
 const pending: Panic = {
   id: 'panic-1',
@@ -59,7 +59,7 @@ describe('PanicActions', () => {
   });
 
   it('button shows loading state while request is in-flight', async () => {
-    (axios.post as Mock).mockReturnValueOnce(new Promise(() => {})); // never resolves
+    (apiClient.post as Mock).mockReturnValueOnce(new Promise(() => {})); // never resolves
 
     renderActions(pending);
 
@@ -69,15 +69,11 @@ describe('PanicActions', () => {
   });
 
   it('calls the correct endpoint for each action button', async () => {
-    const postSpy = vi.spyOn(axios, 'post').mockResolvedValue({});
+    const postSpy = vi.spyOn(apiClient, 'post').mockResolvedValue({});
 
     const { rerender } = renderActions(pending);
     await userEvent.click(screen.getByRole('button', { name: /acknowledge/i }));
-    expect(postSpy).toHaveBeenCalledWith(
-      '/api/v1/panics/panic-1/acknowledge',
-      null,
-      expect.objectContaining({ headers: { Authorization: 'Bearer test-token' } }),
-    );
+    expect(postSpy).toHaveBeenCalledWith('/v1/panics/panic-1/acknowledge', {});
 
     rerender(
       <MemoryRouter>
@@ -89,11 +85,7 @@ describe('PanicActions', () => {
       </MemoryRouter>,
     );
     await userEvent.click(screen.getByRole('button', { name: /dispatch/i }));
-    expect(postSpy).toHaveBeenCalledWith(
-      '/api/v1/panics/panic-2/dispatch',
-      null,
-      expect.objectContaining({ headers: { Authorization: 'Bearer test-token' } }),
-    );
+    expect(postSpy).toHaveBeenCalledWith('/v1/panics/panic-2/dispatch', {});
 
     rerender(
       <MemoryRouter>
@@ -105,15 +97,11 @@ describe('PanicActions', () => {
       </MemoryRouter>,
     );
     await userEvent.click(screen.getByRole('button', { name: /resolve/i }));
-    expect(postSpy).toHaveBeenCalledWith(
-      '/api/v1/panics/panic-3/resolve',
-      null,
-      expect.objectContaining({ headers: { Authorization: 'Bearer test-token' } }),
-    );
+    expect(postSpy).toHaveBeenCalledWith('/v1/panics/panic-3/resolve', {});
   });
 
   it('displays inline error when the API returns an error response', async () => {
-    (axios.post as Mock).mockRejectedValueOnce({
+    (apiClient.post as Mock).mockRejectedValueOnce({
       response: { data: { message: 'Cannot acknowledge a panic with status ACKNOWLEDGED' } },
     });
 

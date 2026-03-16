@@ -1,6 +1,8 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { setAuthToken, clearAuthToken } from '../lib/apiClient.ts';
+
 interface Operator {
   id: string;
   email: string;
@@ -27,14 +29,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
 
   function login(newToken: string, newOperator: Operator) {
+    setAuthToken(newToken);
     setToken(newToken);
     setOperator(newOperator);
   }
 
   function logout() {
+    clearAuthToken();
     setToken(null);
     setOperator(null);
-    navigate('/login');
+    void navigate('/login');
   }
 
   return (

@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
 
-import { useAuth } from '../context/AuthContext.tsx';
+import apiClient from '../../lib/apiClient.ts';
+import { useAuth } from '../../context/AuthContext.tsx';
+
+import { useStyles } from './styles.ts';
 
 interface LogEntry {
   id: string;
@@ -24,13 +26,13 @@ export default function AuditLog({ panicId }: Props) {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const styles = useStyles();
 
   useEffect(() => {
     if (!token) return;
-    void axios
+    void apiClient
       .get<{ data: LogEntry[]; pagination: Pagination }>(
-        `/api/v1/panics/${panicId}/logs?page=${page}&limit=20`,
-        { headers: { Authorization: `Bearer ${token}` } },
+        `/v1/panics/${panicId}/logs?page=${page}&limit=20`,
       )
       .then((res) => {
         setLogs(res.data.data);
@@ -40,10 +42,10 @@ export default function AuditLog({ panicId }: Props) {
 
   return (
     <div>
-      <h3 className="text-slate-400 text-xs uppercase font-bold tracking-widest mb-3">
+      <h3 className={styles.sectionLabel}>
         Audit Log
       </h3>
-      <ul className="space-y-2">
+      <ul className={styles.logList}>
         {logs.map((log) => {
           const actor =
             log.triggeredBy === 'OPERATOR'
@@ -53,13 +55,13 @@ export default function AuditLog({ panicId }: Props) {
             <li
               key={log.id}
               data-testid={`log-row-${log.id}`}
-              className="text-xs font-mono text-slate-400 flex gap-2 items-center"
+              className={styles.logRow}
             >
-              <span className={log.triggeredBy === 'OPERATOR' ? 'text-blue-400' : 'text-amber-400'}>
+              <span className={log.triggeredBy === 'OPERATOR' ? styles.operatorTransition : styles.partnerTransition}>
                 {log.fromStatus} → {log.toStatus}
               </span>
-              <span className="text-slate-500">by {actor}</span>
-              <span className="text-slate-600">
+              <span className={styles.actor}>by {actor}</span>
+              <span className={styles.logTime}>
                 {new Date(log.createdAt).toLocaleTimeString()}
               </span>
             </li>
@@ -67,21 +69,21 @@ export default function AuditLog({ panicId }: Props) {
         })}
       </ul>
       {totalPages > 1 && (
-        <div className="flex gap-2 mt-3">
+        <div className={styles.paginationRow}>
           <button
             type="button"
             disabled={page <= 1}
             onClick={() => setPage((p) => p - 1)}
-            className="text-xs text-slate-400 disabled:opacity-40"
+            className={styles.paginationButton}
           >
             Prev
           </button>
-          <span className="text-xs text-slate-500">{page} / {totalPages}</span>
+          <span className={styles.pageIndicator}>{page} / {totalPages}</span>
           <button
             type="button"
             disabled={page >= totalPages}
             onClick={() => setPage((p) => p + 1)}
-            className="text-xs text-slate-400 disabled:opacity-40"
+            className={styles.paginationButton}
           >
             Next
           </button>

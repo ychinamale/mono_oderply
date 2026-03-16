@@ -1,12 +1,12 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import axios from 'axios';
 import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { vi } from 'vitest';
 
-import { AuthContext } from '../context/AuthContext.tsx';
+import apiClient from '../../lib/apiClient.ts';
+import { AuthContext } from '../../context/AuthContext.tsx';
 
-import Login from './Login.tsx';
+import Login from './Login.page.tsx';
 
 function CurrentPath() {
   return <span data-testid="path">{useLocation().pathname}</span>;
@@ -33,7 +33,7 @@ describe('Login', () => {
   });
 
   it('redirects to dashboard on successful login', async () => {
-    vi.spyOn(axios, 'post').mockResolvedValueOnce({
+    vi.spyOn(apiClient, 'post').mockResolvedValueOnce({
       data: { token: 'test-token', operator: { id: '1', email: 'op@test.com', name: 'Op' } },
     });
     renderLogin();
@@ -44,7 +44,7 @@ describe('Login', () => {
   });
 
   it('displays an inline error message on failed login', async () => {
-    vi.spyOn(axios, 'post').mockRejectedValueOnce({ response: { status: 401 } });
+    vi.spyOn(apiClient, 'post').mockRejectedValueOnce({ response: { status: 401 } });
     renderLogin();
     await userEvent.type(screen.getByLabelText(/email/i), 'bad@example.com');
     await userEvent.type(screen.getByLabelText(/password/i), 'wrongpass');
