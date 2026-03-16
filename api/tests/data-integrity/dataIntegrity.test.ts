@@ -45,4 +45,56 @@ describe('Data Integrity', () => {
     const logCount = await prisma.panicEventLog.count()
     expect(logCount).toBe(0)
   })
+
+  it('every PanicEventLog has exactly one of operatorId or partnerId set — never both, never neither', async () => {
+    const app = await createApp()
+    await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })
+    await prisma.partner.findFirstOrThrow({ where: { type: 'RESPONDER_SYSTEM' } })
+
+    // Create a panic via PANIC_SOURCE (creates no log)
+    const submitRes = await app.inject({
+      method: 'POST',
+      url: '/api/v1/panics',
+      headers: { 'x-api-key': 'ps-test-api-key-001' },
+      payload: { externalUserId: 'u1', latitude: 0, longitude: 0, idempotencyKey: 'invariant-test-idem-1' },
+    })
+    const panicId = submitRes.json<{ id: string }>().id
+
+    // Claim via RESPONDER_SYSTEM — creates a PARTNER_CLAIM log
+    await app.inject({
+      method: 'POST',
+      url: `/api/v1/panics/${panicId}/claim`,
+      headers: { 'x-api-key': 'rs-test-api-key-001' },
+    })
+
+    // Create a second panic and acknowledge it via operator — creates an OPERATOR log
+    const submitRes2 = await app.inject({
+      method: 'POST',
+      url: '/api/v1/panics',
+      headers: { 'x-api-key': 'ps-test-api-key-001' },
+      payload: { externalUserId: 'u2', latitude: 0, longitude: 0, idempotencyKey: 'invariant-test-idem-2' },
+    })
+    const panicId2 = submitRes2.json<{ id: string }>().id
+    const loginRes = await app.inject({
+      method: 'POST',
+      url: '/api/auth/login',
+      payload: { email: 'admin@oderply.com', password: 'Admin1234!' },
+    })
+    const token = loginRes.json<{ token: string }>().token
+    await app.inject({
+      method: 'POST',
+      url: `/api/v1/panics/${panicId2}/acknowledge`,
+      headers: { authorization: `Bearer ${token}` },
+    })
+
+    const logs = await prisma.panicEventLog.findMany()
+    expect(logs.length).toBeGreaterThan(0)
+    for (const log of logs) {
+      const hasOperator = log.operatorId !== null
+      const hasPartner = log.partnerId !== null
+      // Exactly one must be set
+      expect(hasOperator !== hasPartner).toBe(true)
+    }
+
+  })
 })
