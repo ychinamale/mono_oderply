@@ -1,5 +1,6 @@
 import jwt from '@fastify/jwt'
 import Fastify from 'fastify'
+
 import { createApp } from '../../src/app.js'
 import { jwtGuard } from '../../src/hooks/jwtGuard.js'
 import prisma from '../../src/lib/prisma.js'

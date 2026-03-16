@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals'
+
 import { webhookQueue } from '../../src/lib/webhookQueue.js'
 
 describe('webhookQueue', () => {
