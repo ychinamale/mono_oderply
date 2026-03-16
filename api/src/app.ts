@@ -23,6 +23,12 @@ export async function createApp() {
         description: 'On-Demand Emergency Response Platform API',
         contact: { name: 'ODERP-ly Team' },
       },
+      components: {
+        securitySchemes: {
+          ApiKeyAuth: { type: 'apiKey', in: 'header', name: 'x-api-key' },
+          BearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+        },
+      },
     },
   })
 
