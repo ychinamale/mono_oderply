@@ -38,6 +38,33 @@ const panicObject = {
   },
 } as const
 
+const operatorSummary = {
+  type: 'object',
+  additionalProperties: true,
+  properties: {
+    id: { type: 'string' },
+    name: { type: 'string' },
+    email: { type: 'string' },
+  },
+} as const
+
+const panicEventLog = {
+  type: 'object',
+  additionalProperties: true,
+  properties: {
+    id: { type: 'string' },
+    panicId: { type: 'string' },
+    triggeredBy: { type: 'string', enum: ['OPERATOR', 'PARTNER_CLAIM'] },
+    fromStatus: { type: 'string' },
+    toStatus: { type: 'string' },
+    operatorId: { type: 'string', nullable: true },
+    partnerId: { type: 'string', nullable: true },
+    operator: { ...operatorSummary, nullable: true },
+    partner: { ...partnerSummary, nullable: true },
+    createdAt: { type: 'string', format: 'date-time' },
+  },
+} as const
+
 const _paginationMeta = {
   type: 'object',
   properties: {
@@ -155,7 +182,41 @@ export function panicRoutes(fastify: FastifyInstance) {
 
   fastify.get(
     '/api/v1/panics/:id/logs',
-    { preHandler: jwtGuard() },
+    {
+      preHandler: jwtGuard(),
+      schema: {
+        tags: ['Logs'],
+        summary: 'List audit logs for a panic (paginated)',
+        security: [{ BearerAuth: [] }],
+        params: { type: 'object', properties: { id: { type: 'string' } } },
+        querystring: {
+          type: 'object',
+          properties: {
+            page: { type: 'integer', minimum: 1, default: 1 },
+            limit: { type: 'integer', minimum: 1, maximum: 100, default: 20 },
+          },
+        },
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              data: { type: 'array', items: panicEventLog },
+              pagination: {
+                type: 'object',
+                properties: {
+                  page: { type: 'integer' },
+                  limit: { type: 'integer' },
+                  total: { type: 'integer' },
+                  totalPages: { type: 'integer' },
+                },
+              },
+            },
+          },
+          400: errorResponse,
+          404: errorResponse,
+        },
+      },
+    },
     async (request, reply) => {
       const { id } = request.params as { id: string }
       const parsed = listLogsQuerySchema.safeParse(request.query)
@@ -186,7 +247,19 @@ export function panicRoutes(fastify: FastifyInstance) {
 
   fastify.get(
     '/api/v1/panics/:id/logs/:logId',
-    { preHandler: jwtGuard() },
+    {
+      preHandler: jwtGuard(),
+      schema: {
+        tags: ['Logs'],
+        summary: 'Get a single audit log entry',
+        security: [{ BearerAuth: [] }],
+        params: {
+          type: 'object',
+          properties: { id: { type: 'string' }, logId: { type: 'string' } },
+        },
+        response: { 200: panicEventLog, 404: errorResponse },
+      },
+    },
     async (request, reply) => {
       const { id, logId } = request.params as { id: string; logId: string }
       const log = await prisma.panicEventLog.findFirst({
