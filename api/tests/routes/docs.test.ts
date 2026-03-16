@@ -17,6 +17,17 @@ describe('API Documentation', () => {
     expect(spec.info.title).toBe('ODERP-ly API')
   })
 
+  it('openapi.json spec has POST /api/auth/login annotated with tag "Auth", 200 and 401 responses', async () => {
+    const app = await createApp()
+    const res = await app.inject({ method: 'GET', url: '/docs/openapi.json' })
+    const spec = JSON.parse(res.body)
+    const login = spec.paths?.['/api/auth/login']?.post
+    expect(login).toBeDefined()
+    expect(login.tags).toContain('Auth')
+    expect(login.responses?.['200']).toBeDefined()
+    expect(login.responses?.['401']).toBeDefined()
+  })
+
   it('GET /docs/openapi.json spec contains ApiKeyAuth and BearerAuth security schemes', async () => {
     const app = await createApp()
     const res = await app.inject({ method: 'GET', url: '/docs/openapi.json' })
