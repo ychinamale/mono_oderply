@@ -731,14 +731,24 @@
 **I want** a clean README and well-structured codebase,
 **so that** I can walk through the project confidently during the demo.
 
-- [ ] TASK-11.2.1 — Write README
+- [x] TASK-11.2.1 — Write README
 
-    - [ ] SUB: Document project overview and tech stack
-    - [ ] SUB: Document local setup steps (prerequisites, install, migrate, seed, dev)
-    - [ ] SUB: Document all environment variables with descriptions
-    - [ ] SUB: Document API endpoints with example curl commands for ingestion and claim
-    - [ ] SUB: Document demo credentials (operator login, partner API keys)
-    - [ ] SUB: Include architecture diagram (link to `.md` file in repo)
+    - [x] SUB: Document project overview and tech stack
+    - [x] SUB: Document local setup steps (prerequisites, install, migrate, seed, dev)
+    - [x] SUB: Document all environment variables with descriptions
+    - [x] SUB: Document API endpoints with example curl commands for ingestion and claim
+    - [x] SUB: Document demo credentials (operator login, partner API keys)
+    - [x] SUB: Include architecture diagram (link to `.md` file in repo)
+    - [x] SUB: Document the OpenAPI/Swagger UI (`/docs` endpoint and `/docs/openapi.json`)
+    - [x] SUB: Document WebSocket/real-time behaviour (`panic:new` / `panic:updated` events)
+    - [x] SUB: Document partner integration guides (link to `docs/partner-guides/`)
+    - [x] SUB: Document test coverage (commands + numbers: 137 API, 29 client)
+    - [x] SUB: Write api/README.md (Fastify app structure: routes, hooks, lib, Prisma, tests)
+    - [x] SUB: Write client/README.md (React/Vite app: pages, components, hooks)
+    - [x] SUB: Write shared/README.md (Zod schemas shared between api and client)
+    - [x] SUB: Add demo walkthrough section (happy path: submit → claim → operator transitions)
+    - [x] SUB: Document the Bruno collection (33 requests, how to open and use)
+    - [x] SUB: Add "Agentic Development" section (CLAUDE.md + docs/01_AGENTIC_DEV_SETUP.md)
 
 - [ ] TASK-11.2.2 — Clean up codebase for demo
 
