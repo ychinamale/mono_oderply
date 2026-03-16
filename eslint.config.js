@@ -1,5 +1,76 @@
 // eslint.config.js (monorepo root)
 import js from '@eslint/js'
+
+const localPlugin = {
+  rules: {
+    'page-in-subdirectory': {
+      create(context) {
+        return {
+          Program() {
+            const f = context.filename.replaceAll('\\', '/')
+            if (/\/client\/src\/pages\/[^/]+\.[tj]sx?$/.test(f)) {
+              context.report({
+                loc: { line: 1, column: 0 },
+                message: 'Page files must live in a subdirectory: pages/<name>/Name.page.tsx',
+              })
+            }
+          },
+        }
+      },
+    },
+    'component-in-subdirectory': {
+      create(context) {
+        return {
+          Program() {
+            const f = context.filename.replaceAll('\\', '/')
+            if (/\/client\/src\/components\/[^/]+\.[tj]sx?$/.test(f)) {
+              context.report({
+                loc: { line: 1, column: 0 },
+                message: 'Component files must live in a subdirectory: components/<name>/Name.tsx',
+              })
+            }
+          },
+        }
+      },
+    },
+    'page-file-naming': {
+      create(context) {
+        return {
+          Program() {
+            const f = context.filename.replaceAll('\\', '/')
+            const match = /\/client\/src\/pages\/[^/]+\/([^/]+\.tsx)$/.exec(f)
+            if (match && !match[1].endsWith('.test.tsx') && !match[1].endsWith('.page.tsx')) {
+              context.report({
+                loc: { line: 1, column: 0 },
+                message: 'Page components must be named *.page.tsx',
+              })
+            }
+          },
+        }
+      },
+    },
+    'no-inline-classname': {
+      create(context) {
+        return {
+          JSXAttribute(node) {
+            if (
+              node.name.name === 'className' &&
+              node.value?.type === 'Literal' &&
+              typeof node.value.value === 'string' &&
+              node.value.value.trim() !== ''
+            ) {
+              context.report({
+                node,
+                message:
+                  'Inline className strings are not allowed — extract styles into styles.ts and use useStyles()',
+              })
+            }
+          },
+        }
+      },
+    },
+  },
+}
 import tseslint from 'typescript-eslint'
 import importPlugin from 'eslint-plugin-import'
 import security from 'eslint-plugin-security'
@@ -85,6 +156,26 @@ export default tseslint.config(
       '@typescript-eslint/no-unsafe-member-access': 'off',
       '@typescript-eslint/no-unsafe-argument': 'off',
       '@typescript-eslint/no-unsafe-return': 'off',
+    },
+  },
+
+  // Structural rules — client src files must use subdirectory layout
+  {
+    files: ['client/src/**/*.{ts,tsx}'],
+    plugins: { local: localPlugin },
+    rules: {
+      'local/page-in-subdirectory':      'error',
+      'local/component-in-subdirectory': 'error',
+      'local/page-file-naming':          'error',
+    },
+  },
+
+  // No inline className strings — client TSX only
+  {
+    files: ['client/src/**/*.tsx'],
+    plugins: { local: localPlugin },
+    rules: {
+      'local/no-inline-classname': 'error',
     },
   },
 
