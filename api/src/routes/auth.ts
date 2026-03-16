@@ -8,7 +8,44 @@ const emailSchema = z.object({ email: z.email() })
 const passwordSchema = z.object({ password: z.string().min(1) })
 
 export function authRoutes(fastify: FastifyInstance) {
-  fastify.post('/api/auth/login', async (request, reply) => {
+  fastify.post('/api/auth/login', {
+    schema: {
+      tags: ['Auth'],
+      summary: 'Operator login',
+      body: {
+        type: 'object',
+        required: ['email', 'password'],
+        properties: {
+          email: { type: 'string', format: 'email' },
+          password: { type: 'string', minLength: 1 },
+        },
+      },
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            token: { type: 'string' },
+            operator: {
+              type: 'object',
+              properties: {
+                id: { type: 'string', format: 'uuid' },
+                name: { type: 'string' },
+                email: { type: 'string', format: 'email' },
+              },
+            },
+          },
+        },
+        400: {
+          type: 'object',
+          properties: { error: { type: 'string' } },
+        },
+        401: {
+          type: 'object',
+          properties: { error: { type: 'string' } },
+        },
+      },
+    },
+  }, async (request, reply) => {
     const emailResult = emailSchema.safeParse(request.body)
     if (!emailResult.success) {
       return reply.code(400).send({ error: 'Invalid request body' })
