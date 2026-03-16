@@ -267,14 +267,14 @@ Each section covers a testable concern. Within each section, tests are grouped b
 
 **Type:** Integration
 
-- [ ] `it('idempotencyKey UNIQUE constraint prevents duplicate PanicEvent rows at the DB level')`
+- [x] `it('idempotencyKey UNIQUE constraint prevents duplicate PanicEvent rows at the DB level')`
     - Insert two rows with the same key directly via Prisma; expect a constraint error
-- [ ] `it('PanicEvent and PanicEventLog are always written together — never one without the other')`
+- [x] `it('PanicEvent and PanicEventLog are always written together — never one without the other')`
     - Simulate a transaction failure midway; confirm neither partial write persists
-- [ ] `it('every PanicEventLog has exactly one of operatorId or partnerId set — never both, never neither')`
+- [x] `it('every PanicEventLog has exactly one of operatorId or partnerId set — never both, never neither')`
     - Assert across all log entries created by tests
-- [ ] `it('claimedByPartnerId always references a RESPONDER_SYSTEM partner — never a PANIC_SOURCE')`
-- [ ] `it('apiKeyHash is never returned by any API endpoint')`
+- [x] `it('claimedByPartnerId always references a RESPONDER_SYSTEM partner — never a PANIC_SOURCE')`
+- [x] `it('apiKeyHash is never returned by any API endpoint')`
     - Exhaustively check all response shapes across all partner-returning endpoints
 
 ---
