@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import axios from 'axios';
 
-import { useAuth } from '../context/AuthContext.tsx';
+import apiClient from '../lib/apiClient.ts';
 
 import { type Panic } from './PanicCard.tsx';
 
@@ -16,7 +15,6 @@ const ACTION_MAP: Record<string, { label: string; endpoint: string; className: s
 };
 
 export default function PanicActions({ panic }: PanicActionsProps) {
-  const { token } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,10 +24,8 @@ export default function PanicActions({ panic }: PanicActionsProps) {
   function handleClick() {
     setLoading(true);
     setError(null);
-    void axios
-      .post(`/api/v1/panics/${panic.id}/${action!.endpoint}`, null, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+    void apiClient
+      .post(`/v1/panics/${panic.id}/${action!.endpoint}`, null)
       .catch((err: { response?: { data?: { message?: string } } }) => {
         setError(err.response?.data?.message ?? 'An error occurred');
       })

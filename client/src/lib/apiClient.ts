@@ -1,8 +1,13 @@
 import axios from 'axios';
 
-export function createApiClient(token: string | null) {
-  return axios.create({
-    baseURL: '/api',
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  });
+const apiClient = axios.create({ baseURL: '/api' });
+
+export function setAuthToken(token: string) {
+  apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 }
+
+export function clearAuthToken() {
+  delete apiClient.defaults.headers.common['Authorization'];
+}
+
+export default apiClient;

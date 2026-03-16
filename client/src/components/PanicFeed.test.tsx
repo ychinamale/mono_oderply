@@ -1,15 +1,15 @@
 import { render, screen, act, waitFor } from '@testing-library/react';
-import axios from 'axios';
 import { io } from 'socket.io-client';
 import { MemoryRouter } from 'react-router-dom';
 import { vi, type Mock } from 'vitest';
 
+import apiClient from '../lib/apiClient.ts';
 import { AuthContext } from '../context/AuthContext.tsx';
 
 import PanicFeed from './PanicFeed.tsx';
 
 vi.mock('socket.io-client', () => ({ io: vi.fn() }));
-vi.mock('axios');
+vi.mock('../lib/apiClient.ts', () => ({ default: { get: vi.fn() } }));
 
 const socketHandlers: Record<string, (data: unknown) => void> = {};
 
@@ -76,7 +76,7 @@ beforeEach(() => {
 
 describe('PanicFeed', () => {
   it('renders a PanicCard for each panic in the initial fetch response', async () => {
-    (axios.get as Mock).mockResolvedValueOnce({
+    (apiClient.get as Mock).mockResolvedValueOnce({
       data: { data: [panicA, panicB] },
     });
 
@@ -86,7 +86,7 @@ describe('PanicFeed', () => {
   });
 
   it('disconnects the socket on component unmount', async () => {
-    (axios.get as Mock).mockResolvedValueOnce({ data: { data: [] } });
+    (apiClient.get as Mock).mockResolvedValueOnce({ data: { data: [] } });
 
     const { unmount } = renderFeed();
 
@@ -100,7 +100,7 @@ describe('PanicFeed', () => {
   });
 
   it('PENDING panics are visually distinct from other statuses', async () => {
-    (axios.get as Mock).mockResolvedValueOnce({
+    (apiClient.get as Mock).mockResolvedValueOnce({
       data: { data: [panicA, panicB] }, // panicA=PENDING, panicB=ACKNOWLEDGED
     });
 
@@ -112,7 +112,7 @@ describe('PanicFeed', () => {
   });
 
   it('shows an error state when the initial fetch fails', async () => {
-    (axios.get as Mock).mockRejectedValueOnce(new Error('Network error'));
+    (apiClient.get as Mock).mockRejectedValueOnce(new Error('Network error'));
 
     renderFeed();
 
@@ -120,7 +120,7 @@ describe('PanicFeed', () => {
   });
 
   it('shows a loading skeleton while the initial fetch is in progress', () => {
-    (axios.get as Mock).mockReturnValueOnce(new Promise(() => {})); // never resolves
+    (apiClient.get as Mock).mockReturnValueOnce(new Promise(() => {})); // never resolves
 
     renderFeed();
 
@@ -128,7 +128,7 @@ describe('PanicFeed', () => {
   });
 
   it('updates the correct PanicCard when panic:updated socket event is received', async () => {
-    (axios.get as Mock).mockResolvedValueOnce({
+    (apiClient.get as Mock).mockResolvedValueOnce({
       data: { data: [panicA, panicB] },
     });
 
@@ -145,7 +145,7 @@ describe('PanicFeed', () => {
   });
 
   it('prepends a new PanicCard when panic:new socket event is received', async () => {
-    (axios.get as Mock).mockResolvedValueOnce({
+    (apiClient.get as Mock).mockResolvedValueOnce({
       data: { data: [panicA, panicB] },
     });
 

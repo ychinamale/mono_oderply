@@ -1,7 +1,7 @@
-import axios from 'axios';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import apiClient from '../lib/apiClient.ts';
 import { useAuth } from '../context/AuthContext.tsx';
 
 interface LoginResponse {
@@ -19,9 +19,9 @@ export default function Login() {
   async function handleSubmit() {
     setError(null);
     try {
-      const { data } = await axios.post<LoginResponse>('/api/auth/login', { email, password });
+      const { data } = await apiClient.post<LoginResponse>('/auth/login', { email, password });
       login(data.token, data.operator);
-      navigate('/dashboard');
+      void navigate('/dashboard');
     } catch {
       setError('Invalid email or password.');
     }

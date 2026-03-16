@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
 
+import apiClient from '../lib/apiClient.ts';
 import { useAuth } from '../context/AuthContext.tsx';
 import { useSocket } from '../hooks/useSocket.tsx';
 import AuditLog from '../components/AuditLog.tsx';
@@ -23,10 +23,8 @@ export default function PanicDetail() {
 
   useEffect(() => {
     if (!token || !id) return;
-    void axios
-      .get<Panic>(`/api/v1/panics/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+    void apiClient
+      .get<Panic>(`/v1/panics/${id}`)
       .then((res) => setPanic(res.data));
   }, [token, id]);
 

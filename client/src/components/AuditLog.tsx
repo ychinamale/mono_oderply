@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
 
+import apiClient from '../lib/apiClient.ts';
 import { useAuth } from '../context/AuthContext.tsx';
 
 interface LogEntry {
@@ -27,10 +27,9 @@ export default function AuditLog({ panicId }: Props) {
 
   useEffect(() => {
     if (!token) return;
-    void axios
+    void apiClient
       .get<{ data: LogEntry[]; pagination: Pagination }>(
-        `/api/v1/panics/${panicId}/logs?page=${page}&limit=20`,
-        { headers: { Authorization: `Bearer ${token}` } },
+        `/v1/panics/${panicId}/logs?page=${page}&limit=20`,
       )
       .then((res) => {
         setLogs(res.data.data);

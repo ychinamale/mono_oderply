@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
 
+import apiClient from '../lib/apiClient.ts';
 import { useAuth } from '../context/AuthContext.tsx';
 import { useSocket } from '../hooks/useSocket.tsx';
 
@@ -16,10 +16,8 @@ export default function PanicFeed() {
   useEffect(() => {
     if (!token) return;
     setLoading(true);
-    void axios
-      .get<{ data: Panic[] }>('/api/v1/panics', {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+    void apiClient
+      .get<{ data: Panic[] }>('/v1/panics')
       .then((res) => {
         setPanics(res.data.data);
         setLoading(false);

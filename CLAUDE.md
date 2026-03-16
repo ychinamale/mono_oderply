@@ -127,7 +127,7 @@ When a task is complete:
 3. Mark the task complete in the backlog: check the task checkbox AND all sub-task
    checkboxes (`- [x]`) in docs/_project_specs/00_oderply_backlog_v2.md.
 4. Commit the backlog update and push.
-5. Open a PR.
+5. Open a PR: run `npm run lint` first, fix any errors and commit the fixes, then create the PR.
 
 Do NOT open a PR before the backlog has been updated, committed, and pushed.
 Do NOT ask about marking a task complete before the work is committed and pushed.
@@ -137,6 +137,17 @@ Do NOT ask about marking a task complete before the work is committed and pushed
 - Commit format: type(scope): description [RED|GREEN|REFACTOR]
 - One PR per task, reviewed before merging into develop
 - Never commit .env files
+
+## Linting
+
+Never run `npm run lint` during task implementation — it wastes tokens and the output is
+irrelevant until the work is done.
+
+Lint only as the first step of opening a PR (step 5 above):
+1. `npm run lint`
+2. Fix any errors
+3. Commit the fixes (if any)
+4. Then create the PR
 
 ## Useful commands
 - npm run lint              — lint entire project

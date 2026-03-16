@@ -1,15 +1,15 @@
 import { render, screen, act } from '@testing-library/react';
-import axios from 'axios';
 import { io } from 'socket.io-client';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { vi, type Mock } from 'vitest';
 
+import apiClient from '../lib/apiClient.ts';
 import { AuthContext } from '../context/AuthContext.tsx';
 
 import PanicDetail from './PanicDetail.tsx';
 
 vi.mock('socket.io-client', () => ({ io: vi.fn() }));
-vi.mock('axios');
+vi.mock('../lib/apiClient.ts', () => ({ default: { get: vi.fn() } }));
 
 const socketHandlers: Record<string, (data: unknown) => void> = {};
 
@@ -57,13 +57,13 @@ beforeEach(() => {
   for (const key of Object.keys(socketHandlers)) delete socketHandlers[key];
   (io as Mock).mockReturnValue(mockSocket);
   // AuditLog is rendered inside PanicDetail; queue a default empty-logs response
-  // so every test's second axios.get (for /logs) resolves cleanly.
-  (axios.get as Mock).mockResolvedValue(emptyLogs);
+  // so every test's second apiClient.get (for /logs) resolves cleanly.
+  (apiClient.get as Mock).mockResolvedValue(emptyLogs);
 });
 
 describe('PanicDetail', () => {
   it('renders status badge, partner name, coordinates, and createdAt', async () => {
-    (axios.get as Mock).mockResolvedValueOnce({ data: panic });
+    (apiClient.get as Mock).mockResolvedValueOnce({ data: panic });
 
     renderDetail();
 
@@ -80,7 +80,7 @@ describe('PanicDetail', () => {
       status: 'ACKNOWLEDGED',
       claimedByPartner: { id: 'r1', name: 'ResponderCo', type: 'RESPONDER_SYSTEM' },
     };
-    (axios.get as Mock).mockResolvedValueOnce({ data: claimed });
+    (apiClient.get as Mock).mockResolvedValueOnce({ data: claimed });
 
     renderDetail();
 
@@ -88,7 +88,7 @@ describe('PanicDetail', () => {
   });
 
   it('does not render claimedByPartner section when panic is unclaimed', async () => {
-    (axios.get as Mock).mockResolvedValueOnce({ data: panic }); // claimedByPartner: null
+    (apiClient.get as Mock).mockResolvedValueOnce({ data: panic }); // claimedByPartner: null
 
     renderDetail();
 
@@ -97,7 +97,7 @@ describe('PanicDetail', () => {
   });
 
   it('updates detail view when panic:updated event is received for the current panic', async () => {
-    (axios.get as Mock).mockResolvedValueOnce({ data: panic });
+    (apiClient.get as Mock).mockResolvedValueOnce({ data: panic });
 
     renderDetail();
     await screen.findByText('PENDING');
@@ -109,7 +109,7 @@ describe('PanicDetail', () => {
   });
 
   it('does not update detail view when panic:updated event is for a different panic', async () => {
-    (axios.get as Mock).mockResolvedValueOnce({ data: panic });
+    (apiClient.get as Mock).mockResolvedValueOnce({ data: panic });
 
     renderDetail();
     await screen.findByText('PENDING');
