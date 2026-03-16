@@ -95,6 +95,30 @@ describe('Data Integrity', () => {
       // Exactly one must be set
       expect(hasOperator !== hasPartner).toBe(true)
     }
+  })
 
+  it('claimedByPartnerId always references a RESPONDER_SYSTEM partner — never a PANIC_SOURCE', async () => {
+    const app = await createApp()
+    const submitRes = await app.inject({
+      method: 'POST',
+      url: '/api/v1/panics',
+      headers: { 'x-api-key': 'ps-test-api-key-001' },
+      payload: { externalUserId: 'u1', latitude: 0, longitude: 0, idempotencyKey: 'claim-type-test-idem' },
+    })
+    const panicId = submitRes.json<{ id: string }>().id
+    await app.inject({
+      method: 'POST',
+      url: `/api/v1/panics/${panicId}/claim`,
+      headers: { 'x-api-key': 'rs-test-api-key-001' },
+    })
+
+    const claimed = await prisma.panicEvent.findMany({
+      where: { claimedByPartnerId: { not: null } },
+      include: { claimedByPartner: true },
+    })
+    expect(claimed.length).toBeGreaterThan(0)
+    for (const event of claimed) {
+      expect(event.claimedByPartner?.type).toBe('RESPONDER_SYSTEM')
+    }
   })
 })
