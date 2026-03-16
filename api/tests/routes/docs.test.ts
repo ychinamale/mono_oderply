@@ -28,6 +28,24 @@ describe('API Documentation', () => {
     expect(login.responses?.['401']).toBeDefined()
   })
 
+  it('openapi.json spec has POST /api/v1/panics annotated with tag "Panics — Partner" and ApiKeyAuth security', async () => {
+    const app = await createApp()
+    const res = await app.inject({ method: 'GET', url: '/docs/openapi.json' })
+    const spec = JSON.parse(res.body)
+    const create = spec.paths?.['/api/v1/panics']?.post
+    expect(create).toBeDefined()
+    expect(create.tags).toContain('Panics — Partner')
+    expect(create.security).toEqual(expect.arrayContaining([{ ApiKeyAuth: [] }]))
+    expect(create.responses?.['201']).toBeDefined()
+    expect(create.responses?.['409']).toBeDefined()
+    const claim = spec.paths?.['/api/v1/panics/{id}/claim']?.post
+    expect(claim).toBeDefined()
+    expect(claim.tags).toContain('Panics — Partner')
+    expect(claim.security).toEqual(expect.arrayContaining([{ ApiKeyAuth: [] }]))
+    expect(claim.responses?.['200']).toBeDefined()
+    expect(claim.responses?.['409']).toBeDefined()
+  })
+
   it('GET /docs/openapi.json spec contains ApiKeyAuth and BearerAuth security schemes', async () => {
     const app = await createApp()
     const res = await app.inject({ method: 'GET', url: '/docs/openapi.json' })
