@@ -28,6 +28,23 @@ describe('API Documentation', () => {
     expect(login.responses?.['401']).toBeDefined()
   })
 
+  it('openapi.json spec has partner routes annotated with tag "Partners", BearerAuth, and no apiKeyHash in schema', async () => {
+    const app = await createApp()
+    const res = await app.inject({ method: 'GET', url: '/docs/openapi.json' })
+    const spec = JSON.parse(res.body)
+    const listPartners = spec.paths?.['/api/v1/partners']?.get
+    expect(listPartners).toBeDefined()
+    expect(listPartners.tags).toContain('Partners')
+    expect(listPartners.security).toEqual(expect.arrayContaining([{ BearerAuth: [] }]))
+    expect(listPartners.responses?.['200']).toBeDefined()
+    const getPartner = spec.paths?.['/api/v1/partners/{id}']?.get
+    expect(getPartner).toBeDefined()
+    expect(getPartner.tags).toContain('Partners')
+    expect(getPartner.responses?.['404']).toBeDefined()
+    const specStr = JSON.stringify(spec)
+    expect(specStr).not.toContain('apiKeyHash')
+  })
+
   it('openapi.json spec has log routes annotated with tag "Logs" and BearerAuth', async () => {
     const app = await createApp()
     const res = await app.inject({ method: 'GET', url: '/docs/openapi.json' })
