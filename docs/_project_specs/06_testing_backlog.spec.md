@@ -301,13 +301,13 @@ Each section covers a testable concern. Within each section, tests are grouped b
 
 **Type:** Unit (React Testing Library)
 
-- [ ] `it('renders a PanicCard for each panic in the initial fetch response')`
-- [ ] `it('prepends a new PanicCard when panic:new socket event is received')`
-- [ ] `it('updates the correct PanicCard when panic:updated socket event is received')`
-- [ ] `it('shows a loading skeleton while the initial fetch is in progress')`
-- [ ] `it('shows an error state when the initial fetch fails')`
-- [ ] `it('PENDING panics are visually distinct from other statuses')`
-- [ ] `it('disconnects the socket on component unmount')`
+- [x] `it('renders a PanicCard for each panic in the initial fetch response')`
+- [x] `it('prepends a new PanicCard when panic:new socket event is received')`
+- [x] `it('updates the correct PanicCard when panic:updated socket event is received')`
+- [x] `it('shows a loading skeleton while the initial fetch is in progress')`
+- [x] `it('shows an error state when the initial fetch fails')`
+- [x] `it('PENDING panics are visually distinct from other statuses')`
+- [x] `it('disconnects the socket on component unmount')`
 
 ---
 
