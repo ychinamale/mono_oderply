@@ -28,6 +28,30 @@ describe('API Documentation', () => {
     expect(login.responses?.['401']).toBeDefined()
   })
 
+  it('openapi.json spec has operator panic routes annotated with tag "Panics — Operator" and BearerAuth', async () => {
+    const app = await createApp()
+    const res = await app.inject({ method: 'GET', url: '/docs/openapi.json' })
+    const spec = JSON.parse(res.body)
+    const paths = spec.paths
+    const listPanics = paths?.['/api/v1/panics']?.get
+    expect(listPanics).toBeDefined()
+    expect(listPanics.tags).toContain('Panics — Operator')
+    expect(listPanics.security).toEqual(expect.arrayContaining([{ BearerAuth: [] }]))
+    expect(listPanics.responses?.['200']).toBeDefined()
+    const getPanic = paths?.['/api/v1/panics/{id}']?.get
+    expect(getPanic).toBeDefined()
+    expect(getPanic.tags).toContain('Panics — Operator')
+    expect(getPanic.responses?.['404']).toBeDefined()
+    for (const action of ['acknowledge', 'dispatch', 'resolve']) {
+      const route = paths?.[`/api/v1/panics/{id}/${action}`]?.post
+      expect(route).toBeDefined()
+      expect(route.tags).toContain('Panics — Operator')
+      expect(route.security).toEqual(expect.arrayContaining([{ BearerAuth: [] }]))
+      expect(route.responses?.['200']).toBeDefined()
+      expect(route.responses?.['400']).toBeDefined()
+    }
+  })
+
   it('openapi.json spec has POST /api/v1/panics annotated with tag "Panics — Partner" and ApiKeyAuth security', async () => {
     const app = await createApp()
     const res = await app.inject({ method: 'GET', url: '/docs/openapi.json' })
