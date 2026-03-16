@@ -76,7 +76,41 @@ const createPanicSchema = z.object({
 export function panicRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/api/v1/panics',
-    { preHandler: jwtGuard() },
+    {
+      preHandler: jwtGuard(),
+      schema: {
+        tags: ['Panics — Operator'],
+        summary: 'List panics (paginated)',
+        security: [{ BearerAuth: [] }],
+        querystring: {
+          type: 'object',
+          properties: {
+            page: { type: 'integer', minimum: 1, default: 1 },
+            limit: { type: 'integer', minimum: 1, maximum: 100, default: 20 },
+            status: { type: 'string', enum: ['PENDING', 'ACKNOWLEDGED', 'DISPATCHED', 'RESOLVED'] },
+            partnerId: { type: 'string' },
+          },
+        },
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              data: { type: 'array', items: panicObject },
+              pagination: {
+                type: 'object',
+                properties: {
+                  page: { type: 'integer' },
+                  limit: { type: 'integer' },
+                  total: { type: 'integer' },
+                  totalPages: { type: 'integer' },
+                },
+              },
+            },
+          },
+          400: errorResponse,
+        },
+      },
+    },
     async (request, reply) => {
       const parsed = listPanicsQuerySchema.safeParse(request.query)
       if (!parsed.success) return reply.code(400).send({ error: 'Invalid query params' })
@@ -95,7 +129,16 @@ export function panicRoutes(fastify: FastifyInstance) {
 
   fastify.get(
     '/api/v1/panics/:id',
-    { preHandler: jwtGuard() },
+    {
+      preHandler: jwtGuard(),
+      schema: {
+        tags: ['Panics — Operator'],
+        summary: 'Get a panic by ID',
+        security: [{ BearerAuth: [] }],
+        params: { type: 'object', properties: { id: { type: 'string' } } },
+        response: { 200: panicObject, 404: errorResponse },
+      },
+    },
     async (request, reply) => {
       const { id } = request.params as { id: string }
       const panic = await prisma.panicEvent.findUnique({
@@ -160,7 +203,16 @@ export function panicRoutes(fastify: FastifyInstance) {
 
   fastify.post(
     '/api/v1/panics/:id/acknowledge',
-    { preHandler: jwtGuard() },
+    {
+      preHandler: jwtGuard(),
+      schema: {
+        tags: ['Panics — Operator'],
+        summary: 'Acknowledge a panic',
+        security: [{ BearerAuth: [] }],
+        params: { type: 'object', properties: { id: { type: 'string' } } },
+        response: { 200: panicObject, 400: errorResponse, 404: errorResponse },
+      },
+    },
     async (request, reply) => {
       const { id } = request.params as { id: string }
       const panic = await prisma.panicEvent.findUnique({ where: { id }, select: { id: true, status: true } })
@@ -203,7 +255,16 @@ export function panicRoutes(fastify: FastifyInstance) {
 
   fastify.post(
     '/api/v1/panics/:id/dispatch',
-    { preHandler: jwtGuard() },
+    {
+      preHandler: jwtGuard(),
+      schema: {
+        tags: ['Panics — Operator'],
+        summary: 'Dispatch a panic',
+        security: [{ BearerAuth: [] }],
+        params: { type: 'object', properties: { id: { type: 'string' } } },
+        response: { 200: panicObject, 400: errorResponse, 404: errorResponse },
+      },
+    },
     async (request, reply) => {
       const { id } = request.params as { id: string }
       const panic = await prisma.panicEvent.findUnique({ where: { id }, select: { id: true, status: true } })
@@ -252,7 +313,16 @@ export function panicRoutes(fastify: FastifyInstance) {
 
   fastify.post(
     '/api/v1/panics/:id/resolve',
-    { preHandler: jwtGuard() },
+    {
+      preHandler: jwtGuard(),
+      schema: {
+        tags: ['Panics — Operator'],
+        summary: 'Resolve a panic',
+        security: [{ BearerAuth: [] }],
+        params: { type: 'object', properties: { id: { type: 'string' } } },
+        response: { 200: panicObject, 400: errorResponse, 404: errorResponse },
+      },
+    },
     async (request, reply) => {
       const { id } = request.params as { id: string }
       const panic = await prisma.panicEvent.findUnique({ where: { id }, select: { id: true, status: true } })
