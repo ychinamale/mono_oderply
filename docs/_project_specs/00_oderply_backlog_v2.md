@@ -633,37 +633,37 @@
 **I want** to verify the complete panic lifecycle works across all components,
 **so that** I can deploy with confidence.
 
-- [ ] TASK-10.1.1 — Verify panic ingestion end-to-end
+- [x] TASK-10.1.1 — Verify panic ingestion end-to-end
 
-    - [ ] SUB: Submit panic via Postman/curl as `PANIC_SOURCE` partner
-    - [ ] SUB: Confirm 201 response with correct shape
-    - [ ] SUB: Confirm `PanicEvent` row exists in DB with correct data
-    - [ ] SUB: Confirm operator dashboard receives `panic:new` WebSocket event
-    - [ ] SUB: Confirm all `RESPONDER_SYSTEM` webhook URLs receive the broadcast
+    - [x] SUB: Submit panic via Postman/curl as `PANIC_SOURCE` partner
+    - [x] SUB: Confirm 201 response with correct shape
+    - [x] SUB: Confirm `PanicEvent` row exists in DB with correct data
+    - [x] SUB: Confirm operator dashboard receives `panic:new` WebSocket event
+    - [x] SUB: Confirm all `RESPONDER_SYSTEM` webhook URLs receive the broadcast
 
-- [ ] TASK-10.1.2 — Verify responder claim end-to-end
+- [x] TASK-10.1.2 — Verify responder claim end-to-end
 
-    - [ ] SUB: Claim the panic as a `RESPONDER_SYSTEM` partner
-    - [ ] SUB: Confirm 200 response, status is `ACKNOWLEDGED`, `claimedByPartnerId` set
-    - [ ] SUB: Confirm `PanicEventLog` row with `triggeredBy: PARTNER_CLAIM`
-    - [ ] SUB: Confirm operator dashboard receives `panic:updated`
-    - [ ] SUB: Confirm `PANIC_SOURCE` webhook receives status update
-    - [ ] SUB: Confirm second claim attempt returns 409
+    - [x] SUB: Claim the panic as a `RESPONDER_SYSTEM` partner
+    - [x] SUB: Confirm 200 response, status is `ACKNOWLEDGED`, `claimedByPartnerId` set
+    - [x] SUB: Confirm `PanicEventLog` row with `triggeredBy: PARTNER_CLAIM`
+    - [x] SUB: Confirm operator dashboard receives `panic:updated`
+    - [x] SUB: Confirm `PANIC_SOURCE` webhook receives status update
+    - [x] SUB: Confirm second claim attempt returns 409
 
-- [ ] TASK-10.1.3 — Verify operator status transitions end-to-end
+- [x] TASK-10.1.3 — Verify operator status transitions end-to-end
 
-    - [ ] SUB: Dispatch the panic as an operator
-    - [ ] SUB: Confirm `PanicEventLog` with `triggeredBy: OPERATOR`, `operatorId` set
-    - [ ] SUB: Confirm `PANIC_SOURCE` and `RESPONDER_SYSTEM` both receive status update webhooks
-    - [ ] SUB: Resolve the panic and confirm all downstream notifications fire
-    - [ ] SUB: Attempt an illegal transition (e.g. resolve a PENDING) and confirm 400
+    - [x] SUB: Dispatch the panic as an operator
+    - [x] SUB: Confirm `PanicEventLog` with `triggeredBy: OPERATOR`, `operatorId` set
+    - [x] SUB: Confirm `PANIC_SOURCE` and `RESPONDER_SYSTEM` both receive status update webhooks
+    - [x] SUB: Resolve the panic and confirm all downstream notifications fire
+    - [x] SUB: Attempt an illegal transition (e.g. resolve a PENDING) and confirm 400
 
-- [ ] TASK-10.1.4 — Verify idempotency
+- [x] TASK-10.1.4 — Verify idempotency
 
-    - [ ] SUB: Submit panic with an `idempotencyKey`
-    - [ ] SUB: Submit same panic again with the same `idempotencyKey`
-    - [ ] SUB: Confirm second response is 200 with original event (no duplicate row in DB)
-    - [ ] SUB: Confirm only one `panic:new` was emitted
+    - [x] SUB: Submit panic with an `idempotencyKey`
+    - [x] SUB: Submit same panic again with the same `idempotencyKey`
+    - [x] SUB: Confirm second response is 200 with original event (no duplicate row in DB)
+    - [x] SUB: Confirm only one `panic:new` was emitted
 
 ---
 
