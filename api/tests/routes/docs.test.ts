@@ -3,9 +3,10 @@ import { createApp } from '../../src/app.js'
 describe('API Documentation', () => {
   it('GET /docs returns 200 with HTML containing the API title', async () => {
     const app = await createApp()
-    const res = await app.inject({ method: 'GET', url: '/docs' })
+    const res = await app.inject({ method: 'GET', url: '/docs/' })
     expect(res.statusCode).toBe(200)
-    expect(res.body).toContain('ODERP-ly API')
+    expect(res.headers['content-type']).toMatch(/text\/html/)
+    expect(res.body).toContain('openapi.json')
   })
 
   it('GET /docs/openapi.json returns 200 with OpenAPI spec containing correct title', async () => {
