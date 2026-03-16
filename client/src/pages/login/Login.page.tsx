@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import apiClient from '../lib/apiClient.ts';
-import { useAuth } from '../context/AuthContext.tsx';
+import apiClient from '../../lib/apiClient.ts';
+import { useAuth } from '../../context/AuthContext.tsx';
+
+import { useStyles } from './styles.ts';
 
 interface LoginResponse {
   token: string;
@@ -15,6 +17,7 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const styles = useStyles();
 
   async function handleSubmit() {
     setError(null);
@@ -28,15 +31,15 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-      <div className="w-full max-w-sm bg-slate-900/40 border border-slate-800 rounded-2xl p-8 space-y-6 shadow-2xl backdrop-blur-sm">
-        <div className="text-center space-y-1">
-          <h1 className="text-2xl font-black text-white tracking-tight">ODERP&apos;ly</h1>
-          <p className="text-slate-500 text-xs uppercase tracking-widest font-bold">Control Room Access</p>
+    <div className={styles.page}>
+      <div className={styles.card}>
+        <div className={styles.cardHeader}>
+          <h1 className={styles.appTitle}>ODERP&apos;ly</h1>
+          <p className={styles.subtitle}>Control Room Access</p>
         </div>
-        <div className="space-y-4">
+        <div className={styles.fieldsGroup}>
           <div>
-            <label htmlFor="email" className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">
+            <label htmlFor="email" className={styles.fieldLabel}>
               Email
             </label>
             <input
@@ -44,11 +47,11 @@ export default function Login() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-800 rounded-lg py-2.5 px-3 text-sm text-slate-300 focus:outline-none focus:border-blue-500 transition-colors"
+              className={styles.input}
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">
+            <label htmlFor="password" className={styles.fieldLabel}>
               Password
             </label>
             <input
@@ -56,19 +59,20 @@ export default function Login() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-800 rounded-lg py-2.5 px-3 text-sm text-slate-300 focus:outline-none focus:border-blue-500 transition-colors"
+              className={styles.input}
+              autoComplete="off"
             />
           </div>
         </div>
         {error && (
-          <p role="alert" className="text-sm text-red-400">
+          <p role="alert" className={styles.errorText}>
             {error}
           </p>
         )}
         <button
           type="button"
           onClick={() => void handleSubmit()}
-          className="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 px-4 rounded-lg text-sm transition-all duration-200 active:scale-95 shadow-lg shadow-blue-900/20"
+          className={styles.submitButton}
         >
           Sign In
         </button>

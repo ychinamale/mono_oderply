@@ -3,13 +3,13 @@ import { io } from 'socket.io-client';
 import { MemoryRouter } from 'react-router-dom';
 import { vi, type Mock } from 'vitest';
 
-import apiClient from '../lib/apiClient.ts';
-import { AuthContext } from '../context/AuthContext.tsx';
+import apiClient from '../../lib/apiClient.ts';
+import { AuthContext } from '../../context/AuthContext.tsx';
 
 import PanicFeed from './PanicFeed.tsx';
 
 vi.mock('socket.io-client', () => ({ io: vi.fn() }));
-vi.mock('../lib/apiClient.ts', () => ({ default: { get: vi.fn() } }));
+vi.mock('../../lib/apiClient.ts', () => ({ default: { get: vi.fn() } }));
 
 const socketHandlers: Record<string, (data: unknown) => void> = {};
 

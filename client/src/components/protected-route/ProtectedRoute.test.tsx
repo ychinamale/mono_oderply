@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 
-import { AuthContext } from '../context/AuthContext.tsx';
+import { AuthContext } from '../../context/AuthContext.tsx';
 
 import ProtectedRoute from './ProtectedRoute.tsx';
 

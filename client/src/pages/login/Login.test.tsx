@@ -3,10 +3,10 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { vi } from 'vitest';
 
-import apiClient from '../lib/apiClient.ts';
-import { AuthContext } from '../context/AuthContext.tsx';
+import apiClient from '../../lib/apiClient.ts';
+import { AuthContext } from '../../context/AuthContext.tsx';
 
-import Login from './Login.tsx';
+import Login from './Login.page.tsx';
 
 function CurrentPath() {
   return <span data-testid="path">{useLocation().pathname}</span>;

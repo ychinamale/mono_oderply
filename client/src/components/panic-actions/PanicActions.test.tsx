@@ -3,13 +3,13 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { vi, type Mock } from 'vitest';
 
-import apiClient from '../lib/apiClient.ts';
-import { AuthContext } from '../context/AuthContext.tsx';
+import apiClient from '../../lib/apiClient.ts';
+import { AuthContext } from '../../context/AuthContext.tsx';
+import { type Panic } from '../panic-card/PanicCard.tsx';
 
 import PanicActions from './PanicActions.tsx';
-import { type Panic } from './PanicCard.tsx';
 
-vi.mock('../lib/apiClient.ts', () => ({ default: { get: vi.fn(), post: vi.fn() } }));
+vi.mock('../../lib/apiClient.ts', () => ({ default: { get: vi.fn(), post: vi.fn() } }));
 
 const pending: Panic = {
   id: 'panic-1',
@@ -73,7 +73,7 @@ describe('PanicActions', () => {
 
     const { rerender } = renderActions(pending);
     await userEvent.click(screen.getByRole('button', { name: /acknowledge/i }));
-    expect(postSpy).toHaveBeenCalledWith('/v1/panics/panic-1/acknowledge', null);
+    expect(postSpy).toHaveBeenCalledWith('/v1/panics/panic-1/acknowledge', {});
 
     rerender(
       <MemoryRouter>
@@ -85,7 +85,7 @@ describe('PanicActions', () => {
       </MemoryRouter>,
     );
     await userEvent.click(screen.getByRole('button', { name: /dispatch/i }));
-    expect(postSpy).toHaveBeenCalledWith('/v1/panics/panic-2/dispatch', null);
+    expect(postSpy).toHaveBeenCalledWith('/v1/panics/panic-2/dispatch', {});
 
     rerender(
       <MemoryRouter>
@@ -97,7 +97,7 @@ describe('PanicActions', () => {
       </MemoryRouter>,
     );
     await userEvent.click(screen.getByRole('button', { name: /resolve/i }));
-    expect(postSpy).toHaveBeenCalledWith('/v1/panics/panic-3/resolve', null);
+    expect(postSpy).toHaveBeenCalledWith('/v1/panics/panic-3/resolve', {});
   });
 
   it('displays inline error when the API returns an error response', async () => {

@@ -1,11 +1,11 @@
 import { Routes, Route } from 'react-router-dom';
 
-import ProtectedRoute from './components/ProtectedRoute.tsx';
+import ProtectedRoute from './components/protected-route/ProtectedRoute.tsx';
 import { AuthProvider } from './context/AuthContext.tsx';
-import Dashboard from './pages/Dashboard.tsx';
-import Login from './pages/Login.tsx';
-import NotFound from './pages/NotFound.tsx';
-import PanicDetail from './pages/PanicDetail.tsx';
+import Dashboard from './pages/dashboard/Dashboard.page.tsx';
+import Login from './pages/login/Login.page.tsx';
+import NotFound from './pages/not-found/NotFound.page.tsx';
+import PanicDetail from './pages/panic-detail/PanicDetail.page.tsx';
 
 export default function AppRoutes() {
   return (

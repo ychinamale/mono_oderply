@@ -2,12 +2,12 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { vi, type Mock } from 'vitest';
 
-import apiClient from '../lib/apiClient.ts';
-import { AuthContext } from '../context/AuthContext.tsx';
+import apiClient from '../../lib/apiClient.ts';
+import { AuthContext } from '../../context/AuthContext.tsx';
 
 import AuditLog from './AuditLog.tsx';
 
-vi.mock('../lib/apiClient.ts', () => ({ default: { get: vi.fn() } }));
+vi.mock('../../lib/apiClient.ts', () => ({ default: { get: vi.fn() } }));
 
 function renderLog(panicId = 'panic-1') {
   return render(
