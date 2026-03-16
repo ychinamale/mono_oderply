@@ -121,4 +121,62 @@ describe('Data Integrity', () => {
       expect(event.claimedByPartner?.type).toBe('RESPONDER_SYSTEM')
     }
   })
+
+  it('apiKeyHash is never returned by any API endpoint', async () => {
+    const app = await createApp()
+
+    // Get operator JWT
+    const loginRes = await app.inject({
+      method: 'POST',
+      url: '/api/auth/login',
+      payload: { email: 'admin@oderply.com', password: 'Admin1234!' },
+    })
+    const token = loginRes.json<{ token: string }>().token
+    const auth = { authorization: `Bearer ${token}` }
+
+    // Create a panic (PANIC_SOURCE)
+    const submitRes = await app.inject({
+      method: 'POST',
+      url: '/api/v1/panics',
+      headers: { 'x-api-key': 'ps-test-api-key-001' },
+      payload: { externalUserId: 'u1', latitude: 0, longitude: 0, idempotencyKey: 'apikeytest-idem-1' },
+    })
+    expect(submitRes.statusCode).toBe(201)
+    const panic1Id = submitRes.json<{ id: string }>().id
+
+    // Claim it (RESPONDER_SYSTEM)
+    const claimRes = await app.inject({
+      method: 'POST',
+      url: `/api/v1/panics/${panic1Id}/claim`,
+      headers: { 'x-api-key': 'rs-test-api-key-001' },
+    })
+
+    // Create a second panic for transition endpoints
+    const submitRes2 = await app.inject({
+      method: 'POST',
+      url: '/api/v1/panics',
+      headers: { 'x-api-key': 'ps-test-api-key-001' },
+      payload: { externalUserId: 'u2', latitude: 0, longitude: 0, idempotencyKey: 'apikeytest-idem-2' },
+    })
+    const panic2Id = submitRes2.json<{ id: string }>().id
+    const ackRes = await app.inject({ method: 'POST', url: `/api/v1/panics/${panic2Id}/acknowledge`, headers: auth })
+    const dispatchRes = await app.inject({ method: 'POST', url: `/api/v1/panics/${panic2Id}/dispatch`, headers: auth })
+    const resolveRes = await app.inject({ method: 'POST', url: `/api/v1/panics/${panic2Id}/resolve`, headers: auth })
+
+    const responses = [
+      submitRes,
+      claimRes,
+      ackRes,
+      dispatchRes,
+      resolveRes,
+      await app.inject({ method: 'GET', url: '/api/v1/panics', headers: auth }),
+      await app.inject({ method: 'GET', url: `/api/v1/panics/${panic1Id}`, headers: auth }),
+      await app.inject({ method: 'GET', url: '/api/v1/partners', headers: auth }),
+      await app.inject({ method: 'GET', url: `/api/v1/partners/${(await prisma.partner.findFirstOrThrow({ where: { type: 'PANIC_SOURCE' } })).id}`, headers: auth }),
+    ]
+
+    for (const res of responses) {
+      expect(JSON.stringify(res.json())).not.toContain('apiKeyHash')
+    }
+  })
 })
