@@ -762,58 +762,58 @@
 **I want** to read accurate, interactive API documentation at a stable URL,
 **so that** I can understand every endpoint, request shape, and response shape without reading source code.
 
-- [ ] TASK-12.1.1 — Install and register `@fastify/swagger` and Scalar
+- [x] TASK-12.1.1 — Install and register `@fastify/swagger` and Scalar
 
-    - [ ] SUB: Install `@fastify/swagger` and `@scalar/fastify-api-reference` in `api/`
-    - [ ] SUB: Register `@fastify/swagger` in `api/src/index.js` before any routes
-    - [ ] SUB: Configure OpenAPI metadata: `title: "ODERP-ly API"`, `version`, `description`, `contact`
-    - [ ] SUB: Register Scalar at `/docs` to serve the interactive UI
-    - [ ] SUB: Confirm `/docs` loads in the browser and shows an empty spec
+    - [x] SUB: Install `@fastify/swagger` and `@scalar/fastify-api-reference` in `api/`
+    - [x] SUB: Register `@fastify/swagger` in `api/src/index.js` before any routes
+    - [x] SUB: Configure OpenAPI metadata: `title: "ODERP-ly API"`, `version`, `description`, `contact`
+    - [x] SUB: Register Scalar at `/docs` to serve the interactive UI
+    - [x] SUB: Confirm `/docs` loads in the browser and shows an empty spec
 
-- [ ] TASK-12.1.2 — Define OpenAPI security schemes
+- [x] TASK-12.1.2 — Define OpenAPI security schemes
 
-    - [ ] SUB: Define `ApiKeyAuth` security scheme: `in: header`, `name: x-api-key`
-    - [ ] SUB: Define `BearerAuth` security scheme: `type: http`, `scheme: bearer`, `bearerFormat: JWT`
-    - [ ] SUB: Register both schemes under `components.securitySchemes` in the swagger config
-    - [ ] SUB: Confirm both schemes appear in the Scalar UI security section
+    - [x] SUB: Define `ApiKeyAuth` security scheme: `in: header`, `name: x-api-key`
+    - [x] SUB: Define `BearerAuth` security scheme: `type: http`, `scheme: bearer`, `bearerFormat: JWT`
+    - [x] SUB: Register both schemes under `components.securitySchemes` in the swagger config
+    - [x] SUB: Confirm both schemes appear in the Scalar UI security section
 
-- [ ] TASK-12.1.3 — Annotate auth routes
+- [x] TASK-12.1.3 — Annotate auth routes
 
-    - [ ] SUB: Add OpenAPI schema to `POST /api/auth/login` — request body, 200 response with token + operator, 401 response
-    - [ ] SUB: Tag the route with `"Auth"`
+    - [x] SUB: Add OpenAPI schema to `POST /api/auth/login` — request body, 200 response with token + operator, 401 response
+    - [x] SUB: Tag the route with `"Auth"`
 
-- [ ] TASK-12.1.4 — Annotate partner-facing panic routes
+- [x] TASK-12.1.4 — Annotate partner-facing panic routes
 
-    - [ ] SUB: Add OpenAPI schema to `POST /api/v1/panics` — request body (with `idempotencyKey`), 201 response, 400/401/403/409 responses
-    - [ ] SUB: Apply `ApiKeyAuth` security to this route
-    - [ ] SUB: Add OpenAPI schema to `POST /api/v1/panics/:id/claim` — params, 200 response, 400/403/404/409 responses
-    - [ ] SUB: Apply `ApiKeyAuth` security to this route
-    - [ ] SUB: Tag both routes with `"Panics — Partner"`
+    - [x] SUB: Add OpenAPI schema to `POST /api/v1/panics` — request body (with `idempotencyKey`), 201 response, 400/401/403/409 responses
+    - [x] SUB: Apply `ApiKeyAuth` security to this route
+    - [x] SUB: Add OpenAPI schema to `POST /api/v1/panics/:id/claim` — params, 200 response, 400/403/404/409 responses
+    - [x] SUB: Apply `ApiKeyAuth` security to this route
+    - [x] SUB: Tag both routes with `"Panics — Partner"`
 
-- [ ] TASK-12.1.5 — Annotate operator-facing panic routes
+- [x] TASK-12.1.5 — Annotate operator-facing panic routes
 
-    - [ ] SUB: Add OpenAPI schema to `GET /api/v1/panics` — query params (page, limit, status, partnerId), paginated response shape
-    - [ ] SUB: Add OpenAPI schema to `GET /api/v1/panics/:id` — params, 200 response, 404 response
-    - [ ] SUB: Add OpenAPI schema to `POST /api/v1/panics/:id/acknowledge` — params, 200 response, 400/404 responses
-    - [ ] SUB: Add OpenAPI schema to `POST /api/v1/panics/:id/dispatch` — params, 200 response, 400/404 responses
-    - [ ] SUB: Add OpenAPI schema to `POST /api/v1/panics/:id/resolve` — params, 200 response, 400/404 responses
-    - [ ] SUB: Apply `BearerAuth` security to all operator panic routes
-    - [ ] SUB: Tag all routes with `"Panics — Operator"`
+    - [x] SUB: Add OpenAPI schema to `GET /api/v1/panics` — query params (page, limit, status, partnerId), paginated response shape
+    - [x] SUB: Add OpenAPI schema to `GET /api/v1/panics/:id` — params, 200 response, 404 response
+    - [x] SUB: Add OpenAPI schema to `POST /api/v1/panics/:id/acknowledge` — params, 200 response, 400/404 responses
+    - [x] SUB: Add OpenAPI schema to `POST /api/v1/panics/:id/dispatch` — params, 200 response, 400/404 responses
+    - [x] SUB: Add OpenAPI schema to `POST /api/v1/panics/:id/resolve` — params, 200 response, 400/404 responses
+    - [x] SUB: Apply `BearerAuth` security to all operator panic routes
+    - [x] SUB: Tag all routes with `"Panics — Operator"`
 
-- [ ] TASK-12.1.6 — Annotate log routes
+- [x] TASK-12.1.6 — Annotate log routes
 
-    - [ ] SUB: Add OpenAPI schema to `GET /api/v1/panics/:id/logs` — query params, paginated response with inline operator and partner
-    - [ ] SUB: Add OpenAPI schema to `GET /api/v1/panics/:id/logs/:logId` — params, 200 response, 404 response
-    - [ ] SUB: Apply `BearerAuth` security to both routes
-    - [ ] SUB: Tag both routes with `"Logs"`
+    - [x] SUB: Add OpenAPI schema to `GET /api/v1/panics/:id/logs` — query params, paginated response with inline operator and partner
+    - [x] SUB: Add OpenAPI schema to `GET /api/v1/panics/:id/logs/:logId` — params, 200 response, 404 response
+    - [x] SUB: Apply `BearerAuth` security to both routes
+    - [x] SUB: Tag both routes with `"Logs"`
 
-- [ ] TASK-12.1.7 — Annotate partner routes
+- [x] TASK-12.1.7 — Annotate partner routes
 
-    - [ ] SUB: Add OpenAPI schema to `GET /api/v1/partners` — query params, paginated response with `_count`
-    - [ ] SUB: Add OpenAPI schema to `GET /api/v1/partners/:id` — params, 200 response with `_count`, 404 response
-    - [ ] SUB: Apply `BearerAuth` security to both routes
-    - [ ] SUB: Tag both routes with `"Partners"`
-    - [ ] SUB: Confirm `apiKeyHash` field is excluded from all partner response schemas
+    - [x] SUB: Add OpenAPI schema to `GET /api/v1/partners` — query params, paginated response with `_count`
+    - [x] SUB: Add OpenAPI schema to `GET /api/v1/partners/:id` — params, 200 response with `_count`, 404 response
+    - [x] SUB: Apply `BearerAuth` security to both routes
+    - [x] SUB: Tag both routes with `"Partners"`
+    - [x] SUB: Confirm `apiKeyHash` field is excluded from all partner response schemas
 
 ---
 
@@ -823,28 +823,28 @@
 **I want** prose guides alongside the endpoint reference,
 **so that** I understand the authentication flow, idempotency requirements, and webhook contract before writing any code.
 
-- [ ] TASK-12.2.1 — Write PANIC_SOURCE integration guide
+- [x] TASK-12.2.1 — Write PANIC_SOURCE integration guide
 
-    - [ ] SUB: Document how to obtain and use an API key (`x-api-key` header)
-    - [ ] SUB: Document the panic submission flow with a full example request and response
-    - [ ] SUB: Document the `idempotencyKey` contract — what it is, how to generate it (UUID v4), retry behaviour
-    - [ ] SUB: Document the webhook notification shape partners will receive on status changes
-    - [ ] SUB: Document all status values and what each means from the partner's perspective
+    - [x] SUB: Document how to obtain and use an API key (`x-api-key` header)
+    - [x] SUB: Document the panic submission flow with a full example request and response
+    - [x] SUB: Document the `idempotencyKey` contract — what it is, how to generate it (UUID v4), retry behaviour
+    - [x] SUB: Document the webhook notification shape partners will receive on status changes
+    - [x] SUB: Document all status values and what each means from the partner's perspective
 
-- [ ] TASK-12.2.2 — Write RESPONDER_SYSTEM integration guide
+- [x] TASK-12.2.2 — Write RESPONDER_SYSTEM integration guide
 
-    - [ ] SUB: Document how to obtain and use a RESPONDER_SYSTEM API key
-    - [ ] SUB: Document the webhook broadcast received on panic creation — shape, fields, how to parse it
-    - [ ] SUB: Document the claim flow — when to call it, what happens when claim succeeds vs 409 conflict
-    - [ ] SUB: Document the status update webhooks received after claiming a panic
-    - [ ] SUB: Document `webhookUrl` registration requirement — what happens if it is not set
+    - [x] SUB: Document how to obtain and use a RESPONDER_SYSTEM API key
+    - [x] SUB: Document the webhook broadcast received on panic creation — shape, fields, how to parse it
+    - [x] SUB: Document the claim flow — when to call it, what happens when claim succeeds vs 409 conflict
+    - [x] SUB: Document the status update webhooks received after claiming a panic
+    - [x] SUB: Document `webhookUrl` registration requirement — what happens if it is not set
 
-- [ ] TASK-12.2.3 — Expose and protect the `/docs` route appropriately
+- [x] TASK-12.2.3 — Expose and protect the `/docs` route appropriately
 
-    - [ ] SUB: Decide on access policy for `/docs` — open (partner-accessible) or gated (internal only)
-    - [ ] SUB: If open: confirm no sensitive internal details (e.g. operator routes) are exposed to partner audience
-    - [ ] SUB: If gated: add a lightweight access control mechanism to the `/docs` route
-    - [ ] SUB: Confirm `/docs` is excluded from Railway's public-facing routing if gated
+    - [x] SUB: Decide on access policy for `/docs` — open (partner-accessible) or gated (internal only)
+    - [x] SUB: If open: confirm no sensitive internal details (e.g. operator routes) are exposed to partner audience
+    - [x] SUB: If gated: add a lightweight access control mechanism to the `/docs` route
+    - [x] SUB: Confirm `/docs` is excluded from Railway's public-facing routing if gated
 
 ---
 
