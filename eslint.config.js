@@ -85,6 +85,18 @@ export default tseslint.config(
   // TypeScript rules — applied to all workspaces
   ...tseslint.configs.recommendedTypeChecked,
 
+  // Honour the _ prefix convention for intentionally unused variables/args/destructure slots
+  {
+    rules: {
+      '@typescript-eslint/no-unused-vars': ['error', {
+        varsIgnorePattern:               '^_',
+        argsIgnorePattern:               '^_',
+        caughtErrorsIgnorePattern:       '^_',
+        destructuredArrayIgnorePattern:  '^_',
+      }],
+    },
+  },
+
   // Parser options for type-checked rules
   {
     languageOptions: {
@@ -93,6 +105,7 @@ export default tseslint.config(
           // Allow files that live outside tsconfig include paths (config/scripts)
           allowDefaultProject: [
             '*.js',
+            'api/jest.config.js',
             'api/prisma/*.ts',
             'api/prisma.config.ts',
             'client/vite.config.ts',
@@ -148,6 +161,20 @@ export default tseslint.config(
 
   // Exempt script/config files outside src/ from unsafe-* rules —
   // they run under allowDefaultProject where full type resolution isn't guaranteed
+  {
+    files: ['api/tests/**/*.ts', 'api/jest.config.js'],
+    rules: {
+      '@typescript-eslint/no-unsafe-assignment':          'off',
+      '@typescript-eslint/no-unsafe-call':                'off',
+      '@typescript-eslint/no-unsafe-member-access':       'off',
+      '@typescript-eslint/no-unsafe-argument':            'off',
+      '@typescript-eslint/no-unsafe-return':              'off',
+      // Test URLs are not secrets; entropy false-positives on query strings
+      'no-secrets/no-secrets':                            'off',
+      // Tests legitimately re-reject caught errors as unknown
+      '@typescript-eslint/prefer-promise-reject-errors':  'off',
+    },
+  },
   {
     files: ['api/prisma/**/*.ts', 'api/prisma.config.ts', 'client/vite.config.ts'],
     rules: {
