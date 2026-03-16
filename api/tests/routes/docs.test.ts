@@ -28,6 +28,22 @@ describe('API Documentation', () => {
     expect(login.responses?.['401']).toBeDefined()
   })
 
+  it('openapi.json spec has log routes annotated with tag "Logs" and BearerAuth', async () => {
+    const app = await createApp()
+    const res = await app.inject({ method: 'GET', url: '/docs/openapi.json' })
+    const spec = JSON.parse(res.body)
+    const paths = spec.paths
+    const listLogs = paths?.['/api/v1/panics/{id}/logs']?.get
+    expect(listLogs).toBeDefined()
+    expect(listLogs.tags).toContain('Logs')
+    expect(listLogs.security).toEqual(expect.arrayContaining([{ BearerAuth: [] }]))
+    expect(listLogs.responses?.['200']).toBeDefined()
+    const getLog = paths?.['/api/v1/panics/{id}/logs/{logId}']?.get
+    expect(getLog).toBeDefined()
+    expect(getLog.tags).toContain('Logs')
+    expect(getLog.responses?.['404']).toBeDefined()
+  })
+
   it('openapi.json spec has operator panic routes annotated with tag "Panics — Operator" and BearerAuth', async () => {
     const app = await createApp()
     const res = await app.inject({ method: 'GET', url: '/docs/openapi.json' })
