@@ -105,9 +105,9 @@ export default tseslint.config(
           // Allow files that live outside tsconfig include paths (config/scripts)
           allowDefaultProject: [
             '*.js',
-            'api/jest.config.js',
-            'api/prisma/*.ts',
-            'api/prisma.config.ts',
+            'api.typescript/jest.config.js',
+            'api.typescript/prisma/*.ts',
+            'api.typescript/prisma.config.ts',
             'client/vite.config.ts',
           ],
         },
@@ -126,7 +126,7 @@ export default tseslint.config(
     settings: {
       'import/resolver': {
         typescript: {
-          project: ['api/tsconfig.json', 'client/tsconfig.json', 'shared/tsconfig.json'],
+          project: ['api.typescript/tsconfig.json', 'client/tsconfig.json', 'shared/tsconfig.json'],
           extensionAlias: { '.js': ['.ts', '.js'] },
         },
       },
@@ -135,7 +135,7 @@ export default tseslint.config(
 
   // Security rules — api and shared only (not client)
   {
-    files: ['api/**/*.ts', 'shared/**/*.ts'],
+    files: ['api.typescript/**/*.ts', 'shared/**/*.ts'],
     plugins: { security, 'no-secrets': noSecrets },
     rules: {
       ...security.configs.recommended.rules,
@@ -162,7 +162,7 @@ export default tseslint.config(
   // Exempt script/config files outside src/ from unsafe-* rules —
   // they run under allowDefaultProject where full type resolution isn't guaranteed
   {
-    files: ['api/tests/**/*.ts', 'api/jest.config.js'],
+    files: ['api.typescript/tests/**/*.ts', 'api.typescript/jest.config.js'],
     rules: {
       '@typescript-eslint/no-unsafe-assignment':          'off',
       '@typescript-eslint/no-unsafe-call':                'off',
@@ -176,7 +176,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['api/prisma/**/*.ts', 'api/prisma.config.ts', 'client/vite.config.ts'],
+    files: ['api.typescript/prisma/**/*.ts', 'api.typescript/prisma.config.ts', 'client/vite.config.ts'],
     rules: {
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-unsafe-call': 'off',
