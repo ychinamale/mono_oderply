@@ -5,23 +5,23 @@
 - Frontend: React + Vite, Tailwind CSS
 - Language: TypeScript throughout (strict mode, ESM)
 - Node: 22.13.0 (pinned)
-- Monorepo: npm workspaces (api/, client/, shared/)
+- Monorepo: npm workspaces (api.typescript/, client/, shared/)
 - Auth: @fastify/jwt (operators), API key guard (partners)
 
 ## Project structure
-- tsconfig.base.json     — shared TS config; api/, client/, shared/ each extend it
-- api/src/routes/        — Fastify route modules
-- api/src/hooks/         — preHandler guards (apiKeyGuard, jwtGuard)
-- api/src/lib/           — shared utilities (assertTransition, webhookQueue)
-- api/prisma/            — schema, migrations, seed files
+- tsconfig.base.json     — shared TS config; api.typescript/, client/, shared/ each extend it
+- api.typescript/src/routes/        — Fastify route modules
+- api.typescript/src/hooks/         — preHandler guards (apiKeyGuard, jwtGuard)
+- api.typescript/src/lib/           — shared utilities (assertTransition, webhookQueue)
+- api.typescript/prisma/            — schema, migrations, seed files
 - client/src/pages/      — React pages
 - client/src/components/ — React components
 - client/src/hooks/      — custom React hooks
 - shared/src/            — Zod schemas and types shared between api and client
 
 ## Key conventions
-- TypeScript throughout — all source files are .ts (api/, shared/) or .ts/.tsx (client/)
-- ESM module system — write .ts source files; use .js extensions in relative imports for the api/ workspace (NodeNext module resolution maps .js → .ts for both type checking and IDE go-to-definition, while the compiled output correctly references .js files). For client/ (Vite), use .tsx/.ts extensions directly. Never invent a different extension convention without explicit instruction.
+- TypeScript throughout — all source files are .ts (api.typescript/, shared/) or .ts/.tsx (client/)
+- ESM module system — write .ts source files; use .js extensions in relative imports for the api.typescript/ workspace (NodeNext module resolution maps .js → .ts for both type checking and IDE go-to-definition, while the compiled output correctly references .js files). For client/ (Vite), use .tsx/.ts extensions directly. Never invent a different extension convention without explicit instruction.
 - Strict mode is on across all workspaces via tsconfig.base.json
 - Prisma transactions wrap every status transition + audit log write
 - SELECT FOR UPDATE on the claim endpoint (pessimistic locking)
@@ -151,7 +151,7 @@ Lint only as the first step of opening a PR (step 5 above):
 
 ## Useful commands
 - npm run lint              — lint entire project
-- npm test --workspace=api  — run api tests
+- npm test --workspace=api.typescript  — run api tests
 - npm run dev               — start api + client concurrently
 
 ---
@@ -260,9 +260,9 @@ When designing new modules, see .claude/skills/tdd/interface-design.md and
 PanicEvent must have DB indexes on: `status`, `partnerId`, `claimedByPartnerId`, `createdAt DESC`.
 Add these in the migration when the PanicEvent model is first created.
 
-1. Edit `api/prisma/schema.prisma` with the required change
-2. Run `npx prisma migrate dev --name <descriptive-name>` from `api/`
-3. Confirm the migration file was created in `api/prisma/migrations/`
+1. Edit `api.typescript/prisma/schema.prisma` with the required change
+2. Run `npx prisma migrate dev --name <descriptive-name>` from `api.typescript/`
+3. Confirm the migration file was created in `api.typescript/prisma/migrations/`
 4. Run `npx prisma generate` to update the client
 5. Confirm `@prisma/client` reflects the change before proceeding
 6. Never edit migration files manually after they have been applied

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "workspaces": [
-    "api",
+    "api.typescript",
     "client",
     "shared"
   ],
@@ -13,15 +13,15 @@
   },
   "scripts": {
     "dev": "concurrently \"npm run dev:api\" \"npm run dev:client\"",
-    "dev:api": "npm run dev --workspace=api",
+    "dev:api": "npm run dev --workspace=api.typescript",
     "dev:client": "npm run dev --workspace=client",
     "build": "npm run build --workspace=client",
-    "start": "npm run start --workspace=api",
+    "start": "npm run start --workspace=api.typescript",
     "prepare": "husky",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "lint:api": "eslint api/",
-    "lint:api:fix": "eslint api/ --fix",
+    "lint:api": "eslint api.typescript/",
+    "lint:api:fix": "eslint api.typescript/ --fix",
     "lint:client": "eslint client/",
     "lint:client:fix": "eslint client/ --fix",
     "test": "npm test --workspaces --if-present"
@@ -30,13 +30,13 @@
     "package.json": [
       "npmPkgJsonLint --allowEmptyInput ."
     ],
-    "{api,shared}/src/**/*.ts": [
+    "{api.typescript,shared}/src/**/*.ts": [
       "eslint --fix --max-warnings 0 --config eslint.config.staged.js"
     ],
     "client/src/**/*.{ts,tsx}": [
       "eslint --fix --max-warnings 0 --config eslint.config.staged.js"
     ],
-    "{api,client,shared}/src/**/*.{json,md,yml}": [
+    "{api.typescript,client,shared}/src/**/*.{json,md,yml}": [
       "prettier --write"
     ]
   },
