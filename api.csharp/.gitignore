@@ -1,0 +1,28 @@
+## .NET build output
+bin/
+obj/
+
+## User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Visual Studio / Rider
+.vs/
+.idea/
+
+## Environment / secrets
+appsettings.Development.json
+*.env
+
+## NuGet packages (restored by dotnet restore, not committed)
+packages/
+*.nupkg
+
+## EF Core migrations temp
+Migrations/
+
+## Test results
+TestResults/
+coverage/
